@@ -1,0 +1,35 @@
+---
+description: Linear issue discipline for Cestovni — aligns with /create-issue and Git specs
+alwaysApply: true
+---
+
+# Cestovni — Linear issues & `/create-issue`
+
+## Product boundary
+
+- All work for this repository maps to **Linear project `Cestovni`** (team **Cestovni**).
+- Do **not** add scope for other products on these issues.
+
+## When capturing work (including `/create-issue`)
+
+Follow the **Cursor `/create-issue` command** habits:
+
+- **Fast:** aim for under ~2 minutes; 2–3 targeted questions in **one** message when needed; skip obvious asks.
+- **Shape:** clear **title**; **TL;DR** bullets; **current state vs expected outcome** (bugs/features/improvements); **relevant files — maximum three**, most important only; **risks/notes** if useful; **bullets** over long prose.
+- **Defaults:** priority **Normal** (Linear priority field), **effort:medium** unless the user says otherwise.
+- **Labels:** use workspace labels — **type:** one of `type:bug` | `type:feature` | `type:improvement` | `type:chore` | `type:spike`; **effort:** one of `effort:low` | `effort:medium` | `effort:high`.
+
+## Linear-specific fields (always add when drafting for Linear)
+
+- **Team:** `Cestovni`
+- **Project:** `Cestovni`
+- **`Spec:` line** in the description: path under `docs/specs/…` in this repo, or **TBD** / **stub to create** for spikes or early discovery. Non-trivial features should get a spec stub or real doc.
+
+## Structure
+
+- Prefer **parent epic + child issues** for multi-step work; avoid single huge tickets.
+- Issue body section order should match [`docs/linear/issue-templates.md`](docs/linear/issue-templates.md) so paste into Linear stays easy.
+
+## Optional types note
+
+The workspace may still contain legacy labels **Bug**, **Feature**, **Improvement**. For **new** issues, prefer the **`type:*`** labels above for consistency with `/create-issue` output.

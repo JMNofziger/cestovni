@@ -1,0 +1,157 @@
+# Linear issue templates (Cestovni)
+
+Copy into **Workspace settings → Templates → Issue templates** (or start from these in the Linear project documents).
+
+Use the **same section order** as Cursor `/create-issue` so drafts paste with minimal edits.
+
+**Always set:** Team **Cestovni**, Project **Cestovni**, appropriate **type:*** and **effort:*** labels, priority (default **Normal**).
+
+---
+
+## Bug
+
+### TL;DR
+
+- 
+
+### Current behavior
+
+- 
+
+### Expected outcome
+
+- 
+
+### Acceptance / verification
+
+- [ ] Repro steps documented
+- [ ] Fixed when: 
+
+### Relevant files (max 3)
+
+- 
+- 
+- 
+
+### Risks / notes
+
+- None / 
+
+### Spec
+
+`docs/specs/...` or TBD
+
+### Out of scope
+
+- 
+
+---
+
+## Feature
+
+### TL;DR
+
+- 
+
+### Current state
+
+- 
+
+### Expected outcome
+
+- 
+
+### Acceptance criteria
+
+- [ ] 
+- [ ] 
+
+### Relevant files (max 3)
+
+- 
+- 
+- 
+
+### Risks / notes
+
+- None / 
+
+### Spec
+
+`docs/specs/...`
+
+### Out of scope
+
+- 
+
+---
+
+## Improvement
+
+### TL;DR
+
+- 
+
+### Current state
+
+- 
+
+### Expected outcome
+
+- 
+
+### Acceptance criteria
+
+- [ ] 
+- [ ] 
+
+### Relevant files (max 3)
+
+- 
+- 
+- 
+
+### Risks / notes
+
+- None / 
+
+### Spec
+
+`docs/specs/...` or N/A
+
+### Out of scope
+
+- 
+
+---
+
+## Spike
+
+### TL;DR
+
+- 
+
+### Question
+
+- 
+
+### Done when
+
+- [ ] Question answered / time-box respected
+- [ ] Findings linked or summarized for follow-up issues
+
+### Relevant files (max 3)
+
+- N/A
+
+### Risks / notes
+
+- None / 
+
+### Spec
+
+TBD — spike has no spec yet
+
+### Out of scope
+
+- 
