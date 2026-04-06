@@ -1,5 +1,11 @@
 # Linear issue templates (Cestovni)
 
+## Automated
+
+See [saved-views.md](./saved-views.md): `node scripts/linear-workspace-bootstrap.mjs` (with `LINEAR_API_KEY`) creates **Bug**, **Feature**, **Improvement**, and **Spike** templates with defaults for team/project **Cestovni**.
+
+## Manual
+
 Copy into **Workspace settings → Templates → Issue templates** (or start from these in the Linear project documents).
 
 Use the **same section order** as Cursor `/create-issue` so drafts paste with minimal edits.

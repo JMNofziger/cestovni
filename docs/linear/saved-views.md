@@ -2,6 +2,19 @@
 
 Your team uses these **issue states**: Backlog, Todo, In Progress, In Review, Done (+ Canceled, Duplicate).
 
+## Automated (recommended)
+
+From repo root, with a [Personal API key](https://linear.app/settings/api):
+
+```bash
+export LINEAR_API_KEY="lin_api_..."
+node scripts/linear-workspace-bootstrap.mjs
+```
+
+That script also enables **2-week cycles** for team `Cestovni` (if they were off) and creates workspace **issue templates** (Bug, Feature, Improvement, Spike). Re-running is safe: existing views/templates are skipped when Linear reports a duplicate.
+
+## Manual
+
 Create **saved views** in Linear (Issues → filters → **Save as view**). Every view must include **Project = Cestovni** so other products never leak in.
 
 | View name | Filters / notes |
