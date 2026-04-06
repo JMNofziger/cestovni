@@ -1,0 +1,5 @@
+# Secrets and local env — never index or attach in Cursor
+.secrets/
+.env
+.env.*
+
