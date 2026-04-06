@@ -1,0 +1,13 @@
+# Local secrets — never commit
+.secrets/
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+
+# Node (if added later)
+node_modules/
+*.log
+npm-debug.log*

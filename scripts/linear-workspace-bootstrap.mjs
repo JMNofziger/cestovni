@@ -3,11 +3,60 @@
  * One-shot bootstrap: team cycles + Cestovni custom views + issue templates.
  * Requires a Personal API Key: https://linear.app/settings/api
  *
- *   export LINEAR_API_KEY="lin_api_..."
+ * Recommended (local file only, never committed):
+ *   mkdir -p .secrets && cp .secrets.example/linear.env .secrets/linear.env
+ *   chmod 600 .secrets/linear.env
+ *   $EDITOR .secrets/linear.env   # set LINEAR_API_KEY
  *   node scripts/linear-workspace-bootstrap.mjs
+ *
+ * Or one-shot: export LINEAR_API_KEY="..." (shell only; do not commit)
  *
  * Optional: LINEAR_TEAM_NAME (default Cestovni), LINEAR_PROJECT_NAME (default Cestovni)
  */
+
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = join(__dirname, "..");
+const SECRET_FILE = join(REPO_ROOT, ".secrets", "linear.env");
+
+/** Only these keys may be set from the local file (no arbitrary env injection). */
+const ALLOWED_SECRET_KEYS = new Set([
+  "LINEAR_API_KEY",
+  "LINEAR_TEAM_NAME",
+  "LINEAR_PROJECT_NAME",
+]);
+
+function loadLocalSecretsFile() {
+  if (!existsSync(SECRET_FILE)) return;
+  let raw;
+  try {
+    raw = readFileSync(SECRET_FILE, "utf8");
+  } catch {
+    return;
+  }
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    if (!ALLOWED_SECRET_KEYS.has(key)) continue;
+    if (process.env[key] != null && process.env[key] !== "") continue;
+    let value = trimmed.slice(eq + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    process.env[key] = value;
+  }
+}
+
+loadLocalSecretsFile();
 
 const ENDPOINT = "https://api.linear.app/graphql";
 const TEAM_NAME = process.env.LINEAR_TEAM_NAME || "Cestovni";
@@ -174,7 +223,9 @@ async function main() {
   const token = process.env.LINEAR_API_KEY;
   if (!token?.trim()) {
     console.error(
-      "Missing LINEAR_API_KEY. Create one at Linear → Settings → API → Personal API keys.",
+      "Missing LINEAR_API_KEY. Create one at Linear → Settings → API → Personal API keys.\n" +
+        " Store it only in .secrets/linear.env (see .secrets.example/linear.env) " +
+        "or export it in your shell for this session. Never commit the key.",
     );
     process.exit(1);
   }
