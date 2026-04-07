@@ -1,20 +1,17 @@
 # Cestovni — product
 
-Single source of truth for **what** we are building (offline-friendly in Git).
+**Baseline brief (locked):** [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) — principles, v1 scope, decisions, planning phases.
 
-## Vision
+## Vision (from brief)
 
-_TBD — one sentence: who is this for and what outcome do they get?_
-
-## Non-goals (v1)
-
-- _List what we are explicitly not doing in the first release._
+Trustworthy fuel + maintenance history, offline-safe logging, full data portability, credible economy and TCO — without lock-in.
 
 ## Links
 
-- **Linear project:** [Cestovni](https://linear.app/personal-interests-llc/project/cestovni-e4d462505e62) (status and execution)
-- **Issue capture:** Cursor `/create-issue` → paste into Linear with **Project: Cestovni**
+- **Linear project:** [Cestovni](https://linear.app/personal-interests-llc/project/cestovni-e4d462505e62) — description + doc **Product brief — baseline** point here
+- **Baseline pointer issue:** [CES-20](https://linear.app/personal-interests-llc/issue/CES-20/meta-product-brief-baseline-locked-see-git)
+- **Issue capture:** Cursor `/create-issue` → Linear **Project: Cestovni**
 
 ## Specs
 
-Feature-level specs live in [`../specs/`](../specs/).
+Technical specs: [`../specs/`](../specs/) (Phase 2+).
