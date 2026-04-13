@@ -2,6 +2,8 @@
 
 **Baseline brief (locked):** [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) — principles, v1 scope, decisions, planning phases.
 
+**Development workflow (stage gates):** [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) — checklist per product phase; when to use a **spike** vs **architecture / ADR** work.
+
 ## Vision (from brief)
 
 Trustworthy fuel + maintenance history, offline-safe logging, full data portability, credible economy and TCO — without lock-in.
