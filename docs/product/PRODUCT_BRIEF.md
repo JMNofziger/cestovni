@@ -9,6 +9,7 @@
 - **Primary goal:** **Best possible experience for the user** — not revenue, not engagement-for-its-own-sake.
 - **Monetization:** **Not a goal.** No ads, no paywalls on core use. **Donations/tips** are **optional gratitude only** — the product must remain **fully usable and maintainable with zero expectation of user payments.**
 - **Sustainability:** Viability through **lean architecture** (client-heavy, efficient sync/media, minimal server surface) and **operator cost discipline** — **not** through funding from users.
+- **Continuity / self-hosting:** Managed-first delivery is acceptable, but backend architecture must preserve a realistic path for **technical users** to self-host core backend services if the managed service is no longer available.
 - **Telemetry:** **Minimal**, only for **reliability, debugging, and honest product improvement** (e.g. crashes, sync failures, core funnel to find broken flows). **No** behavioral surplus for ads, **no** third-party monetization of user data, **no** growth-hacking stacks unless explicitly decided later.
 
 ## Locked decisions
@@ -25,6 +26,7 @@
 | Insights          | **No** fuel-quality insight **product** in v1; optional notes only; **Phase 2+**                             |
 | Commercial        | **Free**; **donations optional**, never required for sustainability narrative or feature access              |
 | Architecture bias | Client-heavy; efficient images; **minimal ethical telemetry**; user pays own bandwidth on bulk export        |
+| Deployment continuity | **Managed-first** operation is allowed; architecture must support **backend-only self-host** continuity for technical users |
 
 
 ## North star
@@ -79,10 +81,11 @@ Structured fuel-quality insights; OCR; fleet B2B; ads; paywalled core features.
 ## Phase 2 checklist (engineering)
 
 1. Architecture: ADRs or equivalent for **backend/API boundary** and **backup/sync layer** (v1 backup + v1.x path); `docs/specs/ARCHITECTURE.md` (or ADR index) linking to them.
-2. Optional: timeboxed **client POC** with pre-written pass/fail criteria (offline SQLite, camera, **backup job enqueue**, on-device export) — **only if** needed after ADRs.
-3. Specs in `docs/specs/`: consumption/fill-up; **backup + v1.x sync**; export v1; SI + US gal; **ephemeral photo / deferred entry**; telemetry allow-list.
-4. Legal / store: privacy, deletion, donation copy (photos not server-backed, export scope).
-5. Linear: granular issues + spec links; follow [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) stage gates.
+2. Continuity: ADR 001 must include deployment matrix (**managed vs self-host**) and a tracked backend-only self-host runbook skeleton.
+3. Optional: timeboxed **client POC** with pre-written pass/fail criteria (offline SQLite, camera, **backup job enqueue**, on-device export) — **only if** needed after ADRs.
+4. Specs in `docs/specs/`: consumption/fill-up; **backup + v1.x sync**; export v1; SI + US gal; **ephemeral photo / deferred entry**; telemetry allow-list.
+5. Legal / store: privacy, deletion, donation copy (photos not server-backed, export scope).
+6. Linear: granular issues + spec links; follow [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) stage gates.
 
 ---
 
@@ -94,3 +97,5 @@ Structured fuel-quality insights; OCR; fleet B2B; ads; paywalled core features.
 | 2026-04-06 | Baseline locked — initial brief from PM discovery. |
 | 2026-04-13 | **Clarifications:** v1 **backup/restore** vs **v1.x live sync**; **ephemeral local photos** (TTL, no server backup, not in export); Phase 2 workflow — **ADRs** for backend + sync layer; **spike** = optional narrow client POC only. See [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md). |
 | 2026-04-13 | **Engineering:** Draft **ADRs** in `docs/specs/adr/` (001 backend, 002 backup/sync); `docs/specs/ARCHITECTURE.md` + **spec stubs**; Linear **CES-26–CES-32** under **CES-22** (one issue per spec). ADR status **Proposed** until explicitly accepted. |
+| 2026-04-14 | **Continuity update:** self-hosting requirement clarified — managed-first is acceptable, but architecture must preserve **backend-only self-host** continuity for technical users. ADR 001 acceptance gate updated accordingly. |
+| 2026-04-14 | **Risk hardening:** ADR 001 expanded with explicit security model, RLS/authz CI matrix, least-privilege controls, index/performance guardrails, and staging promotion gates (including restore smoke checks) before acceptance. |

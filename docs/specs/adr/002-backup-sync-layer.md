@@ -12,11 +12,13 @@
 
 ## Options considered
 
-| Approach | Fit v1 backup | Fit v1.x live sync | Ops / solo maintainer |
-|----------|----------------|---------------------|------------------------|
-| **Hand-rolled outbox** + Postgres API | Strong if protocol is explicit | Build incrementally; more custom code | Full control; you own bugs |
-| **PowerSync** (Postgres-backed) | Viable if product supports backup-first | Strong candidate for bidirectional | Extra dependency; evaluate license/ops |
-| **ElectricSQL** | Evaluate sync model vs backup-only | Alternative sync engine | Evaluate maturity + ops |
+
+| Approach                              | Fit v1 backup                           | Fit v1.x live sync                    | Ops / solo maintainer                  |
+| ------------------------------------- | --------------------------------------- | ------------------------------------- | -------------------------------------- |
+| **Hand-rolled outbox** + Postgres API | Strong if protocol is explicit          | Build incrementally; more custom code | Full control; you own bugs             |
+| **PowerSync** (Postgres-backed)       | Viable if product supports backup-first | Strong candidate for bidirectional    | Extra dependency; evaluate license/ops |
+| **ElectricSQL**                       | Evaluate sync model vs backup-only      | Alternative sync engine               | Evaluate maturity + ops                |
+
 
 ## Decision (proposed)
 

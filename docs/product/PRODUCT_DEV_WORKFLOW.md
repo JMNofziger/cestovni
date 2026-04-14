@@ -4,7 +4,7 @@
 
 Update this percentage when a **stage exit** is fully met.
 
-Use this file as the **stage gate** for the Cestovni lifecycle. Each stage has exit criteria; do not skip a stage without an explicit written exception (note the reason in the change log of [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) or in Linear).
+Use this file as the **stage gate** for the Cestovni lifecycle. Each stage has exit criteria; do not skip a stage without an explicit written exception (note the reason in the change log of `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` or in Linear).
 
 **Legend:** 🟩 Done · 🟨 In Progress · 🟥 To Do
 
@@ -21,6 +21,7 @@ We move **baseline → architecture decisions → specs → delivery → launch*
 - **Spike vs architecture:** Spikes prove or disprove a specific uncertainty; architecture items (backend boundary, sync layer) use **ADRs** and normal review.
 - **v1 server role:** Cloud **backup/restore** of structured data; **no** server backup of receipt photos (ephemeral, on-device).
 - **v1.x direction:** Live multi-device sync when product is ready; spec merge rules before building it.
+- **Continuity:** managed-first is acceptable, but we must preserve a **backend-only self-host** continuity path for technical users.
 - **Mobile stack:** Chosen after architecture + optional POC; default bias from discovery remains **Flutter + Drift** until ADR/POC says otherwise.
 
 ---
@@ -36,7 +37,7 @@ We move **baseline → architecture decisions → specs → delivery → launch*
 ## Stage 1 — Product baseline (Phase 1)
 
 - 🟩 **Step 1: Baseline brief locked**
-  - 🟩 [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) reflects north star, v1 scope, and **change log** discipline
+  - 🟩 `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` reflects north star, v1 scope, and **change log** discipline
   - 🟩 Scope changes use dated **change log** rows (see 2026-04-13 entry)
 
 **Exit:** Brief “Locked” with agreed v1 boundaries.
@@ -48,17 +49,21 @@ We move **baseline → architecture decisions → specs → delivery → launch*
 Complete **before** treating stack-dependent specs as final.
 
 - 🟨 **Step 2: Backend / API boundary ADR**
-  - 🟨 Options compared — **draft:** [`docs/specs/adr/001-backend-api-boundary.md`](../specs/adr/001-backend-api-boundary.md) (**Proposed**)
-  - 🟥 Security boundary explicit in ADR + tests plan — **expand before “Accepted”**
+  - 🟩 Options compared — **Option C (Hybrid) selected:** `[docs/specs/adr/001-backend-api-boundary.md](../specs/adr/001-backend-api-boundary.md)` (**Proposed**)
+  - 🟨 Security model explicit in ADR + RLS/authz tests plan documented; implementation evidence still required before “Accepted”
+  - 🟥 Deployment matrix documented (**managed vs self-host**) with explicit supported scope (**backend-only continuity for technical users**)  
+  - 🟥 Runbook skeleton tracked (bootstrap, env contract, migrate/seed, backup/restore)
+  - 🟥 CI/staging promotion gates documented (migration dry-run, policy regression, contract tests, restore smoke)
+  - 🟥 Least-privilege model documented (runtime/migration/break-glass roles)
   - 🟨 **Exit / portability** notes sketched in ADR
   - 🟥 **Accepted** status + Linear **CES-23** closed criteria met
 - 🟨 **Step 3: Backup / sync layer ADR (v1 + path to v1.x)**
-  - 🟨 v1 **backup/restore** direction — **draft:** [`docs/specs/adr/002-backup-sync-layer.md`](../specs/adr/002-backup-sync-layer.md) (**Proposed**)
+  - 🟨 v1 **backup/restore** direction — **draft:** `[docs/specs/adr/002-backup-sync-layer.md](../specs/adr/002-backup-sync-layer.md)` (**Proposed**)
   - 🟨 Candidates compared (hand-rolled vs PowerSync vs ElectricSQL)
-  - 🟥 Full protocol + merge rules in [`sync-protocol.md`](../specs/sync-protocol.md) — **spec pass, not ADR-only**
+  - 🟥 Full protocol + merge rules in `[sync-protocol.md](../specs/sync-protocol.md)` — **spec pass, not ADR-only**
   - 🟥 **Accepted** + **CES-24** done
 - 🟨 **Step 4: Architecture overview doc**
-  - 🟨 [`docs/specs/ARCHITECTURE.md`](../specs/ARCHITECTURE.md) draft links ADRs + spec index
+  - 🟨 `[docs/specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)` draft links ADRs + spec index
   - 🟩 Ephemeral photo pipeline called out
   - 🟥 **CES-25** closed when overview is agreed complete for v1 kickoff
 - 🟥 **Step 5 (optional): Mobile client POC — timeboxed**
@@ -75,14 +80,14 @@ Complete **before** treating stack-dependent specs as final.
 Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 - 🟨 **Step 6: Stack-agnostic specs** *(can overlap with Stage 2 if they do not assume server details)*
-  - 🟨 Consumption math — stub [`consumption-math.md`](../specs/consumption-math.md)
-  - 🟨 SI + US gal — stub [`si-units.md`](../specs/si-units.md)
-  - 🟨 Export v1 — stub [`export-v1.md`](../specs/export-v1.md)
-  - 🟨 Telemetry — stub [`telemetry-allowlist.md`](../specs/telemetry-allowlist.md)
-  - 🟨 Ephemeral photos — stub [`photo-pipeline.md`](../specs/photo-pipeline.md)
+  - 🟨 Consumption math — stub `[consumption-math.md](../specs/consumption-math.md)`
+  - 🟨 SI + US gal — stub `[si-units.md](../specs/si-units.md)`
+  - 🟨 Export v1 — stub `[export-v1.md](../specs/export-v1.md)`
+  - 🟨 Telemetry — stub `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`
+  - 🟨 Ephemeral photos — stub `[photo-pipeline.md](../specs/photo-pipeline.md)`
 - 🟨 **Step 7: Stack-bound specs** *(after Stage 2 exit)*
-  - 🟨 Backup/sync protocol — stub [`sync-protocol.md`](../specs/sync-protocol.md) (blocked on **ADR 002**)
-  - 🟨 Data model — stub [`data-model.md`](../specs/data-model.md) (blocked on **ADR 001–002**)
+  - 🟨 Backup/sync protocol — stub `[sync-protocol.md](../specs/sync-protocol.md)` (blocked on **ADR 002**)
+  - 🟨 Data model — stub `[data-model.md](../specs/data-model.md)` (blocked on **ADR 001–002**)
 
 **Exit:** Spec files are **complete** (not stubs) and linked from Linear; stack-bound specs match **Accepted** ADRs.
 
@@ -93,7 +98,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 ## Stage 4 — Product, legal, store (Phase 2c)
 
 - 🟥 **Step 8: Privacy & compliance posture**
-  - 🟨 [`docs/specs/TBD-platform-compliance.md`](../specs/TBD-platform-compliance.md) — outline updated
+  - 🟨 `[docs/specs/TBD-platform-compliance.md](../specs/TBD-platform-compliance.md)` — outline updated
   - 🟥 Deletion, export, and “photos not backed up” user-visible honesty — **complete**
 - 🟥 **Step 9: Launch-facing copy**
   - 🟥 Donations optional; no paywall narrative aligned with brief
@@ -106,7 +111,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 ## Stage 5 — Delivery (Phase 3)
 
 - 🟥 **Step 10: Engineering breakdown**
-  - 🟥 Linear issues per vertical with **`Spec:`** paths
+  - 🟥 Linear issues per vertical with `**Spec:`** paths
   - 🟥 Estimates and dependencies reflect ADRs (no orphan tasks)
 - 🟥 **Step 11: Implementation milestones**
   - 🟥 Local-first app shell → backup → export → remaining v1 scope (order per dependency graph)
@@ -118,7 +123,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 ## Stage 6 — Launch (Phase 4)
 
 - 🟥 **Step 12: Launch criteria & rollback**
-  - 🟥 [`docs/specs/TBD-launch.md`](../specs/TBD-launch.md) checklist owned
+  - 🟥 `[docs/specs/TBD-launch.md](../specs/TBD-launch.md)` checklist owned
   - 🟥 Rollback spike (e.g. CES-19) resolved for chosen platform
 
 **Exit:** Ship decision recorded; post-launch ops path clear.
@@ -141,6 +146,6 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 ## Related
 
-- Baseline: [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md)
-- Spec folder: [`docs/specs/README.md`](../specs/README.md)
-- Linear templates: [`docs/linear/issue-templates.md`](../linear/issue-templates.md)
+- Baseline: `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)`
+- Spec folder: `[docs/specs/README.md](../specs/README.md)`
+- Linear templates: `[docs/linear/issue-templates.md](../linear/issue-templates.md)`

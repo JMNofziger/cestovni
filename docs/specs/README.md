@@ -19,3 +19,4 @@ Each Linear issue should include a **`Spec:`** line pointing to the relevant fil
 | [`photo-pipeline.md`](photo-pipeline.md) | Ephemeral photos / drafts | CES-30 |
 | [`sync-protocol.md`](sync-protocol.md) | Backup + v1.x sync | CES-31 |
 | [`data-model.md`](data-model.md) | Schemas | CES-32 |
+| [`self-host-runbook.md`](self-host-runbook.md) | Backend-only continuity bootstrap | CES-33 |
