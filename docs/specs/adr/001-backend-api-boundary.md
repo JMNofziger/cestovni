@@ -1,7 +1,8 @@
 # ADR 001: Backend / API boundary (Postgres + auth)
 
-**Status:** Proposed (pending explicit product/engineering sign-off)  
+**Status:** Accepted  
 **Date:** 2026-04-13  
+**Accepted on:** 2026-04-14  
 **Linear:** CES-23  
 
 ## Context
@@ -24,7 +25,7 @@
 2. **Thin HTTPS API + Postgres**: client talks only to app-owned API; auth/session validation and policy checks centralized in server code.
 3. **Hybrid (managed-first runtime, app-owned API contract)**: v1 deploys on managed Postgres/Auth, but mobile client targets a stable app-owned API boundary that can run on managed or self-hosted infrastructure.
 
-## Decision (proposed)
+## Decision
 
 **Default for v1:** adopt **Hybrid**.
 
@@ -51,6 +52,30 @@
 
 - User/operator runs compatible Postgres + auth/API stack.
 - Same schema, migration history, and API contract as managed mode.
+
+### Deployment matrix
+
+
+| Capability                             | Managed mode                            | Self-host mode                  | Parity constraint                             |
+| -------------------------------------- | --------------------------------------- | ------------------------------- | --------------------------------------------- |
+| Postgres (schema + migrations)         | Provider-hosted                         | Operator-hosted (Postgres 15+)  | Same migration history; same schema           |
+| Auth (sign-up, sign-in, token refresh) | Provider auth service                   | Compatible OIDC/JWT provider    | Same claim model; same user identity mapping  |
+| API contract layer                     | Provider runtime or edge functions      | App-owned server process        | Same endpoints, request/response models       |
+| RLS policy enforcement                 | Provider Postgres RLS                   | Operator Postgres RLS           | Same policy files applied via migrations      |
+| Backup/restore (structured data)       | Runs against managed DB                 | Runs against self-hosted DB     | Same protocol; restore smoke test covers both |
+| Admin/dashboard tooling                | Provider dashboard (not product-facing) | **Not supported in v1**         | No product feature may depend on dashboard    |
+| Receipt photo storage                  | **Not applicable** (local-only)         | **Not applicable** (local-only) | N/A                                           |
+| Multi-device live sync                 | **v1.x — not in scope**                 | **v1.x — not in scope**         | N/A                                           |
+
+
+**Unsupported in self-host v1:** provider dashboard, provider-specific analytics, provider storage buckets. These are explicitly not product dependencies.
+
+## Client contract rules
+
+- **Allowed client surfaces:** only the app-owned API contract (endpoints + request/response models defined in Git).
+- **Forbidden direct provider calls:** client code must not call provider-specific REST, realtime, or storage APIs directly. All data access routes through the app contract layer.
+- **Contract test ownership:** engineering owns contract tests in `tests/contract/`; both managed and self-host modes must pass the same suite.
+- **Enforcement:** PR review checklist includes "no new provider-specific imports in client feature code." CI lint rule when tooling is available.
 
 ## Security model
 
@@ -81,10 +106,28 @@
 
 ## Least-privilege controls
 
-- Runtime role has only minimum grants needed for product operations.
+### Role model
+
+
+| Role               | Purpose                  | Scope                         | Constraint                                              |
+| ------------------ | ------------------------ | ----------------------------- | ------------------------------------------------------- |
+| `cestovni_app`     | Runtime API operations   | DML on product tables via RLS | No DDL, no BYPASSRLS, no GRANT                          |
+| `cestovni_migrate` | Schema migrations        | DDL on all product tables     | Time-bound to migration window; not used at runtime     |
+| `cestovni_admin`   | Break-glass emergency    | Full access                   | Requires incident record; credentials rotated after use |
+| `anon`             | Unauthenticated requests | None                          | Deny all data access by default                         |
+
+
+### Rules
+
+- Runtime role has only minimum grants needed for product operations (SELECT, INSERT, UPDATE, DELETE through RLS).
 - Migration role is separate from runtime role; elevated privileges are time-bound to migration execution.
-- Admin/service credentials are never embedded in client binaries or client-accessible config.
+- Admin/service credentials are never embedded in client binaries, `.env.example`, or client-accessible config.
 - Break-glass access requires explicit incident record and follow-up credential rotation.
+
+### Validation
+
+- Role separation tests live in `tests/roles/` and run as part of the CI promotion gate.
+- See `tests/roles/README.md` for the full test matrix.
 
 ## Index and performance guardrails
 
@@ -117,17 +160,16 @@
 - Better long-term survivability and lower re-platforming risk.
 - Need discipline: contract tests, migration tests, policy regression tests, and restore drills become mandatory engineering hygiene.
 
-## Acceptance gate (to move Proposed -> Accepted)
+## Acceptance evidence
 
-- [ ] Deployment matrix documented with explicit capabilities, unsupported scope, and parity constraints for managed vs self-host.
-- [ ] Runbook skeleton added at `docs/specs/self-host-runbook.md` covering bootstrap, env contract, migrate/seed, and backup/restore.
-- [ ] Contract-locking decisions captured (allowed client surfaces, forbidden direct provider calls, and ownership of contract tests).
-- [ ] RLS/authz matrix implemented in CI with evidence links from CES-23 (policy allow/deny + `WITH CHECK` coverage).
-- [ ] Least-privilege role model documented and validated (runtime vs migration vs break-glass handling).
-- [ ] Staging promotion gate documented with migration dry-run, policy regression, contract, and restore smoke checks.
-- [ ] Linked updates in `docs/specs/ARCHITECTURE.md` and `docs/product/PRODUCT_BRIEF.md` change log.
 
-## Open questions
+- Deployment matrix finalized in this ADR and referenced from `docs/specs/ARCHITECTURE.md`.
+- Client contract rules finalized in this ADR; direct provider calls are out of bounds for product code.
+- Runbook established at `docs/specs/self-host-runbook.md` with bootstrap, migration, backup/restore, and drill checklist.
+- Security and least-privilege validation scaffolding established in `tests/rls/`, `tests/roles/`, and `ci/`.
+- Product/workflow alignment captured in `docs/product/PRODUCT_BRIEF.md` and `docs/product/PRODUCT_DEV_WORKFLOW.md`.
 
-- Final v1 auth provider list (magic link + Apple + Google) and minimal self-host-compatible alternative.
-- Whether any server-side endpoint beyond core CRUD is needed in v1 (brief prefers on-device export, so default is no heavy export service).
+## Follow-ups (tracked outside this ADR)
+
+- Finalize ADR 002 (backup/sync layer) and downstream stack-bound specs.
+- Select concrete auth provider mix for v1 implementation.

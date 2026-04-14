@@ -1,0 +1,49 @@
+# CI workflow stub: RLS / authorization regression
+# Gate 4 in ADR 001 acceptance gate
+#
+# Adapt to chosen CI platform (GitHub Actions, etc.) when implementation starts.
+#
+# Trigger: migration PRs, pre-release promotion
+#
+# Steps:
+#   1. Start Postgres with migrations applied
+#   2. Provision two test users with distinct roles/claims
+#   3. Run tests/rls/*.sql (or test runner equivalent)
+#   4. Fail pipeline if any test fails
+#   5. Upload test results as CI artifact
+
+name: rls-regression
+
+on:
+  pull_request:
+    paths:
+      - 'migrations/**'
+      - 'tests/rls/**'
+
+jobs:
+  rls-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_DB: cestovni_test
+          POSTGRES_USER: cestovni_test
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply migrations
+        run: echo "TODO: run migration tool against test DB"
+
+      - name: Run RLS regression tests
+        run: echo "TODO: execute tests/rls/*.sql against test DB and assert results"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-regression-results
+          path: test-results/

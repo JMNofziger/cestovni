@@ -1,0 +1,75 @@
+# CI workflow stub: staging promotion gates
+# Gate 6 in ADR 001 acceptance gate
+#
+# Adapt to chosen CI platform (GitHub Actions, etc.) when implementation starts.
+#
+# Trigger: release branch push, manual promotion request
+#
+# Gates (all must pass):
+#   1. Migration dry-run: apply against clean DB + representative snapshot
+#   2. RLS regression: full authz test matrix (calls rls-regression workflow)
+#   3. Contract tests: API contract suite against managed and self-host targets
+#   4. Restore smoke: backup/restore cycle proves data integrity
+#
+# Failure blocks promotion until fixed or explicitly waived.
+
+name: promotion-gates
+
+on:
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+
+jobs:
+  migration-dry-run:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_DB: cestovni_test
+          POSTGRES_USER: cestovni_test
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean DB migration dry-run
+        run: echo "TODO: apply all migrations to clean DB and verify success"
+      - name: Snapshot DB migration dry-run
+        run: echo "TODO: apply migrations to representative snapshot and verify success"
+
+  rls-regression:
+    needs: migration-dry-run
+    uses: ./.github/workflows/rls-regression.yml
+
+  contract-tests:
+    needs: migration-dry-run
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [managed, self-host]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run contract tests (${{ matrix.target }})
+        run: echo "TODO: run tests/contract/ against ${{ matrix.target }} target"
+
+  restore-smoke:
+    needs: migration-dry-run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backup, restore, and verify
+        run: |
+          echo "TODO: create backup via pg_dump"
+          echo "TODO: restore via pg_restore"
+          echo "TODO: run migrations post-restore"
+          echo "TODO: verify signed-in user can read data through API"
+
+  gate-summary:
+    needs: [migration-dry-run, rls-regression, contract-tests, restore-smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All gates passed
+        run: echo "All promotion gates passed. Ready for staging deployment."

@@ -22,7 +22,7 @@
 
 | Topic | Document | Status |
 |-------|-----------|--------|
-| Backend / API boundary | [`adr/001-backend-api-boundary.md`](adr/001-backend-api-boundary.md) | Proposed |
+| Backend / API boundary | [`adr/001-backend-api-boundary.md`](adr/001-backend-api-boundary.md) | Accepted |
 | Backup / sync layer | [`adr/002-backup-sync-layer.md`](adr/002-backup-sync-layer.md) | Proposed |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
@@ -31,6 +31,8 @@
 - **Managed mode (v1 default):** hosted backend runtime for fastest delivery and lower ops.
 - **Self-host mode (continuity path):** technical users can run backend services themselves using the same schema and app contract.
 - **Scope for continuity v1:** backend services only (API, DB, auth boundary); no promise of additional admin tooling in this phase.
+- **Deployment matrix:** explicit capability/parity table in [`adr/001-backend-api-boundary.md` — Deployment matrix](adr/001-backend-api-boundary.md#deployment-matrix).
+- **Client contract rules:** allowed/forbidden client surfaces in [`adr/001-backend-api-boundary.md` — Client contract rules](adr/001-backend-api-boundary.md#client-contract-rules).
 - Source of truth for boundary requirements: [`adr/001-backend-api-boundary.md`](adr/001-backend-api-boundary.md).
 - Runbook tracking: `docs/specs/self-host-runbook.md` (Linear CES-33).
 

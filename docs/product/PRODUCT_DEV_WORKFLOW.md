@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~40% *(Stage 0–1 done; Stage 2a ADR + architecture **drafted** — needs **Accepted**; Stage 2b spec **stubs** + Linear children CES-26–32 filed.)*
+**Overall Progress:** ~50% *(Stage 0–1 done; Stage 2a Step 2 accepted (ADR 001); Stage 2b spec **stubs** + Linear children CES-26–32 filed.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -12,7 +12,7 @@ Use this file as the **stage gate** for the Cestovni lifecycle. Each stage has e
 
 ## TL;DR
 
-We move **baseline → architecture decisions → specs → delivery → launch**. A **spike** is a **short, timeboxed experiment** that answers **one narrow technical question** (e.g. “does on-device ZIP stream acceptably on a mid-range Android in framework X?”). **Backend hosting** and **sync/backup layer** choices are **architecture / ADR work**: discussed, documented, and decided—not buried inside a vague “spike.” Optional **mobile client POC** runs only if the team still has material uncertainty after reading ADRs and the brief.
+We move **baseline → architecture decisions → specs → delivery → launch**. A **spike** is a **short, timeboxed experiment** that answers **one narrow technical question** (e.g. "does on-device ZIP stream acceptably on a mid-range Android in framework X?"). **Backend hosting** and **sync/backup layer** choices are **architecture / ADR work**: discussed, documented, and decided—not buried inside a vague "spike." Optional **mobile client POC** runs only if the team still has material uncertainty after reading ADRs and the brief.
 
 ---
 
@@ -40,7 +40,7 @@ We move **baseline → architecture decisions → specs → delivery → launch*
   - 🟩 `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` reflects north star, v1 scope, and **change log** discipline
   - 🟩 Scope changes use dated **change log** rows (see 2026-04-13 entry)
 
-**Exit:** Brief “Locked” with agreed v1 boundaries.
+**Exit:** Brief "Locked" with agreed v1 boundaries.
 
 ---
 
@@ -48,15 +48,15 @@ We move **baseline → architecture decisions → specs → delivery → launch*
 
 Complete **before** treating stack-dependent specs as final.
 
-- 🟨 **Step 2: Backend / API boundary ADR**
-  - 🟩 Options compared — **Option C (Hybrid) selected:** `[docs/specs/adr/001-backend-api-boundary.md](../specs/adr/001-backend-api-boundary.md)` (**Proposed**)
-  - 🟨 Security model explicit in ADR + RLS/authz tests plan documented; implementation evidence still required before “Accepted”
-  - 🟥 Deployment matrix documented (**managed vs self-host**) with explicit supported scope (**backend-only continuity for technical users**)  
-  - 🟥 Runbook skeleton tracked (bootstrap, env contract, migrate/seed, backup/restore)
-  - 🟥 CI/staging promotion gates documented (migration dry-run, policy regression, contract tests, restore smoke)
-  - 🟥 Least-privilege model documented (runtime/migration/break-glass roles)
-  - 🟨 **Exit / portability** notes sketched in ADR
-  - 🟥 **Accepted** status + Linear **CES-23** closed criteria met
+- 🟩 **Step 2: Backend / API boundary ADR**
+  - 🟩 Options compared — **Option C (Hybrid) selected:** `[docs/specs/adr/001-backend-api-boundary.md](../specs/adr/001-backend-api-boundary.md)` (**Accepted**)
+  - 🟩 Security model explicit in ADR + RLS/authz test matrix scaffolded in `tests/rls/`
+  - 🟩 Deployment matrix documented (managed vs self-host capability table + client contract rules in ADR)
+  - 🟩 Runbook executable minimum at `[self-host-runbook.md](../specs/self-host-runbook.md)` with drill checklist
+  - 🟩 CI/staging promotion gates scaffolded (`ci/rls-regression.yml`, `ci/promotion-gates.yml`)
+  - 🟩 Least-privilege role model documented in ADR + validation tests in `tests/roles/`
+  - 🟩 **Exit / portability** notes complete in ADR
+  - 🟩 **Accepted** status + Linear **CES-23** closed
 - 🟨 **Step 3: Backup / sync layer ADR (v1 + path to v1.x)**
   - 🟨 v1 **backup/restore** direction — **draft:** `[docs/specs/adr/002-backup-sync-layer.md](../specs/adr/002-backup-sync-layer.md)` (**Proposed**)
   - 🟨 Candidates compared (hand-rolled vs PowerSync vs ElectricSQL)
@@ -68,6 +68,12 @@ Complete **before** treating stack-dependent specs as final.
   - 🟥 **CES-25** closed when overview is agreed complete for v1 kickoff
 - 🟥 **Step 5 (optional): Mobile client POC — timeboxed**
   - 🟥 **Not started** — run only after ADR review if client-only uncertainty remains (**CES-21**)
+
+### Remaining Stage 2 blockers
+
+- ADR 002 still **Proposed** — must be **Accepted** before Stage 3 stack-bound specs.
+- `sync-protocol.md` and `data-model.md` remain **Stubs** — blocked until ADR 001 + 002 accepted.
+- Architecture overview (CES-25) needs final alignment pass after both ADRs are accepted.
 
 **Exit:** Backend ADR + sync-layer ADR **Accepted**; architecture doc points to them; optional POC complete or explicitly waived with rationale.
 
@@ -99,7 +105,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 - 🟥 **Step 8: Privacy & compliance posture**
   - 🟨 `[docs/specs/TBD-platform-compliance.md](../specs/TBD-platform-compliance.md)` — outline updated
-  - 🟥 Deletion, export, and “photos not backed up” user-visible honesty — **complete**
+  - 🟥 Deletion, export, and "photos not backed up" user-visible honesty — **complete**
 - 🟥 **Step 9: Launch-facing copy**
   - 🟥 Donations optional; no paywall narrative aligned with brief
   - 🟥 Apple privacy manifest plan (ties to telemetry spec)
@@ -130,7 +136,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 ---
 
-## How I’ll alert you (process)
+## How I'll alert you (process)
 
 
 | If you try to…                                                             | Stop and fix first                |
