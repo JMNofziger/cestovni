@@ -39,6 +39,7 @@ Create **saved views** in Linear (Issues → filters → **Save as view**). Ever
 | **Cestovni — In review**     | Project **Cestovni** + Status **In Review**                                                                                 |
 | **Cestovni — Bugs**          | Project **Cestovni** + Label **type:bug**                                                                                   |
 | **Cestovni — Current cycle** | Project **Cestovni** + **Current cycle** *(enable cycles for team **Cestovni** in Linear settings if this filter is empty)* |
+| **Cestovni — Stage 5 delivery** | Project **Cestovni** + Parent **CES-35** (Delivery v1 epic). Shows the 12 vertical children in dependency order. |
 
 
 Pin or favorite these views in the sidebar.

@@ -41,22 +41,22 @@ flowchart LR
 
 ## Per-vertical backlog (Linear)
 
-Each row maps to one Linear child of the `Delivery v1` epic. `Spec:` lines below are literal — paste into the Linear issue.
+Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)**. Every row below is a child of that epic with a literal `Spec:` line and `blockedBy` relations matching this table.
 
-| # | Vertical | Milestone | `Spec:` | Depends on | Effort | Notes |
-|---|----------|-----------|---------|------------|--------|-------|
-| 1 | Mobile client bootstrap | M0 | `docs/specs/adr/003-mobile-stack.md` | — | medium | Project scaffold, navigation, settings shell, build pipeline. |
-| 2 | Client DB schema + migrations | M0 | `docs/specs/data-model.md` + `docs/specs/si-units.md` | 1 | medium | Drift (or chosen stack) schema; migration infra; INT64 storage honored. |
-| 3 | Consumption math module + golden tests | M1 | `docs/specs/consumption-math.md` | 2 | low | 8 golden fixtures pass; pure function module. |
-| 4 | Fill-up + vehicle UI (core logging) | M1 | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md` | 2, 3 | high | Offline-safe flows; drafts; amend; `odometer_reset` flag UX. |
-| 5 | Photo pipeline implementation | M1 | `docs/specs/photo-pipeline.md` | 2 | medium | EXIF strip, TTL sweep, `photo_refs`, no server upload. |
-| 6 | Export ZIP | M2 | `docs/specs/export-v1.md` | 2 | medium | Streaming ZIP; `photos_in_export: false` invariant; manifest. |
-| 7 | Server Postgres + RLS migrations | M3 | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md` | — | medium | Wires [`ci/rls-regression.yml`](../../ci/rls-regression.yml); `tests/rls/` fixtures. |
-| 8 | Server API + auth | M3 | `docs/specs/adr/001-backend-api-boundary.md` | 7 | high | Endpoints per sync-protocol; JWT auth; contract tests under `tests/contract/`. |
-| 9 | Backup / outbox (client) | M3 | `docs/specs/adr/002-backup-sync-layer.md` + `docs/specs/sync-protocol.md` | 2, 8 | high | Idempotent mutations; batch caps; 429 handling. |
-| 10 | Restore + dead-letter UX | M3 | `docs/specs/sync-protocol.md` | 9 | medium | Cursor pagination; dead-letter surfacing; rehydrate tests. |
-| 11 | Telemetry client wiring | M4 | `docs/specs/telemetry-allowlist.md` + `docs/specs/adr/004-telemetry-crash-sdk.md` | 1 | medium | Uses `ci/telemetry-gate.*`; pepper-HMAC user key. |
-| 12 | Client schema migration rollback tooling | M5 | `docs/specs/TBD-migration-rollback.md` | 2 | medium | New stub spec lands first; downgrade path + outbox replay. |
+| # | Linear | Vertical | Milestone | `Spec:` | Depends on | Effort |
+|---|--------|----------|-----------|---------|------------|--------|
+| 1 | [CES-36](https://linear.app/personal-interests-llc/issue/CES-36) | Mobile client bootstrap | M0 | `docs/specs/adr/003-mobile-stack.md` | — | medium |
+| 2 | [CES-37](https://linear.app/personal-interests-llc/issue/CES-37) | Client DB schema + migrations | M0 | `docs/specs/data-model.md` + `docs/specs/si-units.md` | CES-36 | medium |
+| 3 | [CES-38](https://linear.app/personal-interests-llc/issue/CES-38) | Consumption math module + golden tests | M1 | `docs/specs/consumption-math.md` | CES-37 | low |
+| 4 | [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) | Fill-up + vehicle UI (core logging) | M1 | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md` | CES-37, CES-38 | high |
+| 5 | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation | M1 | `docs/specs/photo-pipeline.md` | CES-37 | medium |
+| 6 | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP | M2 | `docs/specs/export-v1.md` | CES-37 | medium |
+| 7 | [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) | Server Postgres + RLS migrations | M3 | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md` | — | medium |
+| 8 | [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) | Server API + auth | M3 | `docs/specs/adr/001-backend-api-boundary.md` + `docs/specs/sync-protocol.md` | CES-42 | high |
+| 9 | [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) | Backup / outbox (client) | M3 | `docs/specs/adr/002-backup-sync-layer.md` + `docs/specs/sync-protocol.md` | CES-37, CES-43 | high |
+| 10 | [CES-45](https://linear.app/personal-interests-llc/issue/CES-45) | Restore + dead-letter UX | M3 | `docs/specs/sync-protocol.md` | CES-44 | medium |
+| 11 | [CES-46](https://linear.app/personal-interests-llc/issue/CES-46) | Telemetry client wiring | M4 | `docs/specs/telemetry-allowlist.md` + `docs/specs/adr/004-telemetry-crash-sdk.md` | CES-36 | medium |
+| 12 | [CES-47](https://linear.app/personal-interests-llc/issue/CES-47) | Client schema migration rollback tooling | M5 | `docs/specs/TBD-migration-rollback.md` | CES-37 | medium |
 
 **Non-verticals inside Stage 5** (scaffolded separately, not app code):
 
