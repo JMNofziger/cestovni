@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~50% *(Stage 0–1 done; Stage 2a Step 2 accepted (ADR 001); Stage 2b spec **stubs** + Linear children CES-26–32 filed.)*
+**Overall Progress:** ~65% *(Stage 0–1 done; Stage 2a Steps 2–3 accepted (ADR 001 + ADR 002); `sync-protocol.md` spec pass 1 landed; Stage 2b stack-bound specs unblocked, `data-model.md` still to do.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -57,23 +57,23 @@ Complete **before** treating stack-dependent specs as final.
   - 🟩 Least-privilege role model documented in ADR + validation tests in `tests/roles/`
   - 🟩 **Exit / portability** notes complete in ADR
   - 🟩 **Accepted** status + Linear **CES-23** closed
-- 🟨 **Step 3: Backup / sync layer ADR (v1 + path to v1.x)**
-  - 🟨 v1 **backup/restore** direction — **draft:** `[docs/specs/adr/002-backup-sync-layer.md](../specs/adr/002-backup-sync-layer.md)` (**Proposed**)
-  - 🟨 Candidates compared (hand-rolled vs PowerSync vs ElectricSQL)
-  - 🟥 Full protocol + merge rules in `[sync-protocol.md](../specs/sync-protocol.md)` — **spec pass, not ADR-only**
-  - 🟥 **Accepted** + **CES-24** done
+- 🟩 **Step 3: Backup / sync layer ADR (v1 + path to v1.x)**
+  - 🟩 v1 **backup/restore** direction — **hand-rolled outbox** selected: `[docs/specs/adr/002-backup-sync-layer.md](../specs/adr/002-backup-sync-layer.md)` (**Accepted** 2026-04-17)
+  - 🟩 Candidates compared (hand-rolled vs PowerSync vs ElectricSQL); managed sync runtimes deferred to an explicit v1.x revisit gate in ADR 002
+  - 🟩 Protocol primitives (server `row_version` sequence, per-table cursor, idempotent mutations, cursor-paginated restore) frozen in ADR 002 + `[sync-protocol.md](../specs/sync-protocol.md)` **spec pass 1**; v1.x field-level merge rules remain a roadmap pointer
+  - 🟩 **Accepted** + **CES-24** ready to close
 - 🟨 **Step 4: Architecture overview doc**
-  - 🟨 `[docs/specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)` draft links ADRs + spec index
+  - 🟩 `[docs/specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)` links both **Accepted** ADRs and the sync-protocol spec
   - 🟩 Ephemeral photo pipeline called out
-  - 🟥 **CES-25** closed when overview is agreed complete for v1 kickoff
+  - 🟨 **CES-25** final alignment pass pending product sign-off for v1 kickoff
 - 🟥 **Step 5 (optional): Mobile client POC — timeboxed**
   - 🟥 **Not started** — run only after ADR review if client-only uncertainty remains (**CES-21**)
 
 ### Remaining Stage 2 blockers
 
-- ADR 002 still **Proposed** — must be **Accepted** before Stage 3 stack-bound specs.
-- `sync-protocol.md` and `data-model.md` remain **Stubs** — blocked until ADR 001 + 002 accepted.
-- Architecture overview (CES-25) needs final alignment pass after both ADRs are accepted.
+- `sync-protocol.md` is now **Draft — spec pass 1** (v1 backup protocol frozen; v1.x live-sync merge rules still TBD — acceptable for Stage 3 kickoff but must land before v1.x delivery).
+- `data-model.md` remains a **Stub** — unblocked by ADR 001 + 002; CES-32 pass should land alongside domain specs (consumption math, fill-up lifecycle).
+- Architecture overview (CES-25) needs final product sign-off now that both ADRs link in.
 
 **Exit:** Backend ADR + sync-layer ADR **Accepted**; architecture doc points to them; optional POC complete or explicitly waived with rationale.
 
@@ -92,8 +92,8 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
   - 🟨 Telemetry — stub `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`
   - 🟨 Ephemeral photos — stub `[photo-pipeline.md](../specs/photo-pipeline.md)`
 - 🟨 **Step 7: Stack-bound specs** *(after Stage 2 exit)*
-  - 🟨 Backup/sync protocol — stub `[sync-protocol.md](../specs/sync-protocol.md)` (blocked on **ADR 002**)
-  - 🟨 Data model — stub `[data-model.md](../specs/data-model.md)` (blocked on **ADR 001–002**)
+  - 🟨 Backup/sync protocol — `[sync-protocol.md](../specs/sync-protocol.md)` **Draft (spec pass 1)** covering v1 backup; v1.x merge-rule pass still open
+  - 🟨 Data model — stub `[data-model.md](../specs/data-model.md)` (unblocked by ADR 001 + 002; CES-32)
 
 **Exit:** Spec files are **complete** (not stubs) and linked from Linear; stack-bound specs match **Accepted** ADRs.
 

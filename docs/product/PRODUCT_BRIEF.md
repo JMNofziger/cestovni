@@ -15,18 +15,18 @@
 ## Locked decisions
 
 
-| Area              | Choice                                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------------------ |
-| Platform          | Cross-platform mobile (one codebase); stack chosen in **Phase 2** via **architecture + optional client POC** (see [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md)) |
-| Offline           | Open app + **log fill-up with zero network**; **v1** = cloud **backup/restore** of structured data when signed in; **v1.x** = live multi-device sync (spec’d separately) |
-| Photos            | **Ephemeral on-device** aids for deferred entry (e.g. receipt snap → complete later); **short TTL** (target **30 days**); **not** backed up to server; **not** in ZIP export |
-| OCR               | Manual entry + photos + queue; **OCR Phase 2+**                                                              |
-| Units             | **SI canonical** in storage; user **mi/km** + **gal/L** display/entry; **US liquid gallon** when gal is used |
-| Export            | **ZIP**: per-entity **CSVs** + `README_export.txt` + `manifest.json`; prefer **on-device** assembly          |
-| Insights          | **No** fuel-quality insight **product** in v1; optional notes only; **Phase 2+**                             |
-| Commercial        | **Free**; **donations optional**, never required for sustainability narrative or feature access              |
-| Architecture bias | Client-heavy; efficient images; **minimal ethical telemetry**; user pays own bandwidth on bulk export        |
-| Deployment continuity | **Managed-first** operation is allowed; architecture must support **backend-only self-host** continuity for technical users |
+| Area                  | Choice                                                                                                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Platform              | Cross-platform mobile (one codebase); stack chosen in **Phase 2** via **architecture + optional client POC** (see [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md))      |
+| Offline               | Open app + **log fill-up with zero network**; **v1** = cloud **backup/restore** of structured data when signed in; **v1.x** = live multi-device sync (spec’d separately)     |
+| Photos                | **Ephemeral on-device** aids for deferred entry (e.g. receipt snap → complete later); **short TTL** (target **30 days**); **not** backed up to server; **not** in ZIP export |
+| OCR                   | Manual entry + photos + queue; **OCR Phase 2+**                                                                                                                              |
+| Units                 | **SI canonical** in storage; user **mi/km** + **gal/L** display/entry; **US liquid gallon** when gal is used                                                                 |
+| Export                | **ZIP**: per-entity **CSVs** + `README_export.txt` + `manifest.json`; prefer **on-device** assembly                                                                          |
+| Insights              | **No** fuel-quality insight **product** in v1; optional notes only; **Phase 2+**                                                                                             |
+| Commercial            | **Free**; **donations optional**, never required for sustainability narrative or feature access                                                                              |
+| Architecture bias     | Client-heavy; efficient images; **minimal ethical telemetry**; user pays own bandwidth on bulk export                                                                        |
+| Deployment continuity | **Managed-first** operation is allowed; architecture must support **backend-only self-host** continuity for technical users                                                  |
 
 
 ## North star
@@ -69,11 +69,11 @@ Structured fuel-quality insights; OCR; fleet B2B; ads; paywalled core features.
 ## Planning phases
 
 
-| Phase                    | What                                                                                                           | Status        |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------- |
-| **1 — Product brief**    | This document                                                                                                  | **Locked**    |
+| Phase                    | What                                                                                                                                                                                                                                                                                           | Status        |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **1 — Product brief**    | This document                                                                                                                                                                                                                                                                                  | **Locked**    |
 | **2 — Solution + specs** | **Architecture ADRs** (backend boundary, backup/sync layer) → **architecture note** → Git specs (consumption, backup/sync, export, SI, **ephemeral photos**, telemetry allow-list); **optional** timeboxed **client POC** if needed — see [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) | Next          |
-| **3 — Delivery**         | Linear breakdown, estimates, link `docs/specs/...`                                                             | After Phase 2 |
+| **3 — Delivery**         | Linear breakdown, estimates, link `docs/specs/...`                                                                                                                                                                                                                                             | After Phase 2 |
 
 
 **Order:** **Backend + sync-layer ADRs** first (not a “spike”); **stack-agnostic** specs (e.g. consumption math, export, telemetry) may run **in parallel**. **Stack-dependent** specs (data model, backup protocol details) finalize after ADRs. **Optional** timeboxed **client POC** (Flutter vs RN/KMP) only for residual uncertainty — see workflow doc.
@@ -92,11 +92,12 @@ Structured fuel-quality insights; OCR; fleet B2B; ads; paywalled core features.
 ## Change log
 
 
-| Date       | Change                                             |
-| ---------- | -------------------------------------------------- |
-| 2026-04-06 | Baseline locked — initial brief from PM discovery. |
+| Date       | Change                                                                                                                                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-04-06 | Baseline locked — initial brief from PM discovery.                                                                                                                                                                                                                                               |
 | 2026-04-13 | **Clarifications:** v1 **backup/restore** vs **v1.x live sync**; **ephemeral local photos** (TTL, no server backup, not in export); Phase 2 workflow — **ADRs** for backend + sync layer; **spike** = optional narrow client POC only. See [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md). |
-| 2026-04-13 | **Engineering:** Draft **ADRs** in `docs/specs/adr/` (001 backend, 002 backup/sync); `docs/specs/ARCHITECTURE.md` + **spec stubs**; Linear **CES-26–CES-32** under **CES-22** (one issue per spec). ADR status **Proposed** until explicitly accepted. |
-| 2026-04-14 | **Continuity update:** self-hosting requirement clarified — managed-first is acceptable, but architecture must preserve **backend-only self-host** continuity for technical users. ADR 001 acceptance gate updated accordingly. |
-| 2026-04-14 | **Risk hardening:** ADR 001 expanded with explicit security model, RLS/authz CI matrix, least-privilege controls, index/performance guardrails, and staging promotion gates (including restore smoke checks) before acceptance. |
-| 2026-04-14 | **ADR accepted:** ADR 001 (`docs/specs/adr/001-backend-api-boundary.md`) accepted and signed off; Stage 2 focus shifts to ADR 002 and stack-bound spec finalization. |
+| 2026-04-13 | **Engineering:** Draft **ADRs** in `docs/specs/adr/` (001 backend, 002 backup/sync); `docs/specs/ARCHITECTURE.md` + **spec stubs**; Linear **CES-26–CES-32** under **CES-22** (one issue per spec). ADR status **Proposed** until explicitly accepted.                                           |
+| 2026-04-14 | **Continuity update:** self-hosting requirement clarified — managed-first is acceptable, but architecture must preserve **backend-only self-host** continuity for technical users. ADR 001 acceptance gate updated accordingly.                                                                  |
+| 2026-04-14 | **Risk hardening:** ADR 001 expanded with explicit security model, RLS/authz CI matrix, least-privilege controls, index/performance guardrails, and staging promotion gates (including restore smoke checks) before acceptance.                                                                  |
+| 2026-04-14 | **ADR accepted:** ADR 001 (`docs/specs/adr/001-backend-api-boundary.md`) accepted and signed off; Stage 2 focus shifts to ADR 002 and stack-bound spec finalization.                                                                                                                             |
+| 2026-04-17 | **ADR accepted + spec pass:** ADR 002 (`docs/specs/adr/002-backup-sync-layer.md`) accepted — hand-rolled outbox on the app-owned contract for v1; PowerSync/Electric deferred to an explicit revisit gate. `docs/specs/sync-protocol.md` lifted to spec pass 1 (server-assigned `row_version` sequence, per-table cursor, idempotent mutations, cursor-paginated restore, LWW conflict policy); v1.x field-level merge rules remain a roadmap pointer. Stage 2 Step 3 closed. |

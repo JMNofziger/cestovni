@@ -9,13 +9,13 @@
 [Mobile app — Flutter/RN TBD]
   SQLite (offline source of truth for structured data)
   Local filesystem (ephemeral receipt photos, TTL ~30d, not backed up)
-  Outbox → backup upload when online
+  Client outbox → POST /mutations ; GET /changes for restore (see sync-protocol.md)
         ↓
 [App-owned API contract layer] (see ADR 001)
   Stable request/response boundary across managed and self-host modes
         ↓
 [Postgres + auth runtime]
-  Authoritative structured rows for signed-in backup/restore
+  Authoritative structured rows; row_version sequence drives backup/restore ordering
 ```
 
 ## Decisions (source of truth)
@@ -23,7 +23,7 @@
 | Topic | Document | Status |
 |-------|-----------|--------|
 | Backend / API boundary | [`adr/001-backend-api-boundary.md`](adr/001-backend-api-boundary.md) | Accepted |
-| Backup / sync layer | [`adr/002-backup-sync-layer.md`](adr/002-backup-sync-layer.md) | Proposed |
+| Backup / sync layer | [`adr/002-backup-sync-layer.md`](adr/002-backup-sync-layer.md) | Accepted |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
 ## Deployment modes (continuity)
@@ -35,6 +35,12 @@
 - **Client contract rules:** allowed/forbidden client surfaces in [`adr/001-backend-api-boundary.md` — Client contract rules](adr/001-backend-api-boundary.md#client-contract-rules).
 - Source of truth for boundary requirements: [`adr/001-backend-api-boundary.md`](adr/001-backend-api-boundary.md).
 - Runbook tracking: `docs/specs/self-host-runbook.md` (Linear CES-33).
+
+## Backup / restore protocol
+
+- Decision: [`adr/002-backup-sync-layer.md`](adr/002-backup-sync-layer.md) — hand-rolled outbox on the app-owned contract; no third-party sync runtime in v1 (preserves self-host parity).
+- Protocol details: [`sync-protocol.md`](sync-protocol.md) — server-assigned `row_version` (Postgres sequence) + per-table cursor; endpoints `POST /mutations`, `GET /changes`, `GET /restore/manifest`; idempotent mutations via client `mutation_id`; cursor-paginated restore (no snapshot checkpoints in v1).
+- Conflict policy v1: last-write-wins by `row_version`. Field-level merge rules are v1.x and live in `sync-protocol.md` roadmap.
 
 ## Specs (Phase 2b)
 
