@@ -84,7 +84,7 @@ Structured fuel-quality insights; OCR; fleet B2B; ads; paywalled core features.
 2. Continuity: ADR 001 must include deployment matrix (**managed vs self-host**) and a tracked backend-only self-host runbook skeleton.
 3. Optional: timeboxed **client POC** with pre-written pass/fail criteria (offline SQLite, camera, **backup job enqueue**, on-device export) — **only if** needed after ADRs.
 4. Specs in `docs/specs/`: consumption/fill-up; **backup + v1.x sync**; export v1; SI + US gal; **ephemeral photo / deferred entry**; telemetry allow-list.
-5. Legal / store: privacy, deletion, donation copy (photos not server-backed, export scope). **Done (2026-04-17)** — [`docs/specs/platform-compliance-v1.md`](../specs/platform-compliance-v1.md) + [`docs/product/launch-copy-v1.md`](launch-copy-v1.md).
+5. Legal / store: privacy, deletion, donation copy (photos not server-backed, export scope). **Done (2026-04-17)** — [`platform-compliance-v1.md`](../specs/platform-compliance-v1.md), [`launch-copy-v1.md`](launch-copy-v1.md).
 6. Linear: granular issues + spec links; follow [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) stage gates.
 
 ---
