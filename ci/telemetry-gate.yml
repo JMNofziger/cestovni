@@ -1,0 +1,57 @@
+# CI workflow: telemetry allow-list gate
+# Spec: docs/specs/telemetry-allowlist.md §"CI gate"
+# Enforcement: docs/specs/telemetry-events.v1.yaml is the authoritative
+# catalogue; this workflow rejects drift and banned pii_class values.
+#
+# Adapt to chosen CI platform (GitHub Actions, etc.) when implementation
+# starts. This file is shaped for GitHub Actions today.
+#
+# Trigger: PRs touching the YAML, the schema, the gate script itself, or
+# the (future) client source tree.
+#
+# Steps:
+#   1. Check out repo
+#   2. Install Python deps (pyyaml, jsonschema)
+#   3. Run ci/telemetry-gate.py
+#
+# The gate script enforces:
+#   - YAML parse + required top-level keys
+#   - JSON Schema validation (rejects pii_class identifier/freetext)
+#   - Client source scan (skipped until the client lands in Milestone 1)
+#   - Apple PrivacyInfo.xcprivacy drift (skipped until manifest authored)
+
+name: telemetry-gate
+
+on:
+  pull_request:
+    paths:
+      - 'docs/specs/telemetry-events.v1.yaml'
+      - 'docs/specs/telemetry-allowlist.md'
+      - 'ci/telemetry-gate.py'
+      - 'ci/telemetry-schema.json'
+      - 'ci/telemetry-gate.yml'
+      - 'client/**'
+      - 'app/**'
+      - 'mobile/**'
+      - 'apple/PrivacyInfo.xcprivacy'
+      - 'ios/Runner/PrivacyInfo.xcprivacy'
+  push:
+    branches:
+      - main
+
+jobs:
+  telemetry-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyyaml jsonschema
+
+      - name: Run telemetry gate
+        run: python ci/telemetry-gate.py
