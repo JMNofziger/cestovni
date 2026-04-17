@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~92% *(Stages 0–4 complete: baseline through Phase 2c compliance + launch copy; Stage 5 Delivery / engineering breakdown is next.)*
+**Overall Progress:** ~95% *(Stages 0–4 closed: Stage 4 engineering sign-off recorded 2026-04-17 in `platform-compliance-v1.md` §11; product ack on launch copy; Stage 5 Delivery / engineering breakdown is next. Residual compliance work — `ci/telemetry-gate.`*, Apple/Play submission-time forms, external counsel privacy policy — tracked as Stage 5 / launch follow-ups, not Stage 4 blockers.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -102,13 +102,13 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 ## Stage 4 — Product, legal, store (Phase 2c)
 
 - 🟩 **Step 8: Privacy & compliance posture**
-  - 🟩 [`platform-compliance-v1.md`](../specs/platform-compliance-v1.md) — **Complete (v1)** — data inventory, deletion / export / telemetry erasure, user-visible honesty, third parties, Apple + Play disclosure mapping, residency + minors v1 position (**CES-8**)
+  - 🟩 `[platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — **Complete (v1)** — data inventory, deletion / export / telemetry erasure, user-visible honesty, third parties, Apple + Play disclosure mapping, residency + minors v1 position (**CES-8**)
   - 🟩 Deletion, export, and “photos not backed up” user-visible honesty — **complete** (see spec §§3–5)
 - 🟩 **Step 9: Launch-facing copy**
-  - 🟩 [`launch-copy-v1.md`](launch-copy-v1.md) — store listing draft, privacy policy H2 outline, in-app Data & privacy bullets, donations optional / no paywall phrasing
-  - 🟩 Apple privacy manifest plan — normative categories in [`telemetry-allowlist.md`](../specs/telemetry-allowlist.md); ownership + Play mapping in `platform-compliance-v1.md` §8; **`ci/telemetry-gate.*` implementation** deferred to Stage 5 per telemetry spec
+  - 🟩 `[launch-copy-v1.md](launch-copy-v1.md)` — store listing draft, privacy policy H2 outline, in-app Data & privacy bullets, donations optional / no paywall phrasing
+  - 🟩 Apple privacy manifest plan — normative categories in `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`; ownership + Play mapping in `platform-compliance-v1.md` §8; `**ci/telemetry-gate.`* implementation** deferred to Stage 5 per telemetry spec
 
-**Exit:** Met — PM/counsel can draft store listing + privacy policy from Git; engineering sign-off checklist in `platform-compliance-v1.md` §11.
+**Exit:** Met and **signed off (2026-04-17)** — engineering checklist in `[platform-compliance-v1.md` §11](../specs/platform-compliance-v1.md#11-engineering-sign-off-checklist-stage-4-exit) ticked; product ack on `[launch-copy-v1.md](launch-copy-v1.md)`; counsel handoff section in launch copy §10 lists the package for external review.
 
 ---
 
@@ -153,3 +153,4 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 - Baseline: `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)`
 - Spec folder: `[docs/specs/README.md](../specs/README.md)`
 - Linear templates: `[docs/linear/issue-templates.md](../linear/issue-templates.md)`
+
