@@ -12,6 +12,8 @@ Use the **same section order** as Cursor `/create-issue` so drafts paste with mi
 
 **Always set:** Team **Cestovni**, Project **Cestovni**, appropriate **type:*** and **effort:*** labels, priority (default **Normal**).
 
+**`Spec:` paths:** Write repo-relative paths (e.g. `docs/specs/sync-protocol.md`). Canonical URL on GitHub: `https://github.com/JMNofziger/cestovni/blob/main/<path>` (no leading slash in `<path>`). Root [README.md](../../README.md) links the main docs.
+
 ---
 
 ## Bug

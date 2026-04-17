@@ -1,5 +1,7 @@
 # Linear saved views (Cestovni)
 
+**Canonical repo (GitHub `main`):** https://github.com/JMNofziger/cestovni — root [README.md](https://github.com/JMNofziger/cestovni/blob/main/README.md) links product docs, specs, and this Linear project.
+
 Your team uses these **issue states**: Backlog, Todo, In Progress, In Review, Done (+ Canceled, Duplicate).
 
 ## Automated (recommended)

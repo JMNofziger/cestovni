@@ -1,5 +1,7 @@
 # Specs
 
+**Browse on GitHub:** [github.com/JMNofziger/cestovni — `docs/specs/`](https://github.com/JMNofziger/cestovni/tree/main/docs/specs) · Repo root [README.md](../../README.md).
+
 Put feature and technical specs here as Markdown (e.g. `CES-123-short-name.md`).
 
 Each Linear issue should include a **`Spec:`** line pointing to the relevant file in this folder (or `TBD` for spikes / early discovery).

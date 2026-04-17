@@ -29,7 +29,7 @@ We move **baseline → architecture decisions → specs → delivery → launch*
 ## Stage 0 — Repo hygiene & pointers
 
 - 🟩 **Step 0: Canonical docs linked from Linear**
-  - 🟩 Project **Cestovni** description points to `docs/product/PRODUCT_BRIEF.md` and this workflow file
+  - 🟩 Project **Cestovni** description points to GitHub **main** ([repo](https://github.com/JMNofziger/cestovni), [README](https://github.com/JMNofziger/cestovni/blob/main/README.md), [brief](https://github.com/JMNofziger/cestovni/blob/main/docs/product/PRODUCT_BRIEF.md), [this workflow](https://github.com/JMNofziger/cestovni/blob/main/docs/product/PRODUCT_DEV_WORKFLOW.md))
   - 🟩 Phase 2 spec + ADR issues include a **Spec:** path (CES-22 children CES-26–32, CES-23–25); spot-check older epics (CES-5–7, CES-9) on next grooming pass
 
 ---

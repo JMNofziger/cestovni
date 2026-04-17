@@ -1,5 +1,7 @@
 # Cestovni — product
 
+**GitHub (canonical):** [github.com/JMNofziger/cestovni](https://github.com/JMNofziger/cestovni) — product docs live under `docs/product/` on branch `main`.
+
 **Baseline brief (locked):** [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) — principles, v1 scope, decisions, planning phases.
 
 **Development workflow (stage gates):** [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) — checklist per product phase; when to use a **spike** vs **architecture / ADR** work.
