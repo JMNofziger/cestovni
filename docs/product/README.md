@@ -14,6 +14,10 @@ Trustworthy fuel + maintenance history, offline-safe logging, full data portabil
 - **Baseline pointer issue:** [CES-20](https://linear.app/personal-interests-llc/issue/CES-20/meta-product-brief-baseline-locked-see-git)
 - **Issue capture:** Cursor `/create-issue` → Linear **Project: Cestovni**
 
+## Launch copy (Phase 2c)
+
+Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: [`launch-copy-v1.md`](launch-copy-v1.md). Engineering posture: [`../specs/platform-compliance-v1.md`](../specs/platform-compliance-v1.md).
+
 ## Specs
 
 Technical specs: [`../specs/`](../specs/) — Phase 2b domain specs complete for v1 kickoff (see index).

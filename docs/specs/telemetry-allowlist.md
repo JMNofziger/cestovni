@@ -93,7 +93,7 @@ We do **not** declare identifiers, contacts, financial info, location, search hi
 
 ## Right-to-erasure alignment
 
-Because the user's telemetry key is a **pepper-HMAC** of the user id, server-side deletion of the pepper (or its rotation) renders historical telemetry rows un-correlatable to the user without touching them row-by-row. The full plan — including the pepper lifecycle and per-user deletion — is finalized in [`TBD-platform-compliance.md`](TBD-platform-compliance.md) (Stage 4).
+Because the user's telemetry key is a **pepper-HMAC** of the user id, server-side deletion of the pepper (or its rotation) renders historical telemetry rows un-correlatable to the user without touching them row-by-row. The full plan — including the pepper lifecycle and per-user deletion — is finalized in [`platform-compliance-v1.md`](platform-compliance-v1.md) (Stage 4).
 
 ## CI gate
 
@@ -147,4 +147,4 @@ See [`telemetry-events.v1.yaml`](telemetry-events.v1.yaml) for the full file. Ea
 - [`PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) — telemetry principles.
 - [`telemetry-events.v1.yaml`](telemetry-events.v1.yaml) — the authoritative allow-list.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — crash SDK hosting/continuity notes.
-- [`TBD-platform-compliance.md`](TBD-platform-compliance.md) — pepper lifecycle and DSR alignment.
+- [`platform-compliance-v1.md`](platform-compliance-v1.md) — pepper lifecycle and DSR alignment.

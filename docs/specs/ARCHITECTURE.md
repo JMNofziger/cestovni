@@ -58,4 +58,4 @@ Parent **CES-22**; children **CES-26–CES-32** (see [`README.md`](README.md)). 
 
 ## Related compliance / ops
 
-- [`TBD-platform-compliance.md`](TBD-platform-compliance.md) — privacy, deletion, data residency notes.
+- [`platform-compliance-v1.md`](platform-compliance-v1.md) — privacy, deletion, export, telemetry erasure, store disclosures (v1 posture).

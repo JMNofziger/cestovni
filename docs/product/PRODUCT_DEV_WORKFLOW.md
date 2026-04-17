@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~85% *(Stage 0–2 done; Stage 3 (Phase 2b) spec pass landed 2026-04-17 — all domain specs flipped from Stub to Complete; sync-protocol.md marked Complete for v1; housekeeping + Linear issue closure is the only remaining item before Stage 4.)*
+**Overall Progress:** ~92% *(Stages 0–4 complete: baseline through Phase 2c compliance + launch copy; Stage 5 Delivery / engineering breakdown is next.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -64,7 +64,7 @@ Complete **before** treating stack-dependent specs as final.
   - 🟩 **Accepted** + **CES-24** ready to close
 - 🟩 **Step 4: Architecture overview doc**
   - 🟩 `[docs/specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)` links both **Accepted** ADRs and the sync-protocol spec
-  - 🟩 Ephemeral photo pipeline called out (+ link to `photo-pipeline.md` stub)
+  - 🟩 Ephemeral photo pipeline called out (+ link to `photo-pipeline.md`)
   - 🟩 **CES-25** closed — product sign-off for v1 kickoff (2026-04-17)
 - 🟩 **Step 5 (optional): Mobile client POC — timeboxed**
   - 🟩 **Waived (2026-04-17)** — no material client-only uncertainty after Accepted ADRs 001/002 + `sync-protocol.md` spec pass 1; stack follows brief default bias until delivery chooses otherwise. Rationale on **CES-21**.
@@ -101,14 +101,14 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 ## Stage 4 — Product, legal, store (Phase 2c)
 
-- 🟥 **Step 8: Privacy & compliance posture**
-  - 🟨 `[docs/specs/TBD-platform-compliance.md](../specs/TBD-platform-compliance.md)` — outline updated
-  - 🟥 Deletion, export, and "photos not backed up" user-visible honesty — **complete**
-- 🟥 **Step 9: Launch-facing copy**
-  - 🟥 Donations optional; no paywall narrative aligned with brief
-  - 🟥 Apple privacy manifest plan (ties to telemetry spec)
+- 🟩 **Step 8: Privacy & compliance posture**
+  - 🟩 [`platform-compliance-v1.md`](../specs/platform-compliance-v1.md) — **Complete (v1)** — data inventory, deletion / export / telemetry erasure, user-visible honesty, third parties, Apple + Play disclosure mapping, residency + minors v1 position (**CES-8**)
+  - 🟩 Deletion, export, and “photos not backed up” user-visible honesty — **complete** (see spec §§3–5)
+- 🟩 **Step 9: Launch-facing copy**
+  - 🟩 [`launch-copy-v1.md`](launch-copy-v1.md) — store listing draft, privacy policy H2 outline, in-app Data & privacy bullets, donations optional / no paywall phrasing
+  - 🟩 Apple privacy manifest plan — normative categories in [`telemetry-allowlist.md`](../specs/telemetry-allowlist.md); ownership + Play mapping in `platform-compliance-v1.md` §8; **`ci/telemetry-gate.*` implementation** deferred to Stage 5 per telemetry spec
 
-**Exit:** Enough to draft store listing and privacy policy with engineering sign-off.
+**Exit:** Met — PM/counsel can draft store listing + privacy policy from Git; engineering sign-off checklist in `platform-compliance-v1.md` §11.
 
 ---
 
