@@ -24,4 +24,5 @@ Each Linear issue should include a **`Spec:`** line pointing to the relevant fil
 | [`data-model.md`](data-model.md)                     | Client SQLite + server Postgres schemas    | CES-32         | Complete (v1)                          |
 | [`self-host-runbook.md`](self-host-runbook.md)       | Backend-only continuity bootstrap          | CES-33         | Draft (executable minimum)             |
 | [`platform-compliance-v1.md`](platform-compliance-v1.md) | Privacy / deletion / store posture | CES-8 (Stage 4)| Complete (v1)                          |
+| [`TBD-migration-rollback.md`](TBD-migration-rollback.md) | Client schema migration rollback tooling | Stage 5 (M5)   | Stub                                   |
 | [`TBD-launch.md`](TBD-launch.md)                     | Launch criteria & rollback                 | Stage 6        | Stub                                   |
