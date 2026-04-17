@@ -150,10 +150,14 @@ Map **§2 Data inventory** rows to Play categories:
 
 ## 11. Engineering sign-off checklist (Stage 4 exit)
 
-- [ ] Data inventory rows match [`data-model.md`](data-model.md) backed-up tables + client-only tables.
-- [ ] Photo + export claims match [`photo-pipeline.md`](photo-pipeline.md) and [`export-v1.md`](export-v1.md).
-- [ ] Backup scope matches [ADR 002](adr/002-backup-sync-layer.md) + [`sync-protocol.md`](sync-protocol.md).
-- [ ] Telemetry claims match [`telemetry-allowlist.md`](telemetry-allowlist.md) + YAML.
-- [ ] [`../product/launch-copy-v1.md`](../product/launch-copy-v1.md) reuses §3 bullets without contradiction.
+- [x] Data inventory rows match [`data-model.md`](data-model.md) backed-up tables + client-only tables.
+- [x] Photo + export claims match [`photo-pipeline.md`](photo-pipeline.md) and [`export-v1.md`](export-v1.md).
+- [x] Backup scope matches [ADR 002](adr/002-backup-sync-layer.md) + [`sync-protocol.md`](sync-protocol.md).
+- [x] Telemetry claims match [`telemetry-allowlist.md`](telemetry-allowlist.md) + YAML.
+- [x] [`../product/launch-copy-v1.md`](../product/launch-copy-v1.md) reuses §3 bullets without contradiction.
 
-When all boxes are checked in PR or Linear **CES-8**, Stage 4 is **closed** from an engineering posture perspective.
+**Signed off (engineering): 2026-04-17** — principal engineer, Cestovni. Stage 4 is **closed** from an engineering posture perspective. Follow-ups (not blockers) tracked on **CES-8** and Stage 5:
+
+- `ci/telemetry-gate.*` implementation (Stage 5).
+- Apple `PrivacyInfo.xcprivacy` + Play Data Safety form authoring at submission time, using §2 + telemetry YAML as source of truth.
+- External counsel-drafted privacy policy + DPAs (see [`../product/launch-copy-v1.md`](../product/launch-copy-v1.md) §10 handoff).
