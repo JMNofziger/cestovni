@@ -104,3 +104,21 @@ Reuse the same sentences as [`platform-compliance-v1.md`](../specs/platform-comp
 - [ ] Play Data safety form matches [`platform-compliance-v1.md`](../specs/platform-compliance-v1.md) §8.3 mapping (updated for current Play Console definitions).
 - [ ] Store screenshots do not show fake “cloud photo backup.”
 - [ ] Support URL and privacy policy URL live.
+
+---
+
+## 10. Counsel handoff (for external review)
+
+This file is **not** a privacy policy. Before publishing anything user-facing, counsel turns this into legal text. The package they need:
+
+1. **Data inventory** — [`../specs/platform-compliance-v1.md`](../specs/platform-compliance-v1.md) §2 (rows cover App Store privacy labels + Play Data Safety).
+2. **User-visible honesty (copy constraints)** — same file §3 bullets; these must survive translation into the final policy.
+3. **Deletion / retention** — same file §5 (structured rows on account deletion; telemetry pepper lifecycle; photo TTL).
+4. **Third-party SDKs** — same file §7 (allow-listed crash/telemetry SDK to be named at implementation time; not invented here).
+5. **Payments posture** — §6 (free core; donations optional; IAP routing decision is counsel + store policy).
+6. **Residency / minors** — §9 (no user-selectable region in v1; not directed at minors; EU DPA stack is operator-legal work before EU marketing claims).
+7. **Service cessation** — §10 (notice + export + self-host pointer).
+
+**Out of scope for counsel at this stage (engineering owns):** telemetry allow-list contents, data model, backup protocol, CI gate implementation.
+
+**Status (product ack):** Launch copy skeletons above match [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) monetization + principles and [`../specs/platform-compliance-v1.md`](../specs/platform-compliance-v1.md) §3 without contradiction — 2026-04-17.
