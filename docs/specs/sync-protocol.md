@@ -1,11 +1,12 @@
 # Spec: Backup protocol & v1.x sync roadmap
 
-**Status:** Draft — spec pass 1 (v1 backup protocol frozen; v1.x live-sync details still TBD).  
-**Linear:** CES-31 (informed by [ADR 001](adr/001-backend-api-boundary.md) and [ADR 002](adr/002-backup-sync-layer.md))  
+**Status:** Complete for v1; v1.x live-sync roadmap section retained as follow-up (deferred per [ADR 002 revisit gates](adr/002-backup-sync-layer.md#revisit-gates-explicit-not-aspirational)).
+**Linear:** CES-31 (informed by [ADR 001](adr/001-backend-api-boundary.md) and [ADR 002](adr/002-backup-sync-layer.md))
+**Aligned with:** [`data-model.md`](data-model.md) table list.
 
 ## Scope
 
-- **v1:** structured data backup/restore for signed-in users — vehicles, fill-ups, maintenance, settings. Photos stay local ([`photo-pipeline.md`](photo-pipeline.md)); no server photo storage.
+- **v1:** structured data backup/restore for signed-in users — `vehicles`, `fill_ups`, `maintenance_rules`, `maintenance_events`, `settings` (list canonicalized in [`data-model.md`](data-model.md)). Photos stay local ([`photo-pipeline.md`](photo-pipeline.md)); no server photo storage.
 - **v1.x (roadmap pointer only):** live multi-device sync merge rules. Not specified in this pass.
 
 ## Principles
@@ -74,7 +75,7 @@ Request:
       "table": "fill_ups",
       "op": "insert",
       "row_id": "0d2...",
-      "payload": { "vehicle_id": "…", "odometer_km": 12345, "liters": 42.1, "…": "…" }
+      "payload": { "vehicle_id": "…", "filled_at": "2026-04-17T12:30:00Z", "odometer_m": 12345000, "volume_uL": 42100000, "total_price_cents": 5912, "currency_code": "EUR", "is_full": true, "missed_before": false, "odometer_reset": false }
     }
   ]
 }
@@ -96,9 +97,12 @@ Response:
 }
 ```
 
-- Each `result.status` is `applied` (new write) or `duplicate` (already applied — same `row_version` returned).
-- Partial batches are allowed: individual results may carry `{status: "rejected", error: {...}}`. Retriable errors keep the outbox row; non-retriable errors move it to a local dead-letter list for user-visible handling.
+- Each `result.status` is `applied` (new write), `duplicate` (already applied — same `row_version` returned), or `rejected` (carries `error: {...}`).
+- Partial batches are allowed: individual results may carry `{status: "rejected", error: {...}}`. Retriable errors keep the outbox row; non-retriable errors move it to the local dead-letter list (see "Dead-letter handling" below).
 - All mutations in a request execute in a single transaction on the server to keep `row_version` contiguous per batch.
+- **Batch size cap:** client sends at most **100 mutations per request**; server rejects larger batches with HTTP 413 and a clear error code. Client splits the outbox accordingly.
+- **Request size cap:** body size ≤ **1 MiB**. A single mutation whose payload exceeds this is a programming error and moves to dead-letter.
+- **Transaction semantics on partial rejection:** the server still applies the non-rejected mutations in the batch (and assigns them `row_version` values); rejections do not roll back the rest. This is an intentional trade-off for throughput; the client reconciles outcomes per `mutation_id`.
 
 ### `GET /changes?table=…&since=…&limit=…`
 
@@ -115,7 +119,9 @@ Response:
 }
 ```
 
-- Server returns rows with `row_version > since`, ordered ascending, capped at `limit` (hard max enforced server-side).
+- Server returns rows with `row_version > since`, ordered ascending, capped at `limit`.
+- **`limit` cap:** client may request up to **500 rows per page**; server clamps larger values to 500 (not an error — the clamp is silent but noted in response headers as `X-Limit-Clamped: true`).
+- **Default `limit`:** 200 rows if the client omits the parameter.
 - Clients persist `last_seen_row_version := next_since` **only after** the page commits to the local DB.
 - Soft-deleted rows are included so clients can reconcile tombstones.
 
@@ -128,10 +134,11 @@ Response:
 ```json
 {
   "tables": [
-    { "table": "vehicles",   "row_count": 3,    "max_row_version": 1049 },
-    { "table": "fill_ups",   "row_count": 812,  "max_row_version": 1048 },
-    { "table": "maintenance","row_count": 47,   "max_row_version": 1041 },
-    { "table": "settings",   "row_count": 1,    "max_row_version": 1007 }
+    { "table": "vehicles",           "row_count": 3,   "max_row_version": 1049 },
+    { "table": "fill_ups",           "row_count": 812, "max_row_version": 1048 },
+    { "table": "maintenance_rules",  "row_count": 12,  "max_row_version": 1040 },
+    { "table": "maintenance_events", "row_count": 47,  "max_row_version": 1041 },
+    { "table": "settings",           "row_count": 1,   "max_row_version": 1007 }
   ]
 }
 ```
@@ -141,10 +148,23 @@ Response:
 ## Ordering and retry semantics
 
 - **Ordering:** `row_version ASC` is the only ordering contract. `updated_at` ties are possible and must not be used by clients.
-- **Retries:** exponential backoff (e.g. 1s → 2s → 4s → 8s, capped) with jitter; no retry on `error.retriable = false`.
+- **Retries:** exponential backoff `1s → 2s → 4s → 8s → 16s → 30s` (capped) with ±20% jitter; no retry on `error.retriable = false`; max **6** retries before moving to dead-letter.
 - **Cursor safety:** clients commit the new cursor only after durable write of the page's rows; a mid-page crash replays the same page, deduped by `(id, row_version)` on the client.
 - **Clock skew:** irrelevant to protocol decisions; server-side `row_version` is the truth.
-- **Rate limits:** server may return `429` with a `Retry-After` hint; clients honor it with the normal backoff machinery.
+- **Rate limits (429 semantics):**
+  - Server returns `429 Too Many Requests` with a `Retry-After` header (integer seconds) when the client exceeds rate/quota limits.
+  - `Retry-After` is the minimum wait; clients MUST NOT retry before it elapses.
+  - Clients treat 429 as `retriable: true` regardless of error body; the attempt counter increments, but the counter ceiling does NOT move 429s to dead-letter (429 is a server-side signal, not a client defect).
+  - On repeated 429s for the same mutation (> 10 consecutive), the client pauses outbox draining for the duration hinted by the last `Retry-After` and surfaces a non-blocking status indicator ("Backup paused by server — will retry").
+- **HTTP status map:**
+  - `2xx` — normal success path.
+  - `400` — non-retriable; dead-letter.
+  - `401` — token issue; pause outbox, trigger re-auth flow.
+  - `403` — non-retriable; dead-letter (indicates server-side RLS rejected; bug-class event).
+  - `409` — non-retriable in v1 (we don't generate server-side conflicts under LWW-by-`row_version`); dead-letter and log.
+  - `413` — non-retriable for the specific over-sized mutation; split batch client-side for the rest.
+  - `429` — retriable; see above.
+  - `5xx` — retriable with backoff.
 
 ## Fill-up lifecycle (applies to `fill_ups`; analogous patterns for other tables)
 
@@ -155,12 +175,34 @@ Response:
 
 Multiple amendments queued before the first upload succeeds are **coalesced** client-side into a single `update` entry keyed by `row_id` before send, to reduce wasted writes.
 
+## Dead-letter handling
+
+Non-retriable failures (`400`, `403`, `409`, validation-class `4xx`) and exhausted-retry failures move the outbox row to a **local dead-letter list** — a view on `outbox` filtered by `attempts >= max_retries OR last_error.retriable = false`.
+
+### Contract
+
+- Dead-letter rows **do not** block other outbox rows from uploading.
+- The dead-letter row remains on the device until the user resolves it; it is **not** auto-discarded.
+- The failing `mutation_id` is preserved so that if the server's state ever agrees with the client, retrying succeeds idempotently.
+
+### UX hook
+
+A Settings → Backup screen surfaces a non-intrusive indicator when `dead_letter_count > 0`:
+
+- Shows the count and a human-readable summary of the most recent failing entry ("Fill-up on April 3 couldn't be backed up — server rejected it").
+- Offers three actions: **Retry now** (re-queues with a fresh attempt counter), **Discard** (hard-deletes the outbox row and, if it was an `insert`, leaves the local row in a clearly-marked "not backed up" state), and **View details** (shows the error envelope for support).
+- Emits `sync_backup_result` telemetry event with `outcome = non_retriable_error` and the `error_code` enum value (see [`telemetry-allowlist.md`](telemetry-allowlist.md)).
+
+### Server-side metrics
+
+Dead-letter is a **signal** that something is wrong — either a client bug or a server-side policy problem. The server emits a metric on any non-retriable response so operators can alert on sustained rates.
+
 ## Restore flow (cold start / new device)
 
 1. Call `GET /restore/manifest` to size the job.
 2. For each core table (`vehicles`, `fill_ups`), loop `GET /changes?table=…&since=0&limit=…` until `has_more=false`.
 3. Unblock the UI once `vehicles` + `fill_ups` cursors match the manifest's `max_row_version` (logging becomes usable).
-4. Continue `maintenance`, `settings` in the background.
+4. Continue `maintenance_rules`, `maintenance_events`, `settings` in the background.
 5. No snapshot checkpoints in v1; a partial restore resumes cleanly from the last committed cursor per table.
 
 ## v1.x roadmap (pointer only — TBD in this pass)
@@ -175,4 +217,6 @@ Multiple amendments queued before the first upload succeeds are **coalesced** cl
 - [ADR 001 — Backend / API boundary](adr/001-backend-api-boundary.md)
 - [ADR 002 — Backup / sync layer](adr/002-backup-sync-layer.md)
 - [Architecture overview](ARCHITECTURE.md)
+- [Data model (tables referenced here)](data-model.md)
 - [Photo pipeline (ephemeral, local-only)](photo-pipeline.md)
+- [Telemetry allow-list (sync/backup events)](telemetry-allowlist.md)
