@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~65% *(Stage 0–1 done; Stage 2a Steps 2–3 accepted (ADR 001 + ADR 002); `sync-protocol.md` spec pass 1 landed; Stage 2b stack-bound specs unblocked, `data-model.md` still to do.)*
+**Overall Progress:** ~72% *(Stage 0–1 done; Stage 2 Phase 2a **exit met**: ADR 001 + ADR 002 Accepted, architecture overview signed off (**CES-25** Done), optional mobile POC **waived** (**CES-21**); `sync-protocol.md` spec pass 1 landed; Stage 2b stack-bound specs + `data-model.md` still to do.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -62,18 +62,17 @@ Complete **before** treating stack-dependent specs as final.
   - 🟩 Candidates compared (hand-rolled vs PowerSync vs ElectricSQL); managed sync runtimes deferred to an explicit v1.x revisit gate in ADR 002
   - 🟩 Protocol primitives (server `row_version` sequence, per-table cursor, idempotent mutations, cursor-paginated restore) frozen in ADR 002 + `[sync-protocol.md](../specs/sync-protocol.md)` **spec pass 1**; v1.x field-level merge rules remain a roadmap pointer
   - 🟩 **Accepted** + **CES-24** ready to close
-- 🟨 **Step 4: Architecture overview doc**
+- 🟩 **Step 4: Architecture overview doc**
   - 🟩 `[docs/specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)` links both **Accepted** ADRs and the sync-protocol spec
-  - 🟩 Ephemeral photo pipeline called out
-  - 🟨 **CES-25** final alignment pass pending product sign-off for v1 kickoff
-- 🟥 **Step 5 (optional): Mobile client POC — timeboxed**
-  - 🟥 **Not started** — run only after ADR review if client-only uncertainty remains (**CES-21**)
+  - 🟩 Ephemeral photo pipeline called out (+ link to `photo-pipeline.md` stub)
+  - 🟩 **CES-25** closed — product sign-off for v1 kickoff (2026-04-17)
+- 🟩 **Step 5 (optional): Mobile client POC — timeboxed**
+  - 🟩 **Waived (2026-04-17)** — no material client-only uncertainty after Accepted ADRs 001/002 + `sync-protocol.md` spec pass 1; stack follows brief default bias until delivery chooses otherwise. Rationale on **CES-21**.
 
 ### Remaining Stage 2 blockers
 
 - `sync-protocol.md` is now **Draft — spec pass 1** (v1 backup protocol frozen; v1.x live-sync merge rules still TBD — acceptable for Stage 3 kickoff but must land before v1.x delivery).
 - `data-model.md` remains a **Stub** — unblocked by ADR 001 + 002; CES-32 pass should land alongside domain specs (consumption math, fill-up lifecycle).
-- Architecture overview (CES-25) needs final product sign-off now that both ADRs link in.
 
 **Exit:** Backend ADR + sync-layer ADR **Accepted**; architecture doc points to them; optional POC complete or explicitly waived with rationale.
 

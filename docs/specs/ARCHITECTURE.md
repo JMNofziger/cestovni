@@ -1,6 +1,6 @@
 # Cestovni — architecture overview (v1)
 
-**Status:** Draft — evolves with ADRs and specs.  
+**Status:** Agreed for v1 kickoff (2026-04-17) — still evolves with future ADRs/specs.  
 **Workflow:** [`../product/PRODUCT_DEV_WORKFLOW.md`](../product/PRODUCT_DEV_WORKFLOW.md)
 
 ## System shape
@@ -50,6 +50,11 @@ Parent **CES-22**; children **CES-26–CES-32** (see `docs/specs/README.md`). Fi
 
 - Server-side receipt photo storage or export of photos in ZIP.
 - Full multi-device live sync (v1.x — after backup protocol is proven).
+
+## Ephemeral photos (deferred entry)
+
+- Product + diagram above: local TTL photos, not server-backed, not in export ZIP.
+- Spec stub (Phase 2b): [`photo-pipeline.md`](photo-pipeline.md).
 
 ## Related compliance / ops
 
