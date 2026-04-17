@@ -114,13 +114,13 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 ## Stage 5 — Delivery (Phase 3)
 
-- 🟥 **Step 10: Engineering breakdown**
-  - 🟥 Linear issues per vertical with `**Spec:`** paths
-  - 🟥 Estimates and dependencies reflect ADRs (no orphan tasks)
+- 🟨 **Step 10: Engineering breakdown** — source doc [`delivery-plan-v1.md`](delivery-plan-v1.md)
+  - 🟨 Linear issues per vertical with `**Spec:`** paths — 12 verticals enumerated in the delivery plan; `Delivery v1` epic created in Linear
+  - 🟨 Estimates and dependencies reflect ADRs (no orphan tasks) — milestone spine M0→M5 with explicit blocking relations in delivery plan
 - 🟥 **Step 11: Implementation milestones**
-  - 🟥 Local-first app shell → backup → export → remaining v1 scope (order per dependency graph)
+  - 🟥 Local-first app shell → backup → export → remaining v1 scope (order per [`delivery-plan-v1.md`](delivery-plan-v1.md#milestone-spine))
 
-**Exit:** Running build with test strategy tied to spec risks (math, backup, export).
+**Exit:** Running build with test strategy tied to spec risks (math, backup, export). Tracking checklist: [`delivery-plan-v1.md` § Stage 5 exit criteria (tracking)](delivery-plan-v1.md#stage-5-exit-criteria-tracking).
 
 ---
 
@@ -153,4 +153,3 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 - Baseline: `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)`
 - Spec folder: `[docs/specs/README.md](../specs/README.md)`
 - Linear templates: `[docs/linear/issue-templates.md](../linear/issue-templates.md)`
-
