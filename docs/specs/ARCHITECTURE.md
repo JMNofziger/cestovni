@@ -6,8 +6,8 @@
 ## System shape
 
 ```text
-[Mobile app — Flutter/RN TBD]
-  SQLite (offline source of truth for structured data)
+[Mobile app — Flutter + Drift (ADR 003)]
+  SQLite via Drift (offline source of truth for structured data)
   Local filesystem (ephemeral receipt photos, TTL ~30d, not backed up)
   Client outbox → POST /mutations ; GET /changes for restore (see sync-protocol.md)
         ↓
@@ -24,6 +24,8 @@
 |-------|-----------|--------|
 | Backend / API boundary | [`adr/001-backend-api-boundary.md`](adr/001-backend-api-boundary.md) | Accepted |
 | Backup / sync layer | [`adr/002-backup-sync-layer.md`](adr/002-backup-sync-layer.md) | Accepted |
+| Mobile client stack | [`adr/003-mobile-stack.md`](adr/003-mobile-stack.md) | Accepted |
+| Telemetry / crash SDK | [`adr/004-telemetry-crash-sdk.md`](adr/004-telemetry-crash-sdk.md) | Accepted |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
 ## Deployment modes (continuity)

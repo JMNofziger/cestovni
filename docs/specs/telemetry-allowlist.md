@@ -53,7 +53,7 @@ CI rejects any `pii_class: identifier` or `pii_class: freetext` present in the a
 
 ## Transport + SDK
 
-- **Crashes:** single chosen SDK (selected at implementation time; candidates: Sentry, Firebase Crashlytics, Bugsnag). Whichever is chosen MUST support:
+- **Crashes:** **Sentry (self-host-capable)** per [ADR 004](adr/004-telemetry-crash-sdk.md). The SDK MUST support:
   - Server-side PII scrub configuration (URL, IP, body) committed to infra repo (not to client).
   - Breadcrumb allow-list (see below).
   - Deterministic release tagging so crashes map to Git SHAs.
@@ -138,7 +138,7 @@ See [`telemetry-events.v1.yaml`](telemetry-events.v1.yaml) for the full file. Ea
 
 ## Critical gaps / risks
 
-- **SDK choice is deferred** to implementation (ADR follow-up). Risk: a chosen SDK may not cleanly satisfy the breadcrumb allow-list; this is a go/no-go criterion during spike-free evaluation, not a product decision.
+- **SDK chosen:** Sentry (self-host-capable) per [ADR 004](adr/004-telemetry-crash-sdk.md). Breadcrumb allow-list enforced via `beforeSend` + `sanitizeBreadcrumb` in the client (wired in Milestone 4 per [`../product/delivery-plan-v1.md`](../product/delivery-plan-v1.md)).
 - **Pepper management** for the telemetry key is owned by the platform-compliance spec (Stage 4); this spec assumes it exists.
 - **Opt-out default policy** (what is on/off out of the box) is currently engineering's best guess; product may revise before launch.
 
