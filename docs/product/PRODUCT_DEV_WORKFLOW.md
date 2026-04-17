@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~72% *(Stage 0–1 done; Stage 2 Phase 2a **exit met**: ADR 001 + ADR 002 Accepted, architecture overview signed off (**CES-25** Done), optional mobile POC **waived** (**CES-21**); `sync-protocol.md` spec pass 1 landed; Stage 2b stack-bound specs + `data-model.md` still to do.)*
+**Overall Progress:** ~85% *(Stage 0–2 done; Stage 3 (Phase 2b) spec pass landed 2026-04-17 — all domain specs flipped from Stub to Complete; sync-protocol.md marked Complete for v1; housekeeping + Linear issue closure is the only remaining item before Stage 4.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -71,8 +71,7 @@ Complete **before** treating stack-dependent specs as final.
 
 ### Remaining Stage 2 blockers
 
-- `sync-protocol.md` is now **Draft — spec pass 1** (v1 backup protocol frozen; v1.x live-sync merge rules still TBD — acceptable for Stage 3 kickoff but must land before v1.x delivery).
-- `data-model.md` remains a **Stub** — unblocked by ADR 001 + 002; CES-32 pass should land alongside domain specs (consumption math, fill-up lifecycle).
+- None. Stage 2 exit fully met; Stage 3 completed on 2026-04-17 — see the Stage 3 section below for each spec's status.
 
 **Exit:** Backend ADR + sync-layer ADR **Accepted**; architecture doc points to them; optional POC complete or explicitly waived with rationale.
 
@@ -84,15 +83,15 @@ Complete **before** treating stack-dependent specs as final.
 
 Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
-- 🟨 **Step 6: Stack-agnostic specs** *(can overlap with Stage 2 if they do not assume server details)*
-  - 🟨 Consumption math — stub `[consumption-math.md](../specs/consumption-math.md)`
-  - 🟨 SI + US gal — stub `[si-units.md](../specs/si-units.md)`
-  - 🟨 Export v1 — stub `[export-v1.md](../specs/export-v1.md)`
-  - 🟨 Telemetry — stub `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`
-  - 🟨 Ephemeral photos — stub `[photo-pipeline.md](../specs/photo-pipeline.md)`
-- 🟨 **Step 7: Stack-bound specs** *(after Stage 2 exit)*
-  - 🟨 Backup/sync protocol — `[sync-protocol.md](../specs/sync-protocol.md)` **Draft (spec pass 1)** covering v1 backup; v1.x merge-rule pass still open
-  - 🟨 Data model — stub `[data-model.md](../specs/data-model.md)` (unblocked by ADR 001 + 002; CES-32)
+- 🟩 **Step 6: Stack-agnostic specs** *(can overlap with Stage 2 if they do not assume server details)*
+  - 🟩 Consumption math — `[consumption-math.md](../specs/consumption-math.md)` **Complete (v1)** — segment model, integer formulas, 8 golden-test fixtures (**CES-26**)
+  - 🟩 SI + US gal — `[si-units.md](../specs/si-units.md)` **Complete (v1)** — INT64 µL / m / cents; exact conversions; banker's rounding (**CES-27**)
+  - 🟩 Export v1 — `[export-v1.md](../specs/export-v1.md)` **Complete (v1)** — ZIP layout, manifest.json, CSV contract, streaming assembly (**CES-28**)
+  - 🟩 Telemetry — `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)` **Complete (v1)** — + machine-readable `[telemetry-events.v1.yaml](../specs/telemetry-events.v1.yaml)` (**CES-29**)
+  - 🟩 Ephemeral photos — `[photo-pipeline.md](../specs/photo-pipeline.md)` **Complete (v1)** — EXIF strip, TTL rules, no server backup (**CES-30**)
+- 🟩 **Step 7: Stack-bound specs** *(after Stage 2 exit)*
+  - 🟩 Backup/sync protocol — `[sync-protocol.md](../specs/sync-protocol.md)` **Complete for v1** — batch caps, 429 semantics, dead-letter UX, table names aligned with data-model (**CES-31**); v1.x merge-rule pass explicitly deferred per ADR 002
+  - 🟩 Data model — `[data-model.md](../specs/data-model.md)` **Complete (v1)** — tables, SI-integer columns, protocol columns, indexing, RLS shape, migration alignment (**CES-32**)
 
 **Exit:** Spec files are **complete** (not stubs) and linked from Linear; stack-bound specs match **Accepted** ADRs.
 
