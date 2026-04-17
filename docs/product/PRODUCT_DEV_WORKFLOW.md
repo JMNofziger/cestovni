@@ -106,7 +106,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
   - 🟩 Deletion, export, and “photos not backed up” user-visible honesty — **complete** (see spec §§3–5)
 - 🟩 **Step 9: Launch-facing copy**
   - 🟩 `[launch-copy-v1.md](launch-copy-v1.md)` — store listing draft, privacy policy H2 outline, in-app Data & privacy bullets, donations optional / no paywall phrasing
-  - 🟩 Apple privacy manifest plan — normative categories in `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`; ownership + Play mapping in `platform-compliance-v1.md` §8; `**ci/telemetry-gate.`* implementation** deferred to Stage 5 per telemetry spec
+  - 🟩 Apple privacy manifest plan — normative categories in `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`; ownership + Play mapping in `platform-compliance-v1.md` §8; `**ci/telemetry-gate.`* landed 2026-04-18** as `ci/telemetry-gate.py` + `ci/telemetry-schema.json` + `ci/telemetry-gate.yml` (see [`ci/README.md`](../../ci/README.md))
 
 **Exit:** Met and **signed off (2026-04-17)** — engineering checklist in `[platform-compliance-v1.md` §11](../specs/platform-compliance-v1.md#11-engineering-sign-off-checklist-stage-4-exit) ticked; product ack on `[launch-copy-v1.md](launch-copy-v1.md)`; counsel handoff section in launch copy §10 lists the package for external review.
 
