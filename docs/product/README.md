@@ -16,4 +16,4 @@ Trustworthy fuel + maintenance history, offline-safe logging, full data portabil
 
 ## Specs
 
-Technical specs: [`../specs/`](../specs/) (Phase 2+).
+Technical specs: [`../specs/`](../specs/) — Phase 2b domain specs complete for v1 kickoff (see index).
