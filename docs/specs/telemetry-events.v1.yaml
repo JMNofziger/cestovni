@@ -1,0 +1,103 @@
+# Cestovni telemetry allow-list — v1
+#
+# Authoritative machine-readable list of events the client may emit.
+# Human-readable rationale lives in telemetry-allowlist.md.
+# CI gate (ci/telemetry-gate.*) validates this file and rejects any
+# client code that emits an event name or property not listed here.
+#
+# pii_class values:
+#   none        -> safe aggregate value (enum, bool, bucketed int)
+#   pseudo      -> hashed, non-reversible identifier
+#   identifier  -> raw PII (BANNED; CI rejects)
+#   freetext    -> free-form user text (BANNED; CI rejects)
+
+schema_version: 1
+pepper_required: true # telemetry user key must be HMAC-SHA-256(raw_user_id, server_pepper)
+
+events:
+  - name: app_start
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: app_version,   type: string_semver, pii_class: none }
+      - { name: os,            type: enum, values: [ios, android],                       pii_class: none }
+      - { name: os_version_major, type: int,                                              pii_class: none }
+      - { name: cold_start,    type: bool,                                                pii_class: none }
+
+  - name: app_crash
+    category: crash
+    retention_days: 90
+    properties:
+      - { name: app_version,   type: string_semver, pii_class: none }
+      - { name: os,            type: enum, values: [ios, android],                       pii_class: none }
+      - { name: os_version_major, type: int,                                              pii_class: none }
+      - { name: fatal,         type: bool,                                                pii_class: none }
+      - { name: signal,        type: enum, values: [abort, segv, illegal, unknown],      pii_class: none }
+    notes: "Stack trace and breadcrumbs are attached by the crash SDK subject to the breadcrumb allow-list in telemetry-allowlist.md."
+
+  - name: sync_backup_attempt
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: batch_size_bucket, type: enum, values: [lt_10, lt_50, lt_200, ge_200], pii_class: none }
+
+  - name: sync_backup_result
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: outcome,       type: enum, values: [ok, retriable_error, non_retriable_error], pii_class: none }
+      - { name: duration_ms_bucket, type: enum, values: [lt_500, lt_2000, lt_10000, ge_10000], pii_class: none }
+      - { name: error_code,    type: enum, values: [conflict, unauthorized, rate_limited, network, server_5xx, client_4xx, unknown], pii_class: none }
+
+  - name: restore_start
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: reason, type: enum, values: [cold_start, user_initiated, reinstall], pii_class: none }
+
+  - name: restore_result
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: outcome,           type: enum, values: [ok, aborted, error],           pii_class: none }
+      - { name: duration_s_bucket, type: enum, values: [lt_5, lt_30, lt_120, ge_120],  pii_class: none }
+      - { name: rows_bucket,       type: enum, values: [lt_100, lt_1000, lt_10000, ge_10000], pii_class: none }
+
+  - name: export_start
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: trigger, type: enum, values: [user, scheduled], pii_class: none }
+
+  - name: export_result
+    category: reliability
+    retention_days: 30
+    properties:
+      - { name: outcome,             type: enum, values: [ok, error, cancelled],               pii_class: none }
+      - { name: duration_s_bucket,   type: enum, values: [lt_5, lt_30, lt_120, ge_120],        pii_class: none }
+      - { name: zip_size_mb_bucket,  type: enum, values: [lt_1, lt_10, lt_50, ge_50],          pii_class: none }
+      - { name: row_count_bucket,    type: enum, values: [lt_100, lt_1000, lt_10000, ge_10000], pii_class: none }
+
+  - name: fill_up_complete
+    category: product
+    retention_days: 30
+    properties:
+      - { name: is_full,        type: bool, pii_class: none }
+      - { name: missed_before,  type: bool, pii_class: none }
+      - { name: odometer_reset, type: bool, pii_class: none }
+      - { name: had_photo,      type: bool, pii_class: none }
+      - { name: entry_source,   type: enum, values: [quick_add, from_draft, edit_amend], pii_class: none }
+
+  - name: vehicle_add
+    category: product
+    retention_days: 30
+    properties:
+      - { name: nth_vehicle_bucket, type: enum, values: [first, second, third_plus], pii_class: none }
+      - { name: fuel_type, type: enum, values: [gasoline, diesel, lpg, cng, ev_kwh, other], pii_class: none }
+
+  - name: photo_capture
+    category: product
+    retention_days: 30
+    properties:
+      - { name: source, type: enum, values: [camera, photo_library], pii_class: none }
+      - { name: had_permission_prompt, type: bool, pii_class: none }
