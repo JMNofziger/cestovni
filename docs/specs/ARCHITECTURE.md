@@ -42,9 +42,9 @@
 - Protocol details: [`sync-protocol.md`](sync-protocol.md) — server-assigned `row_version` (Postgres sequence) + per-table cursor; endpoints `POST /mutations`, `GET /changes`, `GET /restore/manifest`; idempotent mutations via client `mutation_id`; cursor-paginated restore (no snapshot checkpoints in v1).
 - Conflict policy v1: last-write-wins by `row_version`. Field-level merge rules are v1.x and live in `sync-protocol.md` roadmap.
 
-## Specs (Phase 2b)
+## Specs (Phase 2b — complete for v1 kickoff)
 
-Parent **CES-22**; children **CES-26–CES-32** (see `docs/specs/README.md`). Files are stubs until each issue is closed.
+Parent **CES-22**; children **CES-26–CES-32** (see [`README.md`](README.md)). Domain specs are **Complete (v1)** or **Complete for v1** (sync); see the index for status per file.
 
 ## Non-goals (v1)
 
@@ -54,7 +54,7 @@ Parent **CES-22**; children **CES-26–CES-32** (see `docs/specs/README.md`). Fi
 ## Ephemeral photos (deferred entry)
 
 - Product + diagram above: local TTL photos, not server-backed, not in export ZIP.
-- Spec stub (Phase 2b): [`photo-pipeline.md`](photo-pipeline.md).
+- Spec: [`photo-pipeline.md`](photo-pipeline.md).
 
 ## Related compliance / ops
 
