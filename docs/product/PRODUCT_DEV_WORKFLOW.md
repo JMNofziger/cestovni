@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~95% *(Stages 0–4 closed: Stage 4 engineering sign-off recorded 2026-04-17 in `platform-compliance-v1.md` §11; product ack on launch copy; Stage 5 Delivery / engineering breakdown is next. Residual compliance work — `ci/telemetry-gate.`*, Apple/Play submission-time forms, external counsel privacy policy — tracked as Stage 5 / launch follow-ups, not Stage 4 blockers.)*
+**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — M0 bootstrap + client DB **implemented in repo** (`client/`, `tests/client-db/`, `ci/client-build.yml`, telemetry gate check 2); Linear CES-36/CES-37 in review. M1–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -106,7 +106,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
   - 🟩 Deletion, export, and “photos not backed up” user-visible honesty — **complete** (see spec §§3–5)
 - 🟩 **Step 9: Launch-facing copy**
   - 🟩 `[launch-copy-v1.md](launch-copy-v1.md)` — store listing draft, privacy policy H2 outline, in-app Data & privacy bullets, donations optional / no paywall phrasing
-  - 🟩 Apple privacy manifest plan — normative categories in `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`; ownership + Play mapping in `platform-compliance-v1.md` §8; `**ci/telemetry-gate.`* landed 2026-04-18** as `ci/telemetry-gate.py` + `ci/telemetry-schema.json` + `ci/telemetry-gate.yml` (see [`ci/README.md`](../../ci/README.md))
+  - 🟩 Apple privacy manifest plan — normative categories in `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)`; ownership + Play mapping in `platform-compliance-v1.md` §8; `**ci/telemetry-gate.`* landed 2026-04-18** as `ci/telemetry-gate.py` + `ci/telemetry-schema.json` + `ci/telemetry-gate.yml` (see `[ci/README.md](../../ci/README.md)`)
 
 **Exit:** Met and **signed off (2026-04-17)** — engineering checklist in `[platform-compliance-v1.md` §11](../specs/platform-compliance-v1.md#11-engineering-sign-off-checklist-stage-4-exit) ticked; product ack on `[launch-copy-v1.md](launch-copy-v1.md)`; counsel handoff section in launch copy §10 lists the package for external review.
 
@@ -114,13 +114,14 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 ## Stage 5 — Delivery (Phase 3)
 
-- 🟨 **Step 10: Engineering breakdown** — source doc [`delivery-plan-v1.md`](delivery-plan-v1.md)
-  - 🟨 Linear issues per vertical with `**Spec:`** paths — 12 verticals enumerated in the delivery plan; `Delivery v1` epic created in Linear
-  - 🟨 Estimates and dependencies reflect ADRs (no orphan tasks) — milestone spine M0→M5 with explicit blocking relations in delivery plan
-- 🟥 **Step 11: Implementation milestones**
-  - 🟥 Local-first app shell → backup → export → remaining v1 scope (order per [`delivery-plan-v1.md`](delivery-plan-v1.md#milestone-spine))
+- 🟩 **Step 10: Engineering breakdown** — source doc `[delivery-plan-v1.md](delivery-plan-v1.md)` *(restored and current on `main`)*
+  - 🟩 Linear issues per vertical with `**Spec:`** paths — 12 verticals; `Delivery v1` epic **CES-35** + children **CES-36..CES-47**
+  - 🟩 Estimates and dependencies reflect ADRs — milestone spine M0→M5 with blocking relations in delivery plan
+- 🟨 **Step 11: Implementation milestones**
+  - 🟨 **M0 (bootstrap + client DB)** — **in repo:** Flutter + Drift under `client/` (nav shell, `AppDatabase` v1, migrations, indexes, tests); fixtures `tests/client-db/`; CI `ci/client-build.yml`; `ci/telemetry-gate.py` check 2 scans `client/lib/**/*.dart` for literal `Telemetry.emit` names. **Merge/review:** CES-36, CES-37.
+  - 🟥 **M1–M5** — per `[delivery-plan-v1.md](delivery-plan-v1.md#milestone-spine)` (local logging + math → export → backup/restore → telemetry wiring → hardening)
 
-**Exit:** Running build with test strategy tied to spec risks (math, backup, export). Tracking checklist: [`delivery-plan-v1.md` § Stage 5 exit criteria (tracking)](delivery-plan-v1.md#stage-5-exit-criteria-tracking).
+**Exit:** Running build with test strategy tied to spec risks (math, backup, export). Tracking checklist: `[delivery-plan-v1.md` § Stage 5 exit criteria (tracking)](delivery-plan-v1.md#stage-5-exit-criteria-tracking).
 
 ---
 
@@ -153,3 +154,4 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 - Baseline: `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)`
 - Spec folder: `[docs/specs/README.md](../specs/README.md)`
 - Linear templates: `[docs/linear/issue-templates.md](../linear/issue-templates.md)`
+

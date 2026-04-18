@@ -8,6 +8,8 @@ Each Linear issue should include a **`Spec:`** line pointing to the relevant fil
 
 **Process:** Follow stage gates in [`../product/PRODUCT_DEV_WORKFLOW.md`](../product/PRODUCT_DEV_WORKFLOW.md) — architecture ADRs before finalizing stack-bound specs; optional timeboxed client POC only when needed.
 
+**Implementation (Stage 5):** The **Flutter + Drift** client and v1 **client SQLite schema** (per `data-model.md`) live under [`../../client/`](../../client/) on `main` — see [`../../client/README.md`](../../client/README.md). Server-side migrations remain future work (M3); alignment rule unchanged: every server `NNNN_*.sql` should have a matching client step when the server schema ships.
+
 ## Index (Phase 2)
 
 | Doc                                                  | Purpose                                    | Linear         | Status                                 |

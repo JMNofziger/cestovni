@@ -60,6 +60,10 @@ Why (short form):
 - **Protocol:** replacing the client does not require server changes — contract is in [ADR 001](001-backend-api-boundary.md).
 - **Schema:** [`data-model.md`](../data-model.md) canonical columns are framework-independent; Drift is a typed façade, not a schema authority.
 
+## Implementation reference (Stage 5)
+
+- **2026-04-18:** Repository includes the **Flutter + Drift** client under [`client/`](../../../client/) (nav shell, Drift `AppDatabase`, v1 schema per `data-model.md`). Tracked on Linear as **CES-36** (bootstrap) and **CES-37** (client DB); see [`../../product/delivery-plan-v1.md`](../../product/delivery-plan-v1.md) for milestone status.
+
 ## Related
 
 - [`PRODUCT_DEV_WORKFLOW.md`](../../product/PRODUCT_DEV_WORKFLOW.md) — stage gates.

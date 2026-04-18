@@ -2,9 +2,9 @@
 
 **GitHub (canonical):** [github.com/JMNofziger/cestovni](https://github.com/JMNofziger/cestovni) — product docs live under `docs/product/` on branch `main`.
 
-**Baseline brief (locked):** [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) — principles, v1 scope, decisions, planning phases.
+**Baseline brief (locked):** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` — principles, v1 scope, decisions, planning phases.
 
-**Development workflow (stage gates):** [`PRODUCT_DEV_WORKFLOW.md`](PRODUCT_DEV_WORKFLOW.md) — checklist per product phase; when to use a **spike** vs **architecture / ADR** work.
+**Development workflow (stage gates):** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` — checklist per product phase; when to use a **spike** vs **architecture / ADR** work.
 
 ## Vision (from brief)
 
@@ -18,12 +18,12 @@ Trustworthy fuel + maintenance history, offline-safe logging, full data portabil
 
 ## Launch copy (Phase 2c)
 
-Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: [`launch-copy-v1.md`](launch-copy-v1.md). Engineering posture: [`../specs/platform-compliance-v1.md`](../specs/platform-compliance-v1.md).
+Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: `[launch-copy-v1.md](launch-copy-v1.md)`. Engineering posture: `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)`.
 
 ## Delivery (Phase 3 / Stage 5)
 
-Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, and test strategy: [`delivery-plan-v1.md`](delivery-plan-v1.md). Source for the Linear `Delivery v1` epic.
+Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (includes **M0 status** — Flutter + Drift client in [`../../client/`](../../client/), SQL fixtures in [`../../tests/client-db/`](../../tests/client-db/)). Source for the Linear **`Delivery v1`** epic ([CES-35](https://linear.app/personal-interests-llc/issue/CES-35)); M0 verticals **CES-36** / **CES-37** reflect implementation in review.
 
 ## Specs
 
-Technical specs: [`../specs/`](../specs/) — Phase 2b domain specs complete for v1 kickoff (see index).
+Technical specs: `[../specs/](../specs/)` — Phase 2b domain specs complete for v1 kickoff (see index).

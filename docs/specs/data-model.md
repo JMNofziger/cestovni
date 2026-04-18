@@ -237,6 +237,8 @@ client/
 
 Numbers are aligned: every server migration `NNNN_*.sql` has a matching client Drift migration `NNNN_*.dart` (or equivalent in whichever client stack ships).
 
+**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
+
 ### Rules
 
 1. **Add column**: ship server migration first in release N; client migration in the **same** release N. Ordering within the release: server deployed before the client version hits the store; the client tolerates servers that already have the column (extra field on read is ignored if unknown; SDK defaults to current schema).

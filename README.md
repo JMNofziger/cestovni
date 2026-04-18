@@ -22,10 +22,16 @@ Cross-platform **fuel and maintenance** log: offline-first, structured **backup/
 
 **Compliance and store (v1):** [platform-compliance-v1.md](https://github.com/JMNofziger/cestovni/blob/main/docs/specs/platform-compliance-v1.md) · **Launch copy skeletons:** [launch-copy-v1.md](https://github.com/JMNofziger/cestovni/blob/main/docs/product/launch-copy-v1.md)
 
+## Mobile client (Stage 5 / M0)
+
+- **Source:** [`client/`](https://github.com/JMNofziger/cestovni/tree/main/client) — Flutter + Drift; runbook in [`client/README.md`](https://github.com/JMNofziger/cestovni/blob/main/client/README.md)
+- **CI (GitHub Actions–shaped):** [`ci/client-build.yml`](https://github.com/JMNofziger/cestovni/blob/main/ci/client-build.yml) — analyze, test, Android debug APK, iOS debug (no codesign)
+- **DB fixtures (human-readable):** [`tests/client-db/`](https://github.com/JMNofziger/cestovni/tree/main/tests/client-db)
+
 ## Engineering scaffolding
 
-- [RLS regression CI](https://github.com/JMNofziger/cestovni/blob/main/ci/rls-regression.yml) · [Promotion gates](https://github.com/JMNofziger/cestovni/blob/main/ci/promotion-gates.yml)
-- Tests under [`tests/`](https://github.com/JMNofziger/cestovni/tree/main/tests)
+- [RLS regression CI](https://github.com/JMNofziger/cestovni/blob/main/ci/rls-regression.yml) · [Promotion gates](https://github.com/JMNofziger/cestovni/blob/main/ci/promotion-gates.yml) · [Telemetry gate](https://github.com/JMNofziger/cestovni/blob/main/ci/telemetry-gate.yml) · [Client build](https://github.com/JMNofziger/cestovni/blob/main/ci/client-build.yml)
+- Tests under [`tests/`](https://github.com/JMNofziger/cestovni/tree/main/tests) and [`client/test/`](https://github.com/JMNofziger/cestovni/tree/main/client/test)
 
 ## Linear
 

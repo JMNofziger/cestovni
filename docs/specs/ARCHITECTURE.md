@@ -58,6 +58,10 @@ Parent **CES-22**; children **CES-26–CES-32** (see [`README.md`](README.md)). 
 - Product + diagram above: local TTL photos, not server-backed, not in export ZIP.
 - Spec: [`photo-pipeline.md`](photo-pipeline.md).
 
+## Implementation status (Stage 5)
+
+- **M0 (2026-04-18):** Mobile shell + local Drift database on `main` — repository root [`client/`](../../client/). Matches **ADR 003** (Flutter + Drift) and **`data-model.md`** v1 client tables (`schema_version` 1, `0001_init` migration). Not yet: consumption UI (M1), export (M2), server backup (M3), Sentry wiring (M4). CI: [`ci/client-build.yml`](../../ci/client-build.yml); telemetry allow-list gate includes a **Dart source scan** for literal `Telemetry.emit` event names ([`ci/telemetry-gate.py`](../../ci/telemetry-gate.py)).
+
 ## Related compliance / ops
 
 - [`platform-compliance-v1.md`](platform-compliance-v1.md) — privacy, deletion, export, telemetry erasure, store disclosures (v1 posture).
