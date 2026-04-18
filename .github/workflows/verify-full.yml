@@ -1,35 +1,31 @@
-# CI workflow: mobile client build + test (M0-01)
-# Spec: docs/specs/adr/003-mobile-stack.md (Flutter + Drift)
-# Linear: CES-36
+# Heavier matrix: Flutter unit tests (gates android/ios) + debug APK on
+# ubuntu-latest + debug iOS (no codesign) on macos-14. Runs on main pushes
+# (always), PRs that touch the client or this workflow, and manual dispatch.
 #
-# Live GitHub Actions: .github/workflows/verify-full.yml (client-* jobs).
-# This file stays in ci/ as the parked spec / reference for triggers and
-# acceptance notes (CES-36); edit verify-full.yml when changing CI behavior.
-#
-# Jobs:
-#   test      — dart analyze + flutter test (pure Dart, runs anywhere)
-#   android   — debug APK; no signing in v1 per CES-36 acceptance
-#   ios       — debug .app; no signing / no store artifact in v1
-#
-# Acceptance hook (CES-36): both android + ios must be green before
-# closing the issue. Signing lanes are Stage 6 work.
+# Pair with verify-fast.yml: fast runs everywhere; full catches native-only
+# breakages without burning macOS minutes on unrelated PRs.
 
-name: client-build
+name: 'Verify (full)'
 
 on:
   pull_request:
     paths:
       - 'client/**'
-      - 'ci/client-build.yml'
+      - '.github/workflows/verify-full.yml'
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: verify-full-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: '3.41.7'
 
 jobs:
-  test:
+  client-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,8 +41,8 @@ jobs:
       - run: flutter analyze
       - run: flutter test --no-pub
 
-  android:
-    needs: test
+  client-android:
+    needs: client-test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -69,8 +65,8 @@ jobs:
           name: cestovni-debug-apk
           path: client/build/app/outputs/flutter-apk/app-debug.apk
 
-  ios:
-    needs: test
+  client-ios:
+    needs: client-test
     runs-on: macos-14
     defaults:
       run:
@@ -83,5 +79,4 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      # --no-codesign keeps v1 build matrix infra-free; signing is Stage 6.
       - run: flutter build ios --debug --no-codesign

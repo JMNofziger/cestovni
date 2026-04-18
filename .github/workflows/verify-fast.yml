@@ -1,0 +1,52 @@
+# Fast feedback on every push / PR: Python telemetry gate + Flutter analyze &
+# unit tests on ubuntu-latest only. Add more cheap jobs here (formatters, SQL
+# lint, etc.).
+#
+# Native debug builds live in verify-full.yml.
+
+name: 'Verify (fast)'
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: verify-fast-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.41.7'
+
+jobs:
+  telemetry-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyyaml jsonschema
+
+      - name: Run telemetry gate
+        run: python ci/telemetry-gate.py
+
+  client-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze
+      - run: flutter test --no-pub

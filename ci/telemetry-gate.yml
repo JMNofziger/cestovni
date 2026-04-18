@@ -3,8 +3,9 @@
 # Enforcement: docs/specs/telemetry-events.v1.yaml is the authoritative
 # catalogue; this workflow rejects drift and banned pii_class values.
 #
-# Adapt to chosen CI platform (GitHub Actions, etc.) when implementation
-# starts. This file is shaped for GitHub Actions today.
+# Live GitHub Actions: .github/workflows/verify-fast.yml (telemetry-gate job).
+# Path filters below document when this gate should run; mirror changes in
+# verify-fast.yml if you narrow triggers (fast runs on all PRs/pushes today).
 #
 # Trigger: PRs touching the YAML, the schema, the gate script itself, or
 # the (future) client source tree.

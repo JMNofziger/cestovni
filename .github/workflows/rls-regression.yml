@@ -1,0 +1,43 @@
+# RLS / authorization regression (Gate 4, ADR 001). Callable from promotion
+# workflows via workflow_call; also trigger on migration / RLS test changes.
+#
+# Steps remain TODO until the runner is wired; placeholders exit 0 today.
+
+name: rls-regression
+
+on:
+  workflow_call:
+
+  pull_request:
+    paths:
+      - 'migrations/**'
+      - 'tests/rls/**'
+      - '.github/workflows/rls-regression.yml'
+
+jobs:
+  rls-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_DB: cestovni_test
+          POSTGRES_USER: cestovni_test
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply migrations
+        run: 'echo "TODO: run migration tool against test DB"'
+
+      - name: Run RLS regression tests
+        run: 'echo "TODO: execute tests/rls/*.sql against test DB and assert results"'
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-regression-results
+          path: test-results/
