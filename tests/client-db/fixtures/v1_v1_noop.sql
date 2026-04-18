@@ -1,0 +1,9 @@
+-- v1 -> v1 no-op sentinel.
+--
+-- When a client opens a DB that already reports schema_version = 1,
+-- Drift's `onUpgrade` is NOT called (from == to). The client migration
+-- test ("v1 → v1 upgrade is a no-op") also checks that the
+-- MigrationRunner selects zero steps in this case — no step with
+-- from >= 1 AND to <= 1 AND from < to matches.
+--
+-- Intentionally empty — the whole point is that nothing runs.

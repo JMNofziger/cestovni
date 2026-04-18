@@ -1,0 +1,8 @@
+-- v0 (pre-migration) state — an empty database.
+--
+-- Drift treats any DB without a `schema_version` pragma as v0; running
+-- the `onCreate` path executes MigrationRunner.upgrade(0, 1) which fires
+-- the `0001_init` step. The client round-trip suite asserts that after
+-- this path, all 8 v1 tables and their indexes exist.
+--
+-- Intentionally empty — no CREATE/INSERT.
