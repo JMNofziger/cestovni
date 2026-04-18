@@ -10,9 +10,10 @@ Checks (numbered to match the spec):
 
   1. Parse YAML; fail on syntax or missing required top-level keys.
   2. Static-analyze client code for telemetry emit calls; every
-     eventName literal MUST match an entry in the YAML. Skip with a
-     warning (exit 0) until Milestone 1 ("Mobile client bootstrap")
-     lands a client directory under `client/` or `app/`.
+     eventName literal MUST match an entry in the YAML. ACTIVATED as
+     of M0-01 (CES-36): scans every *.dart file under client/ for
+     `Telemetry.emit('name', ...)` and hard-fails on unknown names or
+     non-literal arguments.
   3. JSON Schema validation of the YAML, including the hard-ban on
      pii_class values 'identifier' and 'freetext' (enforced by the
      schema's enum).
@@ -28,6 +29,7 @@ Exit codes: 0 pass, 1 fail.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -94,25 +96,97 @@ def check_3_schema(doc: dict[str, Any]) -> None:
     print("[3/4] JSON Schema validation passed (identifier/freetext classes banned at schema level).")
 
 
-def check_2_client_scan() -> None:
+# Telemetry emit call pattern for the Dart client.
+#
+# Convention (wired by CES-46 / M4): the Flutter client calls
+# `Telemetry.emit('event_name', props)` or `telemetry.emit('event_name', props)`.
+# The scanner below matches that exact shape with a string literal as the
+# first argument. Calls with a non-literal first argument (variable, const
+# reference) are flagged separately so the gate fails closed on anything
+# it cannot statically verify.
+EMIT_LITERAL_RE = re.compile(
+    r"(?<![A-Za-z0-9_])"
+    r"(?:Telemetry|telemetry)\s*\.\s*emit\s*\(\s*"
+    r"(?P<quote>['\"])(?P<name>[A-Za-z_][A-Za-z0-9_]*)(?P=quote)"
+)
+EMIT_DYNAMIC_RE = re.compile(
+    r"(?<![A-Za-z0-9_])"
+    r"(?:Telemetry|telemetry)\s*\.\s*emit\s*\(\s*(?!['\"])"
+)
+
+
+def check_2_client_scan(doc: dict[str, Any]) -> None:
     """Check 2: scan client code for telemetry emit calls.
 
-    Skipped with a warning until a client directory lands (Milestone 1).
-    When a client directory exists, this function should be extended to
-    search for the Dart/Flutter emit call pattern and cross-check literal
-    event names against the YAML.
+    Activated by CES-36 / M0-01 (mobile client bootstrap). The scanner
+    walks every `*.dart` file under the first client candidate dir that
+    exists and flags:
+
+      * literal `Telemetry.emit('name', …)` calls whose name is not in
+        the authoritative allow-list — HARD FAIL (fails closed).
+      * dynamic `Telemetry.emit(someVar, …)` calls — HARD FAIL because
+        the gate cannot statically verify the name.
+
+    No matches (the M0 state) passes silently — there is no client
+    telemetry surface until CES-46 wires it.
     """
+    client_root: Path | None = None
     for candidate in CLIENT_CANDIDATE_DIRS:
         path = REPO_ROOT / candidate
         if path.exists():
-            print(
-                f"[2/4] WARN — client dir {candidate!r} exists but the source scanner "
-                "has not been implemented yet (pending Milestone 1 stack landing). "
-                "Failing closed is NOT appropriate here until the scanner lands; "
-                "update this check when the Flutter client ships."
+            client_root = path
+            break
+    if client_root is None:
+        print("[2/4] SKIP — no client source tree yet (pre-M0-01).")
+        return
+
+    allowed = {evt["name"] for evt in doc.get("events", [])}
+    dart_files = sorted(client_root.rglob("*.dart"))
+    # Skip generated code (.g.dart / .freezed.dart) — codegen never
+    # contains hand-written telemetry calls and churns frequently.
+    dart_files = [
+        p for p in dart_files
+        if not p.name.endswith(".g.dart") and not p.name.endswith(".freezed.dart")
+    ]
+
+    unknown: list[tuple[Path, int, str]] = []
+    dynamic_calls: list[tuple[Path, int]] = []
+    literal_hits = 0
+
+    for path in dart_files:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            raise Failure(f"could not read {path.relative_to(REPO_ROOT)}: {exc}") from exc
+        for m in EMIT_LITERAL_RE.finditer(text):
+            literal_hits += 1
+            name = m.group("name")
+            line = text.count("\n", 0, m.start()) + 1
+            if name not in allowed:
+                unknown.append((path, line, name))
+        for m in EMIT_DYNAMIC_RE.finditer(text):
+            line = text.count("\n", 0, m.start()) + 1
+            dynamic_calls.append((path, line))
+
+    if unknown or dynamic_calls:
+        lines = ["[2/4] client scan FAILED:"]
+        for path, line, name in unknown:
+            lines.append(
+                f"  - {path.relative_to(REPO_ROOT)}:{line}: "
+                f"unknown event {name!r} (not in telemetry-events.v1.yaml)"
             )
-            return
-    print("[2/4] SKIP — no client source tree yet (pre-M1); will activate when client/ or app/ exists.")
+        for path, line in dynamic_calls:
+            lines.append(
+                f"  - {path.relative_to(REPO_ROOT)}:{line}: "
+                "dynamic Telemetry.emit() argument — must be a string literal "
+                "so CI can verify it."
+            )
+        raise Failure("\n".join(lines))
+
+    print(
+        f"[2/4] client scan passed: {len(dart_files)} Dart file(s), "
+        f"{literal_hits} literal emit call(s), 0 unknown."
+    )
 
 
 def check_4_apple_manifest(doc: dict[str, Any]) -> None:
@@ -144,7 +218,7 @@ def main() -> int:
     try:
         doc = check_1_parse_yaml()
         check_3_schema(doc)
-        check_2_client_scan()
+        check_2_client_scan(doc)
         check_4_apple_manifest(doc)
     except Failure as exc:
         print(f"telemetry-gate: FAIL\n{exc}")
