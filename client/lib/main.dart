@@ -1,15 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-/// Placeholder entrypoint until the app shell and database land in
-/// subsequent commits (split for reviewable history).
+import 'app/app.dart';
+import 'db/app_database.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Cestovni')),
-        body: const Center(child: Text('Bootstrap')),
-      ),
-    ),
-  );
+  final db = AppDatabase();
+  runApp(CestovniApp(db: db));
 }
