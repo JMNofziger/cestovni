@@ -1,0 +1,36 @@
+# iOS debug build on a schedule so main merges still get Android + tests in
+# verify-full without spending macOS minutes on every push. Complements PR /
+# dispatch iOS in verify-full.yml.
+
+name: 'Verify iOS (weekly)'
+
+on:
+  schedule:
+    - cron: '20 6 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: verify-ios-weekly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.41.7'
+
+jobs:
+  client-ios:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter build ios --debug --no-codesign

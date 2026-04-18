@@ -1,9 +1,12 @@
-# Heavier matrix: Flutter unit tests (gates android/ios) + debug APK on
-# ubuntu-latest + debug iOS (no codesign) on macos-14. Runs on main pushes
-# (always), PRs that touch the client or this workflow, and manual dispatch.
+# Heavier matrix: Flutter tests + debug APK (Linux) + optional iOS (macOS).
 #
-# Pair with verify-fast.yml: fast runs everywhere; full catches native-only
-# breakages without burning macOS minutes on unrelated PRs.
+# Minute discipline:
+# - Same triggers as fast for merges (PR + main), but PR is path-filtered to
+#   client / this workflow so unrelated PRs do not run native builds.
+# - iOS is skipped on push to main (PR already exercised iOS for client
+#   changes; merges that skip PR are rare). Re-run iOS via workflow_dispatch
+#   or verify-ios-weekly.yml if needed.
+# - Caches Pub, Gradle, and Flutter SDK where supported.
 
 name: 'Verify (full)'
 
@@ -32,10 +35,13 @@ jobs:
         working-directory: client
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+          cache: true
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter analyze
@@ -49,14 +55,28 @@ jobs:
         working-directory: client
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('client/android/**/*.gradle*', 'client/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+          cache: true
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build apk --debug
@@ -67,16 +87,20 @@ jobs:
 
   client-ios:
     needs: client-test
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: macos-14
     defaults:
       run:
         working-directory: client
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+          cache: true
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build ios --debug --no-codesign

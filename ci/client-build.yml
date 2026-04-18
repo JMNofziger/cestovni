@@ -2,9 +2,10 @@
 # Spec: docs/specs/adr/003-mobile-stack.md (Flutter + Drift)
 # Linear: CES-36
 #
-# Live GitHub Actions: .github/workflows/verify-full.yml (client-* jobs).
+# Live GitHub Actions: .github/workflows/verify-full.yml (client-* jobs) plus
+# verify-ios-weekly.yml for scheduled iOS when full skips macOS on main push.
 # This file stays in ci/ as the parked spec / reference for triggers and
-# acceptance notes (CES-36); edit verify-full.yml when changing CI behavior.
+# acceptance notes (CES-36); edit those workflows when changing CI behavior.
 #
 # Jobs:
 #   test      — dart analyze + flutter test (pure Dart, runs anywhere)

@@ -1,14 +1,18 @@
-# Fast feedback on every push / PR: Python telemetry gate + Flutter analyze &
-# unit tests on ubuntu-latest only. Add more cheap jobs here (formatters, SQL
-# lint, etc.).
+# Fast feedback: telemetry gate + Flutter analyze & tests on ubuntu-latest.
 #
-# Native debug builds live in verify-full.yml.
+# Minute discipline (private free tier): runs on pull_request and pushes to
+# main only — not on every feature-branch push. Making the repo public also
+# removes Actions minute limits for standard jobs (subject to fair use).
+#
+# Native debug builds: verify-full.yml + verify-ios-weekly.yml
 
 name: 'Verify (fast)'
 
 on:
   pull_request:
   push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -42,10 +46,13 @@ jobs:
         working-directory: client
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+          cache: true
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter analyze
