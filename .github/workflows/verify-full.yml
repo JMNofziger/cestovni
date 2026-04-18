@@ -1,8 +1,10 @@
 # Heavier matrix: Flutter tests + debug APK (Linux) + optional iOS (macOS).
 #
 # Minute discipline:
-# - Same triggers as fast for merges (PR + main), but PR is path-filtered to
-#   client / this workflow so unrelated PRs do not run native builds.
+# - PR is path-filtered to client / this workflow so unrelated PRs do not run
+#   native builds.
+# - Pushes to main use the same doc-only paths-ignore list as verify-fast.yml
+#   (keep both in sync) so prose-only merges do not run this workflow.
 # - iOS is skipped on push to main (PR already exercised iOS for client
 #   changes; merges that skip PR are rare). Re-run iOS via workflow_dispatch
 #   or verify-ios-weekly.yml if needed.
@@ -18,6 +20,27 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/product/**'
+      - 'docs/linear/**'
+      - 'docs/specs/adr/**'
+      - 'docs/specs/data-model.md'
+      - 'docs/specs/ARCHITECTURE.md'
+      - 'docs/specs/TBD-migration-rollback.md'
+      - 'docs/specs/platform-compliance-v1.md'
+      - 'docs/specs/README.md'
+      - 'docs/specs/TBD-launch.md'
+      - 'docs/specs/sync-protocol.md'
+      - 'docs/specs/export-v1.md'
+      - 'docs/specs/photo-pipeline.md'
+      - 'docs/specs/consumption-math.md'
+      - 'docs/specs/si-units.md'
+      - 'docs/specs/self-host-runbook.md'
+      - 'README.md'
+      - 'tests/**/*.md'
+      - '.cursor/**'
+      - 'LICENSE'
+      - 'LICENSE.*'
   workflow_dispatch:
 
 concurrency:

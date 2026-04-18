@@ -1,8 +1,11 @@
 # Fast feedback: telemetry gate + Flutter analyze & tests on ubuntu-latest.
 #
 # Minute discipline (private free tier): runs on pull_request and pushes to
-# main only — not on every feature-branch push. Making the repo public also
-# removes Actions minute limits for standard jobs (subject to fair use).
+# main only — not on every feature-branch push. PRs / pushes that touch only
+# paths below (doc & product copy) skip this workflow entirely.
+#
+# Telemetry contracts (YAML + allow-list prose) are NOT ignored — keep those
+# lines in sync with verify-full.yml doc-only paths-ignore.
 #
 # Native debug builds: verify-full.yml + verify-ios-weekly.yml
 
@@ -10,9 +13,31 @@ name: 'Verify (fast)'
 
 on:
   pull_request:
+    paths-ignore: &doc-only-ignore
+      - 'docs/product/**'
+      - 'docs/linear/**'
+      - 'docs/specs/adr/**'
+      - 'docs/specs/data-model.md'
+      - 'docs/specs/ARCHITECTURE.md'
+      - 'docs/specs/TBD-migration-rollback.md'
+      - 'docs/specs/platform-compliance-v1.md'
+      - 'docs/specs/README.md'
+      - 'docs/specs/TBD-launch.md'
+      - 'docs/specs/sync-protocol.md'
+      - 'docs/specs/export-v1.md'
+      - 'docs/specs/photo-pipeline.md'
+      - 'docs/specs/consumption-math.md'
+      - 'docs/specs/si-units.md'
+      - 'docs/specs/self-host-runbook.md'
+      - 'README.md'
+      - 'tests/**/*.md'
+      - '.cursor/**'
+      - 'LICENSE'
+      - 'LICENSE.*'
   push:
     branches:
       - main
+    paths-ignore: *doc-only-ignore
   workflow_dispatch:
 
 concurrency:
