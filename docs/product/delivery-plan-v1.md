@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** M0 (**bootstrap + client DB**) is **implemented in repo** (2026-04-18): Flutter + Drift client under `[client/](../../client/)`, SQL fixtures under `[tests/client-db/](../../tests/client-db/)`, CI descriptors `[ci/client-build.yml](../../ci/client-build.yml)` + live telemetry client scan in `[ci/telemetry-gate.py](../../ci/telemetry-gate.py)`. Linear **CES-36** / **CES-37** track review/merge; remaining milestones **M1–M5** below. Source for Linear `[Delivery v1` epic (CES-35)](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown) and per-vertical children.
+**Status:** Active — **Stage 5 Step 11 (implementation).** M0 (**bootstrap + client DB**) is **implemented in repo** (2026-04-18): Flutter + Drift client under `[client/](../../client/)`, SQL fixtures under `[tests/client-db/](../../tests/client-db/)`, CI descriptors `[ci/client-build.yml](../../ci/client-build.yml)` + live telemetry client scan in `[ci/telemetry-gate.py](../../ci/telemetry-gate.py)`. Linear **CES-36** / **CES-37** track review/merge; remaining milestones **M1–M5** below. Source for Linear `[Delivery v1` epic (CES-35)](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -38,6 +38,58 @@ flowchart LR
 - **M3 — Backup + restore:** server Postgres + RLS + API + outbox + restore + dead-letter UX. Closes the ADR 002 loop.
 - **M4 — Telemetry + CI gate:** `ci/telemetry-gate.`* + client wiring once SDK landed (ADR 004). Can start in parallel with M1 once M0 ships.
 - **M5 — Hardening:** migration rollback tooling + end-to-end integration tests + Stage 5 exit verification.
+
+---
+
+## Implementation checklist (RYG)
+
+**Legend:** 🟩 Done · 🟨 In Progress · 🟥 To Do
+
+Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CES-35](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)). Update emoji when Linear/repo state changes.
+
+### M0 — Bootstrap + client DB
+
+- 🟨 **M0 rollup** — client shell + Drift v1 + fixtures + CI; unblocks downstream milestones.
+  - 🟩 **CES-36 — Mobile client bootstrap** — `[client/](../../client/)`, `[ci/client-build.yml](../../ci/client-build.yml)`; telemetry gate **check 2** scans `client/lib/**/*.dart` for literal `Telemetry.emit` names (`[ci/telemetry-gate.py](../../ci/telemetry-gate.py)`).
+  - 🟩 **CES-37 — Client DB schema + migrations** — `client/lib/db/`, `client/test/db/`, `[tests/client-db/fixtures/](../../tests/client-db/fixtures/)`; indexes + INT64 round-trips per test matrix below.
+  - 🟨 **Merge / review closure** — CES-36 + CES-37 on Linear; treat M0 rollup 🟩 when both issues are **Done** on the board, not only when code exists on a branch.
+
+### M1 — Local logging + math
+
+- 🟥 **M1 rollup** — offline logging usable end-to-end without a server.
+  - 🟥 **CES-38 — Consumption math + golden tests** — pure module + fixtures; home `tests/math/` (planned) per test matrix.
+  - 🟥 **CES-39 — Fill-up + vehicle UI** — core logging UX; depends on CES-37 + CES-38.
+  - 🟥 **CES-40 — Photo pipeline** — per `[photo-pipeline.md](../specs/photo-pipeline.md)`; depends on CES-37.
+
+### M2 — Export
+
+- 🟥 **M2 rollup** — export before backup exists.
+  - 🟥 **CES-41 — Export ZIP** — streaming assembly + manifest; fixture-driven tests in `tests/export/` (planned).
+
+### M3 — Backup + restore
+
+- 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests.
+  - 🟥 **CES-42 — Server Postgres + RLS migrations** — `[tests/rls/](../../tests/rls/)`, `[ci/rls-regression.yml](../../ci/rls-regression.yml)`.
+  - 🟥 **CES-43 — Server API + auth** — contract tests `[tests/contract/](../../tests/contract/)` (managed + self-host).
+  - 🟥 **CES-44 — Backup / outbox (client)** — depends on CES-37 + CES-43.
+  - 🟥 **CES-45 — Restore + dead-letter UX** — depends on CES-44; integration `tests/backup/` (planned).
+
+### M4 — Telemetry + CI gate
+
+- 🟥 **M4 rollup** — allow-listed client emits + CI green end-to-end.
+  - 🟥 **CES-46 — Telemetry client wiring** — `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)` + ADR 004.
+  - 🟨 **`ci/telemetry-gate.*` in repo** — YAML + schema + Python gate + client Dart scan live; **Apple `PrivacyInfo.xcprivacy` drift check** still skipped until that file exists (see non-verticals below).
+
+### M5 — Hardening + rollback tooling
+
+- 🟥 **M5 rollup** — Stage 5 exit verification + rollback story proven.
+  - 🟥 **CES-47 — Client schema migration rollback tooling** — `tests/migrations/` (planned); `[TBD-migration-rollback.md](../specs/TBD-migration-rollback.md)` must be **non-stub** before calling M5 rollup 🟩.
+  - 🟥 **End-to-end / exit verification** — every bullet 🟩 in [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking) below.
+
+### Non-verticals / scaffolding (Stage 5)
+
+- 🟨 **`ci/telemetry-gate.*`** — YAML + schema + **client Dart scan** live; Apple manifest drift check **to do** until `PrivacyInfo.xcprivacy` exists.
+- 🟥 **`TBD-migration-rollback.md`** — stub → normative spec when vertical 12 (CES-47) starts.
 
 ---
 
@@ -87,14 +139,16 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 
 ## Stage 5 exit criteria (tracking)
 
-- Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47.)*
-- M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 code in repo** — merge/review CES-36/CES-37; M1 pending.)*
-- M2 lands: ZIP export round-trips for a representative fixture.
-- M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green.
-- M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.
-- M5 lands: migration rollback spec real (not stub); rollback tooling proven against fixture.
+Leading emoji tracks **exit** state (independent of per-vertical RYG above, but should converge at stage close).
 
-When every box is ticked, Stage 5 exit is met — flip workflow percentage and open Stage 6.
+- 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47.)*
+- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 code in repo** — merge/review CES-36/CES-37; M1 pending.)*
+- 🟥 M2 lands: ZIP export round-trips for a representative fixture.
+- 🟥 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green.
+- 🟥 M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.
+- 🟥 M5 lands: migration rollback spec real (not stub); rollback tooling proven against fixture.
+
+When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow percentage and open Stage 6.
 
 ---
 
