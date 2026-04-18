@@ -1,0 +1,87 @@
+# CI workflow: mobile client build + test (M0-01)
+# Spec: docs/specs/adr/003-mobile-stack.md (Flutter + Drift)
+# Linear: CES-36
+#
+# Shape is GitHub Actions today. The workflow is parked in ci/ until
+# the repo adopts .github/workflows/ — matches the convention in
+# ci/telemetry-gate.yml and ci/rls-regression.yml.
+#
+# Jobs:
+#   test      — dart analyze + flutter test (pure Dart, runs anywhere)
+#   android   — debug APK; no signing in v1 per CES-36 acceptance
+#   ios       — debug .app; no signing / no store artifact in v1
+#
+# Acceptance hook (CES-36): both android + ios must be green before
+# closing the issue. Signing lanes are Stage 6 work.
+
+name: client-build
+
+on:
+  pull_request:
+    paths:
+      - 'client/**'
+      - 'ci/client-build.yml'
+  push:
+    branches:
+      - main
+
+env:
+  FLUTTER_VERSION: '3.41.7'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze
+      - run: flutter test --no-pub
+
+  android:
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cestovni-debug-apk
+          path: client/build/app/outputs/flutter-apk/app-debug.apk
+
+  ios:
+    needs: test
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      # --no-codesign keeps v1 build matrix infra-free; signing is Stage 6.
+      - run: flutter build ios --debug --no-codesign
