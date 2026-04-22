@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '_harness.dart';
@@ -76,6 +77,79 @@ void main() {
         ),
         throwsA(isA<Exception>()),
       );
+    });
+
+    test('maintenance_events.category must be in the allow-list', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      final vehicleId = await _seedVehicle(db);
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO maintenance_events "
+          "(id, user_id, row_version, updated_at, mutation_id, "
+          " vehicle_id, performed_at, odometer_m, cost_cents, currency_code, "
+          " category) "
+          "VALUES (?, ?, 1, ?, ?, ?, ?, 0, 0, 'EUR', 'spa_day')",
+          [newId(), newId(), nowIso(), newId(), vehicleId, nowIso()],
+        ),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('maintenance_events.shop rejects empty string', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      final vehicleId = await _seedVehicle(db);
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO maintenance_events "
+          "(id, user_id, row_version, updated_at, mutation_id, "
+          " vehicle_id, performed_at, odometer_m, cost_cents, currency_code, "
+          " category, shop) "
+          "VALUES (?, ?, 1, ?, ?, ?, ?, 0, 0, 'EUR', 'oil', '')",
+          [newId(), newId(), nowIso(), newId(), vehicleId, nowIso()],
+        ),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('maintenance_events.odometer_m accepts NULL (optional after CES-53)', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      final vehicleId = await _seedVehicle(db);
+
+      await db.customStatement(
+        "INSERT INTO maintenance_events "
+        "(id, user_id, row_version, updated_at, mutation_id, "
+        " vehicle_id, performed_at, odometer_m, cost_cents, currency_code, "
+        " category) "
+        "VALUES (?, ?, 1, ?, ?, ?, ?, NULL, 0, 'EUR', 'inspection')",
+        [newId(), newId(), nowIso(), newId(), vehicleId, nowIso()],
+      );
+    });
+
+    test('maintenance_events.cost_cents defaults to 0 when omitted', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      final vehicleId = await _seedVehicle(db);
+
+      await db.customStatement(
+        "INSERT INTO maintenance_events "
+        "(id, user_id, row_version, updated_at, mutation_id, "
+        " vehicle_id, performed_at, currency_code, category) "
+        "VALUES (?, ?, 1, ?, ?, ?, ?, 'EUR', 'other')",
+        [newId(), newId(), nowIso(), newId(), vehicleId, nowIso()],
+      );
+
+      final rows = await db
+          .customSelect(
+            "SELECT cost_cents FROM maintenance_events WHERE vehicle_id = ?",
+            variables: [Variable.withString(vehicleId)],
+          )
+          .get();
+      expect(rows.single.read<int>('cost_cents'), 0);
     });
 
     test('fill_ups.vehicle_id must reference a live vehicle (FK on)', () async {

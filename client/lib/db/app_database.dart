@@ -35,14 +35,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
     final runner = MigrationRunner(schemaSteps(allTables));
     return MigrationStrategy(
+      // Fresh install: emit the current schema in one shot via Drift's
+      // `createAll()`. Incremental migration steps (`schemaSteps`) are
+      // only for existing DBs on `onUpgrade` — replaying them on
+      // `onCreate` would try to ALTER columns Drift just created.
       onCreate: (m) async {
-        await runner.upgrade(m, 0, schemaVersion);
+        await m.createAll();
         await createIndexes();
       },
       onUpgrade: (m, from, to) async {

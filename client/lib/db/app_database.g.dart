@@ -2701,10 +2701,10 @@ class $MaintenanceEventsTable extends MaintenanceEvents
   late final GeneratedColumn<int> odometerM = GeneratedColumn<int>(
     'odometer_m',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL CHECK (odometer_m >= 0)',
+    requiredDuringInsert: false,
+    $customConstraints: 'CHECK (odometer_m IS NULL OR odometer_m >= 0)',
   );
   static const VerificationMeta _costCentsMeta = const VerificationMeta(
     'costCents',
@@ -2736,6 +2736,31 @@ class $MaintenanceEventsTable extends MaintenanceEvents
     $customConstraints:
         'NOT NULL CHECK (currency_code GLOB \'[A-Z][A-Z][A-Z]\')',
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'NOT NULL DEFAULT \'other\' CHECK (category IN (\'oil\',\'tires\',\'brakes\',\'inspection\',\'battery\',\'fluid\',\'other\'))',
+    defaultValue: const CustomExpression('\'other\''),
+  );
+  static const VerificationMeta _shopMeta = const VerificationMeta('shop');
+  @override
+  late final GeneratedColumn<String> shop = GeneratedColumn<String>(
+    'shop',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (shop IS NULL OR length(shop) BETWEEN 1 AND 120)',
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -2760,6 +2785,8 @@ class $MaintenanceEventsTable extends MaintenanceEvents
     odometerM,
     costCents,
     currencyCode,
+    category,
+    shop,
     notes,
   ];
   @override
@@ -2843,8 +2870,6 @@ class $MaintenanceEventsTable extends MaintenanceEvents
         _odometerMMeta,
         odometerM.isAcceptableOrUnknown(data['odometer_m']!, _odometerMMeta),
       );
-    } else if (isInserting) {
-      context.missing(_odometerMMeta);
     }
     if (data.containsKey('cost_cents')) {
       context.handle(
@@ -2862,6 +2887,18 @@ class $MaintenanceEventsTable extends MaintenanceEvents
       );
     } else if (isInserting) {
       context.missing(_currencyCodeMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('shop')) {
+      context.handle(
+        _shopMeta,
+        shop.isAcceptableOrUnknown(data['shop']!, _shopMeta),
+      );
     }
     if (data.containsKey('notes')) {
       context.handle(
@@ -2917,7 +2954,7 @@ class $MaintenanceEventsTable extends MaintenanceEvents
       odometerM: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}odometer_m'],
-      )!,
+      ),
       costCents: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}cost_cents'],
@@ -2926,6 +2963,14 @@ class $MaintenanceEventsTable extends MaintenanceEvents
         DriftSqlType.string,
         data['${effectivePrefix}currency_code'],
       )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      shop: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shop'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -2966,9 +3011,24 @@ class MaintenanceEventRow extends DataClass
   /// Nullable — one-off events are allowed (no rule attached).
   final String? ruleId;
   final String performedAt;
-  final int odometerM;
+
+  /// Optional. UX allows leaving odometer blank on maintenance entries
+  /// (oil change at the shop with no dashboard reading at hand).
+  /// Cost stays mandatory at the schema level — the form writes 0 when
+  /// the user leaves it empty (DATA_CONTRACTS.md §Maintenance). See
+  /// [CES-53](https://linear.app/personal-interests-llc/issue/CES-53).
+  final int? odometerM;
   final int costCents;
   final String currencyCode;
+
+  /// Maintenance category. Closed enum mirrored in DATA_CONTRACTS.md
+  /// so the form and the metrics bucketing stay in lockstep. Added in
+  /// schema v2 with a `'other'` default so v1 rows round-trip cleanly
+  /// through the 0002 migration.
+  final String category;
+
+  /// Optional shop / vendor name (free text). Added in v2.
+  final String? shop;
   final String? notes;
   const MaintenanceEventRow({
     required this.id,
@@ -2980,9 +3040,11 @@ class MaintenanceEventRow extends DataClass
     required this.vehicleId,
     this.ruleId,
     required this.performedAt,
-    required this.odometerM,
+    this.odometerM,
     required this.costCents,
     required this.currencyCode,
+    required this.category,
+    this.shop,
     this.notes,
   });
   @override
@@ -3005,9 +3067,15 @@ class MaintenanceEventRow extends DataClass
       map['rule_id'] = Variable<String>(ruleId);
     }
     map['performed_at'] = Variable<String>(performedAt);
-    map['odometer_m'] = Variable<int>(odometerM);
+    if (!nullToAbsent || odometerM != null) {
+      map['odometer_m'] = Variable<int>(odometerM);
+    }
     map['cost_cents'] = Variable<int>(costCents);
     map['currency_code'] = Variable<String>(currencyCode);
+    map['category'] = Variable<String>(category);
+    if (!nullToAbsent || shop != null) {
+      map['shop'] = Variable<String>(shop);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -3033,9 +3101,13 @@ class MaintenanceEventRow extends DataClass
           ? const Value.absent()
           : Value(ruleId),
       performedAt: Value(performedAt),
-      odometerM: Value(odometerM),
+      odometerM: odometerM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(odometerM),
       costCents: Value(costCents),
       currencyCode: Value(currencyCode),
+      category: Value(category),
+      shop: shop == null && nullToAbsent ? const Value.absent() : Value(shop),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -3057,9 +3129,11 @@ class MaintenanceEventRow extends DataClass
       vehicleId: serializer.fromJson<String>(json['vehicleId']),
       ruleId: serializer.fromJson<String?>(json['ruleId']),
       performedAt: serializer.fromJson<String>(json['performedAt']),
-      odometerM: serializer.fromJson<int>(json['odometerM']),
+      odometerM: serializer.fromJson<int?>(json['odometerM']),
       costCents: serializer.fromJson<int>(json['costCents']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      category: serializer.fromJson<String>(json['category']),
+      shop: serializer.fromJson<String?>(json['shop']),
       notes: serializer.fromJson<String?>(json['notes']),
     );
   }
@@ -3076,9 +3150,11 @@ class MaintenanceEventRow extends DataClass
       'vehicleId': serializer.toJson<String>(vehicleId),
       'ruleId': serializer.toJson<String?>(ruleId),
       'performedAt': serializer.toJson<String>(performedAt),
-      'odometerM': serializer.toJson<int>(odometerM),
+      'odometerM': serializer.toJson<int?>(odometerM),
       'costCents': serializer.toJson<int>(costCents),
       'currencyCode': serializer.toJson<String>(currencyCode),
+      'category': serializer.toJson<String>(category),
+      'shop': serializer.toJson<String?>(shop),
       'notes': serializer.toJson<String?>(notes),
     };
   }
@@ -3093,9 +3169,11 @@ class MaintenanceEventRow extends DataClass
     String? vehicleId,
     Value<String?> ruleId = const Value.absent(),
     String? performedAt,
-    int? odometerM,
+    Value<int?> odometerM = const Value.absent(),
     int? costCents,
     String? currencyCode,
+    String? category,
+    Value<String?> shop = const Value.absent(),
     Value<String?> notes = const Value.absent(),
   }) => MaintenanceEventRow(
     id: id ?? this.id,
@@ -3107,9 +3185,11 @@ class MaintenanceEventRow extends DataClass
     vehicleId: vehicleId ?? this.vehicleId,
     ruleId: ruleId.present ? ruleId.value : this.ruleId,
     performedAt: performedAt ?? this.performedAt,
-    odometerM: odometerM ?? this.odometerM,
+    odometerM: odometerM.present ? odometerM.value : this.odometerM,
     costCents: costCents ?? this.costCents,
     currencyCode: currencyCode ?? this.currencyCode,
+    category: category ?? this.category,
+    shop: shop.present ? shop.value : this.shop,
     notes: notes.present ? notes.value : this.notes,
   );
   MaintenanceEventRow copyWithCompanion(MaintenanceEventsCompanion data) {
@@ -3134,6 +3214,8 @@ class MaintenanceEventRow extends DataClass
       currencyCode: data.currencyCode.present
           ? data.currencyCode.value
           : this.currencyCode,
+      category: data.category.present ? data.category.value : this.category,
+      shop: data.shop.present ? data.shop.value : this.shop,
       notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
@@ -3153,6 +3235,8 @@ class MaintenanceEventRow extends DataClass
           ..write('odometerM: $odometerM, ')
           ..write('costCents: $costCents, ')
           ..write('currencyCode: $currencyCode, ')
+          ..write('category: $category, ')
+          ..write('shop: $shop, ')
           ..write('notes: $notes')
           ..write(')'))
         .toString();
@@ -3172,6 +3256,8 @@ class MaintenanceEventRow extends DataClass
     odometerM,
     costCents,
     currencyCode,
+    category,
+    shop,
     notes,
   );
   @override
@@ -3190,6 +3276,8 @@ class MaintenanceEventRow extends DataClass
           other.odometerM == this.odometerM &&
           other.costCents == this.costCents &&
           other.currencyCode == this.currencyCode &&
+          other.category == this.category &&
+          other.shop == this.shop &&
           other.notes == this.notes);
 }
 
@@ -3203,9 +3291,11 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
   final Value<String> vehicleId;
   final Value<String?> ruleId;
   final Value<String> performedAt;
-  final Value<int> odometerM;
+  final Value<int?> odometerM;
   final Value<int> costCents;
   final Value<String> currencyCode;
+  final Value<String> category;
+  final Value<String?> shop;
   final Value<String?> notes;
   final Value<int> rowid;
   const MaintenanceEventsCompanion({
@@ -3221,6 +3311,8 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
     this.odometerM = const Value.absent(),
     this.costCents = const Value.absent(),
     this.currencyCode = const Value.absent(),
+    this.category = const Value.absent(),
+    this.shop = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3234,9 +3326,11 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
     required String vehicleId,
     this.ruleId = const Value.absent(),
     required String performedAt,
-    required int odometerM,
+    this.odometerM = const Value.absent(),
     this.costCents = const Value.absent(),
     required String currencyCode,
+    this.category = const Value.absent(),
+    this.shop = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -3244,7 +3338,6 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
        mutationId = Value(mutationId),
        vehicleId = Value(vehicleId),
        performedAt = Value(performedAt),
-       odometerM = Value(odometerM),
        currencyCode = Value(currencyCode);
   static Insertable<MaintenanceEventRow> custom({
     Expression<String>? id,
@@ -3259,6 +3352,8 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
     Expression<int>? odometerM,
     Expression<int>? costCents,
     Expression<String>? currencyCode,
+    Expression<String>? category,
+    Expression<String>? shop,
     Expression<String>? notes,
     Expression<int>? rowid,
   }) {
@@ -3275,6 +3370,8 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
       if (odometerM != null) 'odometer_m': odometerM,
       if (costCents != null) 'cost_cents': costCents,
       if (currencyCode != null) 'currency_code': currencyCode,
+      if (category != null) 'category': category,
+      if (shop != null) 'shop': shop,
       if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3290,9 +3387,11 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
     Value<String>? vehicleId,
     Value<String?>? ruleId,
     Value<String>? performedAt,
-    Value<int>? odometerM,
+    Value<int?>? odometerM,
     Value<int>? costCents,
     Value<String>? currencyCode,
+    Value<String>? category,
+    Value<String?>? shop,
     Value<String?>? notes,
     Value<int>? rowid,
   }) {
@@ -3309,6 +3408,8 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
       odometerM: odometerM ?? this.odometerM,
       costCents: costCents ?? this.costCents,
       currencyCode: currencyCode ?? this.currencyCode,
+      category: category ?? this.category,
+      shop: shop ?? this.shop,
       notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
@@ -3353,6 +3454,12 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
     if (currencyCode.present) {
       map['currency_code'] = Variable<String>(currencyCode.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (shop.present) {
+      map['shop'] = Variable<String>(shop.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -3377,6 +3484,8 @@ class MaintenanceEventsCompanion extends UpdateCompanion<MaintenanceEventRow> {
           ..write('odometerM: $odometerM, ')
           ..write('costCents: $costCents, ')
           ..write('currencyCode: $currencyCode, ')
+          ..write('category: $category, ')
+          ..write('shop: $shop, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -7708,9 +7817,11 @@ typedef $$MaintenanceEventsTableCreateCompanionBuilder =
       required String vehicleId,
       Value<String?> ruleId,
       required String performedAt,
-      required int odometerM,
+      Value<int?> odometerM,
       Value<int> costCents,
       required String currencyCode,
+      Value<String> category,
+      Value<String?> shop,
       Value<String?> notes,
       Value<int> rowid,
     });
@@ -7725,9 +7836,11 @@ typedef $$MaintenanceEventsTableUpdateCompanionBuilder =
       Value<String> vehicleId,
       Value<String?> ruleId,
       Value<String> performedAt,
-      Value<int> odometerM,
+      Value<int?> odometerM,
       Value<int> costCents,
       Value<String> currencyCode,
+      Value<String> category,
+      Value<String?> shop,
       Value<String?> notes,
       Value<int> rowid,
     });
@@ -7846,6 +7959,16 @@ class $$MaintenanceEventsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shop => $composableBuilder(
+    column: $table.shop,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnFilters(column),
@@ -7957,6 +8080,16 @@ class $$MaintenanceEventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shop => $composableBuilder(
+    column: $table.shop,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -8056,6 +8189,12 @@ class $$MaintenanceEventsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get shop =>
+      $composableBuilder(column: $table.shop, builder: (column) => column);
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
@@ -8148,9 +8287,11 @@ class $$MaintenanceEventsTableTableManager
                 Value<String> vehicleId = const Value.absent(),
                 Value<String?> ruleId = const Value.absent(),
                 Value<String> performedAt = const Value.absent(),
-                Value<int> odometerM = const Value.absent(),
+                Value<int?> odometerM = const Value.absent(),
                 Value<int> costCents = const Value.absent(),
                 Value<String> currencyCode = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String?> shop = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MaintenanceEventsCompanion(
@@ -8166,6 +8307,8 @@ class $$MaintenanceEventsTableTableManager
                 odometerM: odometerM,
                 costCents: costCents,
                 currencyCode: currencyCode,
+                category: category,
+                shop: shop,
                 notes: notes,
                 rowid: rowid,
               ),
@@ -8180,9 +8323,11 @@ class $$MaintenanceEventsTableTableManager
                 required String vehicleId,
                 Value<String?> ruleId = const Value.absent(),
                 required String performedAt,
-                required int odometerM,
+                Value<int?> odometerM = const Value.absent(),
                 Value<int> costCents = const Value.absent(),
                 required String currencyCode,
+                Value<String> category = const Value.absent(),
+                Value<String?> shop = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MaintenanceEventsCompanion.insert(
@@ -8198,6 +8343,8 @@ class $$MaintenanceEventsTableTableManager
                 odometerM: odometerM,
                 costCents: costCents,
                 currencyCode: currencyCode,
+                category: category,
+                shop: shop,
                 notes: notes,
                 rowid: rowid,
               ),
