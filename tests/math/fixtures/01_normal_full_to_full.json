@@ -1,0 +1,64 @@
+{
+  "$schema_version": 1,
+  "name": "normal_full_to_full",
+  "description": "Spec row 1: two full fill-ups, 1 000 km apart, 50 L consumed between. 1 known segment @ 5.0 L/100km.",
+  "input": {
+    "fillups": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "filled_at": "2025-01-01T08:00:00Z",
+        "odometer_m": 0,
+        "volume_uL": 40000000,
+        "total_price_cents": 6000,
+        "currency_code": "EUR",
+        "is_full": true,
+        "missed_before": false,
+        "odometer_reset": false,
+        "notes": null
+      },
+      {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "filled_at": "2025-02-01T08:00:00Z",
+        "odometer_m": 1000000,
+        "volume_uL": 50000000,
+        "total_price_cents": 7500,
+        "currency_code": "EUR",
+        "is_full": true,
+        "missed_before": false,
+        "odometer_reset": false,
+        "notes": null
+      }
+    ]
+  },
+  "expected": {
+    "kind": "segments",
+    "segments": [
+      {
+        "prev_full_id": "11111111-1111-4111-8111-111111111111",
+        "next_full_id": "22222222-2222-4222-8222-222222222222",
+        "status": "known",
+        "distance_m": 1000000,
+        "volume_uL": 50000000,
+        "cost_cents": 7500,
+        "l_per_100km_tenths": 50,
+        "cents_per_km_tenths": 75,
+        "closed_at": "2025-02-01T08:00:00Z"
+      }
+    ],
+    "lifetime": {
+      "l_per_100km_tenths": 50,
+      "total_distance_m": 1000000,
+      "total_volume_uL": 50000000,
+      "total_spend_cents_by_currency": { "EUR": 13500 }
+    },
+    "price_history_by_currency": {
+      "EUR": [
+        { "fillup_id": "11111111-1111-4111-8111-111111111111", "filled_at": "2025-01-01T08:00:00Z", "cents_per_litre_tenths": 1500 },
+        { "fillup_id": "22222222-2222-4222-8222-222222222222", "filled_at": "2025-02-01T08:00:00Z", "cents_per_litre_tenths": 1500 }
+      ]
+    },
+    "validation": { "rejected": false, "error_code": null }
+  }
+}

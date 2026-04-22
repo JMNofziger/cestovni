@@ -1,0 +1,38 @@
+{
+  "$schema_version": 1,
+  "name": "first_fill_only",
+  "description": "Spec row 7: single full fill-up. Zero segments. Lifetime L/100km is null (\"—\"), not 0. Total spend still reflects the fill-up.",
+  "input": {
+    "fillups": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "filled_at": "2025-01-01T08:00:00Z",
+        "odometer_m": 0,
+        "volume_uL": 40000000,
+        "total_price_cents": 6000,
+        "currency_code": "EUR",
+        "is_full": true,
+        "missed_before": false,
+        "odometer_reset": false,
+        "notes": null
+      }
+    ]
+  },
+  "expected": {
+    "kind": "segments",
+    "segments": [],
+    "lifetime": {
+      "l_per_100km_tenths": null,
+      "total_distance_m": 0,
+      "total_volume_uL": 0,
+      "total_spend_cents_by_currency": { "EUR": 6000 }
+    },
+    "price_history_by_currency": {
+      "EUR": [
+        { "fillup_id": "11111111-1111-4111-8111-111111111111", "filled_at": "2025-01-01T08:00:00Z", "cents_per_litre_tenths": 1500 }
+      ]
+    },
+    "validation": { "rejected": false, "error_code": null }
+  }
+}

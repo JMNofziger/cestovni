@@ -1,0 +1,29 @@
+{
+  "$schema_version": 1,
+  "name": "reset_on_first_fillup",
+  "description": "Validation rule 4: candidate has odometer_reset=true but there is no prior fill-up for the vehicle → rejected with RESET_ON_FIRST_FILLUP.",
+  "input": {
+    "fillups": [],
+    "candidate": {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "filled_at": "2025-01-01T08:00:00Z",
+      "odometer_m": 100000,
+      "volume_uL": 40000000,
+      "total_price_cents": 6000,
+      "currency_code": "EUR",
+      "is_full": true,
+      "missed_before": false,
+      "odometer_reset": true,
+      "notes": null
+    },
+    "now_utc": "2025-01-02T00:00:00Z"
+  },
+  "expected": {
+    "kind": "validation_rejection",
+    "validation": {
+      "rejected": true,
+      "error_code": "RESET_ON_FIRST_FILLUP"
+    }
+  }
+}
