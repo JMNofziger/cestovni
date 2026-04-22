@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — see [`delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) for M0–M5 and exit emoji; M0 bootstrap + client DB **closed** in Linear (**CES-36/CES-37 Done**); Stage 5 execution is active (**CES-35 In Progress**, **CES-38 In Progress**). M1–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
+**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — see `[delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) for M0–M5 and exit emoji; M0 bootstrap + client DB **closed** in Linear (**CES-36/CES-37 Done**); Stage 5 execution is active (**CES-35 In Progress**, **CES-38 In Progress**). M1–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -117,7 +117,7 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 - 🟩 **Step 10: Engineering breakdown** — source doc `[delivery-plan-v1.md](delivery-plan-v1.md)` *(restored and current on `main`)*
   - 🟩 Linear issues per vertical with `**Spec:`** paths — 12 verticals; `Delivery v1` epic **CES-35** + children **CES-36..CES-47**
   - 🟩 Estimates and dependencies reflect ADRs — milestone spine M0→M5 with blocking relations in delivery plan
-- 🟨 **Step 11: Implementation milestones** — granular **🟩 / 🟨 / 🟥** status for M0–M5, CES-36..CES-47, non-verticals, and exit criteria: [`delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](delivery-plan-v1.md#stage-5-exit-criteria-tracking).
+- 🟨 **Step 11: Implementation milestones** — granular **🟩 / 🟨 / 🟥** status for M0–M5, CES-36..CES-47, non-verticals, and exit criteria: `[delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](delivery-plan-v1.md#stage-5-exit-criteria-tracking).
 
 **Exit:** Running build with test strategy tied to spec risks (math, backup, export). Tracking: same delivery doc sections (RYG checklist + exit criteria).
 
@@ -151,5 +151,6 @@ Track as separate Linear issues under **CES-22**; each issue owns one spec file.
 
 - Baseline: `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)`
 - Spec folder: `[docs/specs/README.md](../specs/README.md)`
+- UX references: `[docs/product/ux/README.md](ux/README.md)`
 - Linear templates: `[docs/linear/issue-templates.md](../linear/issue-templates.md)`
 

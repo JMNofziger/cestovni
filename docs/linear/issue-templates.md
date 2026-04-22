@@ -14,6 +14,8 @@ Use the **same section order** as Cursor `/create-issue` so drafts paste with mi
 
 **`Spec:` paths:** Write repo-relative paths (e.g. `docs/specs/sync-protocol.md`). Canonical URL on GitHub: `https://github.com/JMNofziger/cestovni/blob/main/<path>` (no leading slash in `<path>`). Root [README.md](../../README.md) links the main docs.
 
+**UI-heavy issues:** keep `Spec:` under `docs/specs/...`, and add an extra `UX refs:` line pointing to relevant files under `docs/product/ux/` (for example `docs/product/ux/cestovni-views.md`, `docs/product/ux/DATA_CONTRACTS.md`, `docs/product/ux/DELIVERY_ACCEPTANCE.md`).
+
 ---
 
 ## Bug
@@ -48,6 +50,10 @@ Use the **same section order** as Cursor `/create-issue` so drafts paste with mi
 ### Spec
 
 `docs/specs/...` or TBD
+
+### UX refs (for UI tickets)
+
+`docs/product/ux/...` or N/A
 
 ### Out of scope
 
@@ -88,6 +94,10 @@ Use the **same section order** as Cursor `/create-issue` so drafts paste with mi
 
 `docs/specs/...`
 
+### UX refs (for UI tickets)
+
+`docs/product/ux/...` or N/A
+
 ### Out of scope
 
 - 
@@ -126,6 +136,10 @@ Use the **same section order** as Cursor `/create-issue` so drafts paste with mi
 ### Spec
 
 `docs/specs/...` or N/A
+
+### UX refs (for UI tickets)
+
+`docs/product/ux/...` or N/A
 
 ### Out of scope
 
