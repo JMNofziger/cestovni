@@ -14,12 +14,14 @@
 
 These are **preconditions for CES-39**. Each has a dedicated Linear issue that **blocks** [CES-39](https://linear.app/personal-interests-llc/issue/CES-39).
 
-| # | Topic | Linear | Status |
-|---|--------|--------|--------|
-| 1 | Maintenance UX contract vs `data-model.md` / Drift (`performed_at`, required `odometer_m` / `cost_cents` / `currency_code`, no `category`/`shop` on events; reminders on `maintenance_rules`) | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39) | Open |
-| 2 | Date-only maintenance vs `TIMESTAMPTZ` — explicit storage + display/filter rule (no phantom day shift) | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39) | Open |
-| 3 | Visual system bootstrap — semantic tokens, fonts (`pubspec`), `ThemeData` / dark default, `LedgerCard` / `LedgerTile` / hairline primitives per `cestovni-styling.md` | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Open |
-| 4 | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39) | Open |
+
+| #   | Topic                                                                                                                                                                                         | Linear                                                                                                                              | Status |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1   | Maintenance UX contract vs `data-model.md` / Drift (`performed_at`, required `odometer_m` / `cost_cents` / `currency_code`, no `category`/`shop` on events; reminders on `maintenance_rules`) | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Open   |
+| 2   | Date-only maintenance vs `TIMESTAMPTZ` — explicit storage + display/filter rule (no phantom day shift)                                                                                        | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Open   |
+| 3   | Visual system bootstrap — semantic tokens, fonts (`pubspec`), `ThemeData` / dark default, `LedgerCard` / `LedgerTile` / hairline primitives per `cestovni-styling.md`                         | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Open   |
+| 4   | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings                                               | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Open   |
+
 
 **CES-39** has an in-thread note and is **blocked by** these four issues in Linear (relations + comment). There is no separate “Blocked” workflow state on the Cestovni team — use the blocking relations as the source of truth.
 
@@ -31,25 +33,27 @@ These are **preconditions for CES-39**. Each has a dedicated Linear issue that *
 
 Not automatic blockers for CES-39 unless product promotes them.
 
-| Area | Gap | Suggested owner |
-|------|-----|-----------------|
-| Draft lifecycle | Single vs multiple drafts per vehicle, discard/dirty navigation, “resume draft” entry points | Product + UX |
-| Metrics | “Cost over time” bucketing (day/week/month by range), empty buckets; multi-currency until **CES-51** | Product + eng |
-| Soft delete | Undo window vs confirm-only; whether deleted rows reappear anywhere | Product |
-| Light theme | `light-parchment` screenshots added under `screenshots/` — wire `README` + `cestovni-views.md` if used as reference set | Design |
-| Empty / loading / error | Copy and patterns (no skeleton shimmer per style spec) per screen | Product + UX |
-| Vehicle CRUD UX | Field-level spec beyond “must ship” list in `DELIVERY_ACCEPTANCE.md` | Product |
-| Currency display | ISO-4217 minor units (not always 2 decimals) | Eng + product |
-| i18n / a11y | Dynamic type, locale number/date formatting, semantics labels | Eng (Stage 5/6) |
-| Test matrix | §4 of `SENIOR_REVIEW_CHECKLIST.md` — map each bullet to a PR or issue | Eng |
+
+| Area                    | Gap                                                                                                                     | Suggested owner |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Draft lifecycle         | Single vs multiple drafts per vehicle, discard/dirty navigation, “resume draft” entry points                            | Product + UX    |
+| Metrics                 | “Cost over time” bucketing (day/week/month by range), empty buckets; multi-currency until **CES-51**                    | Product + eng   |
+| Soft delete             | Undo window vs confirm-only; whether deleted rows reappear anywhere                                                     | Product         |
+| Light theme             | Wired in: `light-parchment` set + `full-scroll/` subfolder referenced by `cestovni-full-views.md` and `cestovni-add-vehicle-cta.md`; `README` lists both variants. Dark remains first-load default per `cestovni-styling.md` §5. | Design          |
+| Empty / loading / error | Copy and patterns (no skeleton shimmer per style spec) per screen                                                       | Product + UX    |
+| Vehicle CRUD UX         | Field-level spec beyond “must ship” list in `DELIVERY_ACCEPTANCE.md`                                                    | Product         |
+| Currency display        | ISO-4217 minor units (not always 2 decimals)                                                                            | Eng + product   |
+| i18n / a11y             | Dynamic type, locale number/date formatting, semantics labels                                                           | Eng (Stage 5/6) |
+| Test matrix             | §4 of `SENIOR_REVIEW_CHECKLIST.md` — map each bullet to a PR or issue                                                   | Eng             |
+
 
 ---
 
 ## References
 
-- Delivery prerequisite: [`../delivery-plan-v1.md`](../delivery-plan-v1.md) (M1 — UX gap closure).
-- Data model (normative): [`../../specs/data-model.md`](../../specs/data-model.md).
-- UX contracts under review: [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md), [`cestovni-views.md`](cestovni-views.md), [`DELIVERY_ACCEPTANCE.md`](DELIVERY_ACCEPTANCE.md), [`cestovni-styling.md`](cestovni-styling.md).
+- Delivery prerequisite: `[../delivery-plan-v1.md](../delivery-plan-v1.md)` (M1 — UX gap closure).
+- Data model (normative): `[../../specs/data-model.md](../../specs/data-model.md)`.
+- UX contracts under review: `[DATA_CONTRACTS.md](DATA_CONTRACTS.md)`, `[cestovni-views.md](cestovni-views.md)`, `[DELIVERY_ACCEPTANCE.md](DELIVERY_ACCEPTANCE.md)`, `[cestovni-styling.md](cestovni-styling.md)`.
 - Drift mirrors today: `client/lib/db/tables/maintenance_events.dart`, `client/lib/db/tables/maintenance_rules.dart`, `client/lib/app/shell.dart`, `client/lib/app/app.dart`.
 
 ---
@@ -106,10 +110,10 @@ Use team **Cestovni**, project **Cestovni**, labels **type:improvement** (or **t
 
 **Acceptance criteria**
 
-- [ ] Semantic color/text style tokens (light + dark) consumed by shell or a pilot screen.
-- [ ] Fonts declared in `pubspec.yaml` per spec (or documented deviation).
-- [ ] Reusable primitives: ledger card/tile + hairline divider (names can match spec).
-- [ ] No feature-level raw hex for semantic roles.
+- Semantic color/text style tokens (light + dark) consumed by shell or a pilot screen.
+- Fonts declared in `pubspec.yaml` per spec (or documented deviation).
+- Reusable primitives: ledger card/tile + hairline divider (names can match spec).
+- No feature-level raw hex for semantic roles.
 
 **Spec:** `docs/specs/adr/003-mobile-stack.md`  
 **UX refs:** `docs/product/ux/cestovni-styling.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
