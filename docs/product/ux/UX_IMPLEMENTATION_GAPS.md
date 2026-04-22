@@ -6,7 +6,7 @@
 
 **Owner:** Product + CTO (engineering owns closure in code/specs).
 
-**Last reviewed:** 2026-04-22
+**Last reviewed:** 2026-04-22 (CES-53 closed; three blockers remain for CES-39)
 
 ---
 
@@ -17,7 +17,7 @@ These are **preconditions for CES-39**. Each has a dedicated Linear issue that *
 
 | #   | Topic                                                                                                                                                                                         | Linear                                                                                                                              | Status |
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 1   | Maintenance UX contract vs `data-model.md` / Drift (`performed_at`, required `odometer_m` / `cost_cents` / `currency_code`, no `category`/`shop` on events; reminders on `maintenance_rules`) | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Open   |
+| 1   | Maintenance UX contract vs `data-model.md` / Drift — **resolved in schema v2**: `category` + `shop` added, `odometer_m` nullable, `cost_cents` / `currency_code` stay `NOT NULL` with form-side defaults; reminders remain on `maintenance_rules`. See [DATA_CONTRACTS.md §Maintenance entry contract](DATA_CONTRACTS.md#maintenance-entry-contract) and migration `0002_add_maintenance_events_category_shop` | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Done   |
 | 2   | Date-only maintenance vs `TIMESTAMPTZ` — explicit storage + display/filter rule (no phantom day shift)                                                                                        | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Open   |
 | 3   | Visual system bootstrap — semantic tokens, fonts (`pubspec`), `ThemeData` / dark default, `LedgerCard` / `LedgerTile` / hairline primitives per `cestovni-styling.md`                         | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Open   |
 | 4   | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings                                               | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Open   |

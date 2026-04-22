@@ -106,16 +106,18 @@ CREATE INDEX maintenance_rules_user_row_version_idx ON maintenance_rules (user_i
 
 ### `maintenance_events`
 
-| Column            | Type              | Constraints                                                     | Notes                                  |
-| ----------------- | ----------------- | --------------------------------------------------------------- | -------------------------------------- |
-| *(protocol cols)* | *(see above)*     |                                                                 |                                        |
-| `vehicle_id`      | `UUID`            | NOT NULL, FK → `vehicles.id`                                    |                                        |
-| `rule_id`         | `UUID NULL`       | FK → `maintenance_rules.id` (nullable — one-off events allowed) |                                        |
-| `performed_at`    | `TIMESTAMPTZ`     | NOT NULL                                                         |                                        |
-| `odometer_m`      | `BIGINT`          | NOT NULL, `CHECK (odometer_m >= 0)`                             |                                        |
-| `cost_cents`      | `BIGINT`          | NOT NULL, `CHECK (cost_cents >= 0)` DEFAULT 0                   |                                        |
-| `currency_code`   | `CHAR(3)`         | NOT NULL, same check as `fill_ups.currency_code`                |                                        |
-| `notes`           | `TEXT NULL`       | `length <= 500`                                                 |                                        |
+| Column            | Type              | Constraints                                                                                                          | Notes                                                                                 |
+| ----------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| *(protocol cols)* | *(see above)*     |                                                                                                                      |                                                                                       |
+| `vehicle_id`      | `UUID`            | NOT NULL, FK → `vehicles.id`                                                                                         |                                                                                       |
+| `rule_id`         | `UUID NULL`       | FK → `maintenance_rules.id` (nullable — one-off events allowed)                                                      |                                                                                       |
+| `performed_at`    | `TIMESTAMPTZ`     | NOT NULL                                                                                                             |                                                                                       |
+| `odometer_m`      | `BIGINT NULL`     | `CHECK (odometer_m IS NULL OR odometer_m >= 0)`                                                                      | Optional — form allows leaving blank ([CES-53](https://linear.app/personal-interests-llc/issue/CES-53)). |
+| `cost_cents`      | `BIGINT`          | NOT NULL, `CHECK (cost_cents >= 0)` DEFAULT 0                                                                        | Form writes `0` when user leaves the field blank.                                     |
+| `currency_code`   | `CHAR(3)`         | NOT NULL, same check as `fill_ups.currency_code`                                                                     | Defaults to `settings.currency_code` when the form doesn't prompt.                    |
+| `category`        | `TEXT`            | NOT NULL DEFAULT `'other'`, `CHECK (category IN ('oil','tires','brakes','inspection','battery','fluid','other'))`   | Required in the UX form; closed enum so metrics can bucket on it.                      |
+| `shop`            | `TEXT NULL`       | `CHECK (shop IS NULL OR length(shop) BETWEEN 1 AND 120)`                                                             | Optional vendor/shop name.                                                            |
+| `notes`           | `TEXT NULL`       | `length <= 500`                                                                                                      |                                                                                       |
 
 **Indexes:**
 
@@ -225,13 +227,13 @@ CREATE POLICY fill_ups_delete_own
 db/
   migrations/
     0001_init.sql
-    0002_add_maintenance_events_cost.sql
+    0002_add_maintenance_events_category_shop.sql
     ...
 client/
   drift/
     migrations/
       0001_init.dart
-      0002_add_maintenance_events_cost.dart
+      0002_add_maintenance_events_category_shop.dart
       ...
 ```
 

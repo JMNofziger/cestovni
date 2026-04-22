@@ -141,7 +141,7 @@ Single-column form, similar pattern to the Log view but tighter.
   - **Reminder pair**: Remind in mi (opt.) | Remind in months (opt.) — used to schedule next service hint
   - **SAVE ENTRY** ink CTA (full-width)
 
-> **Contract gap — gated on [CES-53](https://linear.app/personal-interests-llc/issue/CES-53):** the form above marks Shop + Cost as both optional and relies on a `category` field on the event. The current data model ([client/lib/db/tables/maintenance_events.dart](../../../client/lib/db/tables/maintenance_events.dart) / [docs/specs/data-model.md](../../specs/data-model.md)) has `odometer_m`, `cost_cents`, and `currency_code` as **NOT NULL**, no `category` or `shop` columns, and keeps cadence on `maintenance_rules`. Final field optionality and storage shape must be resolved by CES-53 before CES-39 implements this view — see [UX_IMPLEMENTATION_GAPS.md](UX_IMPLEMENTATION_GAPS.md) row 1.
+> **Contract resolution — [CES-53](https://linear.app/personal-interests-llc/issue/CES-53) (schema v2):** `category` + `shop` columns now exist on `maintenance_events`, `odometer_m` is nullable, and `cost_cents` / `currency_code` remain `NOT NULL` with form-side defaults (`0` and `settings.currency_code` respectively). Reminders entered in this form persist on `maintenance_rules`, not on the event itself. Canonical definitions: [DATA_CONTRACTS.md §Maintenance entry contract](DATA_CONTRACTS.md#maintenance-entry-contract) and [../../specs/data-model.md §maintenance_events](../../specs/data-model.md).
 
 ---
 

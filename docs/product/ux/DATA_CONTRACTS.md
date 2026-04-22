@@ -33,19 +33,22 @@ All display conversion must be derived from user settings (distance, volume, cur
 - Odometer must be monotonic unless `odometerReset=true`.
 - `odometerReset=true` not allowed on first fill-up for a vehicle.
 
-## Maintenance entry contract (target)
+## Maintenance entry contract
 
-- Required fields:
+Resolved by [CES-53](https://linear.app/personal-interests-llc/issue/CES-53) — schema v2 migration `0002_add_maintenance_events_category_shop` adds `category` + `shop` and relaxes `odometer_m` to nullable. See [../../specs/data-model.md](../../specs/data-model.md) §`maintenance_events` for the canonical schema.
+
+- **Required in the form** (UX-level validation):
   - `vehicleId`
-  - `serviceAt` (UTC date/datetime)
-  - `category`
-- Optional fields:
-  - `odometerM`
-  - `costCents`
-  - `currencyCode`
-  - `shop`
-  - `notes`
-  - reminders: `remindAtOdometerM`, `remindInMonths`
+  - `performedAt` (UTC date/datetime; see [CES-54](https://linear.app/personal-interests-llc/issue/CES-54) for date-only encoding)
+  - `category` — closed enum: `oil | tires | brakes | inspection | battery | fluid | other`
+- **Optional in the form**:
+  - `odometerM` — persisted as `NULL` when blank.
+  - `shop` — persisted as `NULL` when blank; non-empty strings only (1..120 chars).
+  - `notes` — up to 500 chars.
+- **Blank-but-stored** (schema is `NOT NULL`; form supplies a default):
+  - `costCents` → persisted as `0` when the user leaves the field blank (aggregates treat `0` as "no cost reported").
+  - `currencyCode` → defaults to `settings.currency_code`; the form only prompts if the user has never chosen one.
+- **Reminders** (“Remind in miles / months” fields on the entry form): stored as a `maintenance_rules` row keyed to the same `vehicle_id`, not as columns on `maintenance_events`. Creating an event can create or update the linked rule, but the rule is the source of truth for cadence. Surface the current rule state in the form when one already exists.
 
 ## History feed contract
 
@@ -66,7 +69,7 @@ All display conversion must be derived from user settings (distance, volume, cur
   - total spend
   - average economy
 - Low-data rule: show placeholder when fewer than 2 data points for a trend.
-- Maintenance spend totals include only rows with non-null date and non-null cost.
+- Maintenance spend totals sum `cost_cents` across live events (not soft-deleted); rows where the user left cost blank contribute `0` per the maintenance entry contract above.
 
 ### Economy calculation
 
