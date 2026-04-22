@@ -1,0 +1,80 @@
+{
+  "$schema_version": 1,
+  "name": "multi_currency",
+  "description": "Full (EUR) → partial (CZK) → full (EUR). Segment cost_cents includes only EUR rows (matching closing full's currency). Lifetime total_spend_cents_by_currency has two keys. Price history grouped per currency.",
+  "input": {
+    "fillups": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "filled_at": "2025-01-01T08:00:00Z",
+        "odometer_m": 0,
+        "volume_uL": 40000000,
+        "total_price_cents": 6000,
+        "currency_code": "EUR",
+        "is_full": true,
+        "missed_before": false,
+        "odometer_reset": false,
+        "notes": null
+      },
+      {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "filled_at": "2025-01-15T08:00:00Z",
+        "odometer_m": 400000,
+        "volume_uL": 15000000,
+        "total_price_cents": 9000,
+        "currency_code": "CZK",
+        "is_full": false,
+        "missed_before": false,
+        "odometer_reset": false,
+        "notes": null
+      },
+      {
+        "id": "33333333-3333-4333-8333-333333333333",
+        "vehicle_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "filled_at": "2025-02-01T08:00:00Z",
+        "odometer_m": 1000000,
+        "volume_uL": 35000000,
+        "total_price_cents": 5250,
+        "currency_code": "EUR",
+        "is_full": true,
+        "missed_before": false,
+        "odometer_reset": false,
+        "notes": null
+      }
+    ]
+  },
+  "expected": {
+    "kind": "segments",
+    "segments": [
+      {
+        "prev_full_id": "11111111-1111-4111-8111-111111111111",
+        "next_full_id": "33333333-3333-4333-8333-333333333333",
+        "status": "known",
+        "distance_m": 1000000,
+        "volume_uL": 50000000,
+        "cost_cents": 5250,
+        "l_per_100km_tenths": 50,
+        "cents_per_km_tenths": 52,
+        "closed_at": "2025-02-01T08:00:00Z"
+      }
+    ],
+    "lifetime": {
+      "l_per_100km_tenths": 50,
+      "total_distance_m": 1000000,
+      "total_volume_uL": 50000000,
+      "total_spend_cents_by_currency": { "EUR": 11250, "CZK": 9000 }
+    },
+    "price_history_by_currency": {
+      "EUR": [
+        { "fillup_id": "11111111-1111-4111-8111-111111111111", "filled_at": "2025-01-01T08:00:00Z", "cents_per_litre_tenths": 1500 },
+        { "fillup_id": "33333333-3333-4333-8333-333333333333", "filled_at": "2025-02-01T08:00:00Z", "cents_per_litre_tenths": 1500 }
+      ],
+      "CZK": [
+        { "fillup_id": "22222222-2222-4222-8222-222222222222", "filled_at": "2025-01-15T08:00:00Z", "cents_per_litre_tenths": 6000 }
+      ]
+    },
+    "validation": { "rejected": false, "error_code": null }
+  }
+}
