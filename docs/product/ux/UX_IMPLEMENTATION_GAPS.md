@@ -1,0 +1,129 @@
+# UX implementation gaps — tracker
+
+**Purpose:** Track documentation and product gaps discovered before M1 UI execution so they do not leak into implementation as silent contradictions.
+
+**Gate:** **CES-39** (Fill-up + vehicle UI) must not move to **In Progress** / implementation until every row under [Critical gaps — Linear blockers](#critical-gaps--linear-blockers) is **Done** and this file’s status column is updated. Dependent M1 work that assumes resolved contracts (shell nav, maintenance forms, metrics tied to maintenance rows) stays behind the same gate.
+
+**Owner:** Product + CTO (engineering owns closure in code/specs).
+
+**Last reviewed:** 2026-04-22
+
+---
+
+## Critical gaps — Linear blockers
+
+These are **preconditions for CES-39**. Each has a dedicated Linear issue that **blocks** [CES-39](https://linear.app/personal-interests-llc/issue/CES-39).
+
+| # | Topic | Linear | Status |
+|---|--------|--------|--------|
+| 1 | Maintenance UX contract vs `data-model.md` / Drift (`performed_at`, required `odometer_m` / `cost_cents` / `currency_code`, no `category`/`shop` on events; reminders on `maintenance_rules`) | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39) | Open |
+| 2 | Date-only maintenance vs `TIMESTAMPTZ` — explicit storage + display/filter rule (no phantom day shift) | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39) | Open |
+| 3 | Visual system bootstrap — semantic tokens, fonts (`pubspec`), `ThemeData` / dark default, `LedgerCard` / `LedgerTile` / hairline primitives per `cestovni-styling.md` | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Open |
+| 4 | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39) | Open |
+
+**CES-39** has an in-thread note and is **blocked by** these four issues in Linear (relations + comment). There is no separate “Blocked” workflow state on the Cestovni team — use the blocking relations as the source of truth.
+
+**Closure criteria (per row):** Spec or UX doc updated to match the chosen implementation; any schema migration documented; linked PR merged; this table’s **Status** set to **Done**.
+
+---
+
+## Sharp edges — track here or spin child issues
+
+Not automatic blockers for CES-39 unless product promotes them.
+
+| Area | Gap | Suggested owner |
+|------|-----|-----------------|
+| Draft lifecycle | Single vs multiple drafts per vehicle, discard/dirty navigation, “resume draft” entry points | Product + UX |
+| Metrics | “Cost over time” bucketing (day/week/month by range), empty buckets; multi-currency until **CES-51** | Product + eng |
+| Soft delete | Undo window vs confirm-only; whether deleted rows reappear anywhere | Product |
+| Light theme | `light-parchment` screenshots added under `screenshots/` — wire `README` + `cestovni-views.md` if used as reference set | Design |
+| Empty / loading / error | Copy and patterns (no skeleton shimmer per style spec) per screen | Product + UX |
+| Vehicle CRUD UX | Field-level spec beyond “must ship” list in `DELIVERY_ACCEPTANCE.md` | Product |
+| Currency display | ISO-4217 minor units (not always 2 decimals) | Eng + product |
+| i18n / a11y | Dynamic type, locale number/date formatting, semantics labels | Eng (Stage 5/6) |
+| Test matrix | §4 of `SENIOR_REVIEW_CHECKLIST.md` — map each bullet to a PR or issue | Eng |
+
+---
+
+## References
+
+- Delivery prerequisite: [`../delivery-plan-v1.md`](../delivery-plan-v1.md) (M1 — UX gap closure).
+- Data model (normative): [`../../specs/data-model.md`](../../specs/data-model.md).
+- UX contracts under review: [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md), [`cestovni-views.md`](cestovni-views.md), [`DELIVERY_ACCEPTANCE.md`](DELIVERY_ACCEPTANCE.md), [`cestovni-styling.md`](cestovni-styling.md).
+- Drift mirrors today: `client/lib/db/tables/maintenance_events.dart`, `client/lib/db/tables/maintenance_rules.dart`, `client/lib/app/shell.dart`, `client/lib/app/app.dart`.
+
+---
+
+## Linear issue bodies (copy if API not used)
+
+Use team **Cestovni**, project **Cestovni**, labels **type:improvement** (or **type:spike** where noted), **effort:medium** unless adjusted. Add relation: **This issue blocks CES-39**.
+
+### Issue 1 — Maintenance contract alignment
+
+**Title:** Align maintenance UX contract with data model (blocks CES-39)
+
+**TL;DR**
+
+- `DATA_CONTRACTS.md` describes fields and optionality that do not match `docs/specs/data-model.md` or `client/lib/db/tables/maintenance_events.dart`.
+- Resolve in one direction: update UX + product contracts **or** extend schema with migrations and export rules.
+
+**Current state**
+
+- UX contract: `serviceAt`, optional odometer/cost/currency, required `category`, optional `shop`, reminder fields on the entry.
+- Model: `performed_at` NOT NULL, `odometer_m` / `cost_cents` / `currency_code` NOT NULL, no `category`/`shop`; cadence lives on `maintenance_rules`.
+
+**Expected outcome**
+
+- Single source of truth; `DATA_CONTRACTS.md` and `cestovni-views.md` maintenance section match the schema (or schema change is specified, migrated, and reflected in `data-model.md`).
+
+**Spec:** `docs/specs/data-model.md`  
+**UX refs:** `docs/product/ux/DATA_CONTRACTS.md`, `docs/product/ux/cestovni-views.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
+
+---
+
+### Issue 2 — Date-only maintenance
+
+**Title:** Define date-only maintenance storage vs TIMESTAMPTZ (blocks CES-39)
+
+**TL;DR**
+
+- UX requires local calendar date with no timezone shift; DB uses `TIMESTAMPTZ` for `performed_at`.
+- Decide encoding (e.g. date-only TEXT vs UTC boundary rule) and document in contracts + implementation notes.
+
+**Spec:** `docs/specs/data-model.md`  
+**UX refs:** `docs/product/ux/DATA_CONTRACTS.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
+
+---
+
+### Issue 3 — Visual system bootstrap
+
+**Title:** Flutter visual system bootstrap per cestovni-styling (blocks CES-39)
+
+**TL;DR**
+
+- App still uses generic `ThemeData(colorSchemeSeed: …)`; spec defines OKLCH tokens, fonts, ledger components, grain background.
+- Land shared theme + primitives so feature work does not fork ad-hoc styles.
+
+**Acceptance criteria**
+
+- [ ] Semantic color/text style tokens (light + dark) consumed by shell or a pilot screen.
+- [ ] Fonts declared in `pubspec.yaml` per spec (or documented deviation).
+- [ ] Reusable primitives: ledger card/tile + hairline divider (names can match spec).
+- [ ] No feature-level raw hex for semantic roles.
+
+**Spec:** `docs/specs/adr/003-mobile-stack.md`  
+**UX refs:** `docs/product/ux/cestovni-styling.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
+
+---
+
+### Issue 4 — Shell + active vehicle
+
+**Title:** Shell tabs + active vehicle + default vehicle model (blocks CES-39)
+
+**TL;DR**
+
+- Target: Log / History / Metrics / Maint; current shell: Home / Settings / Debug.
+- Define where active vehicle is shown, how it persists, and how it interacts with default vehicle in settings.
+
+**Spec:** `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md`  
+**UX refs:** `docs/product/ux/cestovni-views.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`

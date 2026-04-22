@@ -5,7 +5,7 @@ Use this when design screenshots change and we need to keep UX references curren
 ## 1) Export and place files
 
 - Export PNG screenshots at consistent mobile frame size.
-- Put files in `docs/product/ux/screenshots/<theme-or-version>/`.
+- Put files in `docs/product/ux/screenshots/<theme-or-version>/` (e.g. `dark-midnight/`, `light-parchment/`).
 - Use stable, screen-based names (no UUIDs):
   - `history.png`
   - `history-flip.png`

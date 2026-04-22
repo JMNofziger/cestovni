@@ -51,4 +51,5 @@ Use this checklist before approving UX-driven implementation work.
 Reviewer notes:
 
 - Docs and Linear alignment complete for CES-39.
+- **CES-39 blocked** until critical rows in [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md) are closed (see [`delivery-plan-v1.md`](../delivery-plan-v1.md) § M1 prerequisite).
 - Implementation/test gates remain open until code and tests land.

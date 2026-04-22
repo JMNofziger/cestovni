@@ -36,9 +36,10 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 - Data semantics contract: `docs/product/ux/DATA_CONTRACTS.md`
 - Must-ship gates and tests: `docs/product/ux/DELIVERY_ACCEPTANCE.md`
 - Visual system reference: `docs/product/ux/cestovni-styling.md`
+- **Implementation gap tracker (blocks CES-39 until closed):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
 - Senior checklist: `docs/product/ux/SENIOR_REVIEW_CHECKLIST.md`
-- Delivery plan linkage: `docs/product/delivery-plan-v1.md` (CES-39 row)
-- Linear issue updated: `CES-39`
+- Delivery plan linkage: `docs/product/delivery-plan-v1.md` (M1 prerequisite + CES-39 row)
+- Linear: **CES-39** blocked by **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** (relations + comment; no separate **Blocked** workflow state on team)
 
 ## Residual risks (not doc conflicts)
 
@@ -49,4 +50,5 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 ## Recommended sign-off decision
 
 - **Approve with follow-up issues** (implementation and test execution), not “approve as-is for ship”.
+- **CES-39** does not start until `UX_IMPLEMENTATION_GAPS.md` critical rows are closed (Linear blockers + doc updates).
 - Use `SENIOR_REVIEW_CHECKLIST.md` as the gate in PR/issue reviews for CES-39 and related UI tickets.

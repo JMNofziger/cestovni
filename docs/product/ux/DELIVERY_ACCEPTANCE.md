@@ -2,6 +2,8 @@
 
 This document defines what must ship vs what can wait. Use it to prevent scope creep during implementation.
 
+**M1 / CES-39 gate:** Close documented contract gaps first — see [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md) and [`../delivery-plan-v1.md`](../delivery-plan-v1.md) (§ M1 prerequisite).
+
 ## Global acceptance gates
 
 - **Must ship**

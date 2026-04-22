@@ -6,7 +6,7 @@
 
 **Development workflow (stage gates):** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` — checklist per product phase; when to use a **spike** vs **architecture / ADR** work.
 
-**UX references (canonical):** `[ux/README.md](ux/README.md)` — styling guide, view-by-view UX notes, and screenshot sets used for implementation and QA.
+**UX references (canonical):** `[ux/README.md](ux/README.md)` — styling guide, view-by-view UX notes, screenshot sets, and **[`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)** (M1 / CES-39 prerequisite tracker).
 
 ## Vision (from brief)
 
@@ -24,7 +24,7 @@ Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: `
 
 ## Delivery (Phase 3 / Stage 5)
 
-Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (includes **M0 status** — Flutter + Drift client in `[../../client/](../../client/)`, SQL fixtures in `[../../tests/client-db/](../../tests/client-db/)`). Source for the Linear `**Delivery v1`** epic ([CES-35](https://linear.app/personal-interests-llc/issue/CES-35)); M0 verticals **CES-36** / **CES-37** are in **Done** and M1 execution (**CES-38**) is in progress.
+Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (includes **M0 status** — Flutter + Drift client in `[../../client/](../../client/)`, SQL fixtures in `[../../tests/client-db/](../../tests/client-db/)`). Source for the Linear `**Delivery v1`** epic ([CES-35](https://linear.app/personal-interests-llc/issue/CES-35)); M0 verticals **CES-36** / **CES-37** are in **Done** and M1 execution (**CES-38**) is in progress. **CES-39** is gated on **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)–[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** per `[ux/UX_IMPLEMENTATION_GAPS.md](ux/UX_IMPLEMENTATION_GAPS.md)`.
 
 ## Specs
 

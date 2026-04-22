@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** in **Done**, CTO review passed, `verify-full` green on `main`. **Current execution: M1 / CES-38 in progress** (consumption module Phase 1 landed with fixture harness and `tests/math/` set). M0 follow-ups tracked as **CES-48** (index test tightening), **CES-49** (`settings` DB invariant, blocks CES-42), **CES-50** (remove `_keepMigratorVisible` scaffold, blocks CES-47). M1 follow-ups tracked as **CES-51** (segment cost multi-currency rule) and **CES-52** (adapter dep-direction revisit). Source for Linear `[Delivery v1` epic (CES-35)]([https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** in **Done**, CTO review passed, `verify-full` green on `main`. **Current execution: M1 / CES-38 in progress** (consumption module Phase 1 landed with fixture harness and `tests/math/` set). **CES-39 is blocked** until [§ M1 prerequisite — UX gap closure](#m1-prerequisite--ux-gap-closure-blocks-ces-39) is satisfied (see [`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)). Linear gap-closure issues: **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** (each **blocks** CES-39; parent **CES-35**). M0 follow-ups tracked as **CES-48** (index test tightening), **CES-49** (`settings` DB invariant, blocks CES-42), **CES-50** (remove `_keepMigratorVisible` scaffold, blocks CES-47). M1 follow-ups tracked as **CES-51** (segment cost multi-currency rule) and **CES-52** (adapter dep-direction revisit). Source for Linear `[Delivery v1` epic (CES-35)]([https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -41,6 +41,23 @@ flowchart LR
 
 ---
 
+## M1 prerequisite — UX gap closure (blocks CES-39)
+
+Before **CES-39** (fill-up + vehicle UI) and any M1 work that depends on aligned contracts and shell chrome (same navigation and vehicle context as History / Metrics / Maint), close the gaps tracked in **[`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)**.
+
+**Prerequisite checklist (all must be Done in Linear + repo):**
+
+1. **Maintenance UX ↔ data model** — [CES-53](https://linear.app/personal-interests-llc/issue/CES-53): `DATA_CONTRACTS.md` / views match `docs/specs/data-model.md` and Drift tables (or schema + spec updated together).
+2. **Date-only maintenance** — [CES-54](https://linear.app/personal-interests-llc/issue/CES-54): explicit rule for `performed_at` / local calendar vs UTC (no silent day shift).
+3. **Visual system bootstrap** — [CES-55](https://linear.app/personal-interests-llc/issue/CES-55): shared Flutter theme + tokens + ledger primitives per `cestovni-styling.md` (no greenfield per-screen hex).
+4. **Shell + active vehicle** — [CES-56](https://linear.app/personal-interests-llc/issue/CES-56): target bottom tabs and documented active/default vehicle behavior.
+
+Linear: each item is an issue **blocking [CES-39](https://linear.app/personal-interests-llc/issue/CES-39)** (see `UX_IMPLEMENTATION_GAPS.md`). The Cestovni team has no dedicated **Blocked** workflow state — **blocking relations** are the source of truth. Do not treat M1 UI rollup as unblocked until **CES-53–CES-56** are **Done**.
+
+**Out of scope for this gate:** photo pipeline (**CES-40**), consumption math completion (**CES-38**) — those keep their existing dependencies.
+
+---
+
 ## Implementation checklist (RYG)
 
 **Legend:** 🟩 Done · 🟨 In Progress · 🟥 To Do
@@ -62,8 +79,9 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 - 🟨 **M1 rollup** — offline logging usable end-to-end without a server.
   - 🟨 **CES-38 — Consumption math + golden tests** — module scaffold + rounding/unit coverage + fixture harness landed; full fixture assertions and validation paths still in progress.
-  - 🟥 **CES-39 — Fill-up + vehicle UI** — core logging UX; depends on CES-37 + CES-38.
+  - 🟥 **CES-39 — Fill-up + vehicle UI** — core logging UX; depends on CES-37 + CES-38; **blocked** until **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)–[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** are **Done** (tracker: [`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)).
   - 🟥 **CES-40 — Photo pipeline** — per `[photo-pipeline.md](../specs/photo-pipeline.md)`; depends on CES-37.
+  - 🟥 **M1 UX gap closure (blocks CES-39):** **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)** maintenance contract alignment · **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)** date-only vs `TIMESTAMPTZ` · **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)** visual bootstrap · **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** shell + active vehicle — parent epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**.
 
 ### M2 — Export
 
@@ -107,7 +125,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 | 1   | [CES-36](https://linear.app/personal-interests-llc/issue/CES-36) | Mobile client bootstrap                  | M0        | `docs/specs/adr/003-mobile-stack.md`                                                                                                                                                | —              | medium | **In repo** — `client/`, `ci/client-build.yml`, telemetry check 2 active                                 |
 | 2   | [CES-37](https://linear.app/personal-interests-llc/issue/CES-37) | Client DB schema + migrations            | M0        | `docs/specs/data-model.md` + `docs/specs/si-units.md`                                                                                                                               | CES-36         | medium | **In repo** — `client/lib/db/`, `client/test/db/`, `tests/client-db/fixtures/`                           |
 | 3   | [CES-38](https://linear.app/personal-interests-llc/issue/CES-38) | Consumption math module + golden tests   | M1        | `docs/specs/consumption-math.md`                                                                                                                                                    | CES-37         | low    | **In progress** — `client/lib/consumption/`, `client/test/consumption/`, `tests/math/` landed in Phase 1 |
-| 4   | [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) | Fill-up + vehicle UI (core logging)      | M1        | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md` + `docs/product/ux/cestovni-views.md` + `docs/product/ux/DATA_CONTRACTS.md` + `docs/product/ux/DELIVERY_ACCEPTANCE.md` | CES-37, CES-38 | high   | —                                                                                                        |
+| 4   | [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) | Fill-up + vehicle UI (core logging)      | M1        | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md` + `docs/product/ux/cestovni-views.md` + `docs/product/ux/DATA_CONTRACTS.md` + `docs/product/ux/DELIVERY_ACCEPTANCE.md` + `docs/product/ux/UX_IMPLEMENTATION_GAPS.md` | CES-37, CES-38; **blocked by** [CES-53](https://linear.app/personal-interests-llc/issue/CES-53)–[CES-56](https://linear.app/personal-interests-llc/issue/CES-56) | high   | —                                                                                                        |
 | 5   | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation            | M1        | `docs/specs/photo-pipeline.md`                                                                                                                                                      | CES-37         | medium | —                                                                                                        |
 | 6   | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP                               | M2        | `docs/specs/export-v1.md`                                                                                                                                                           | CES-37         | medium | —                                                                                                        |
 | 7   | [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) | Server Postgres + RLS migrations         | M3        | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md`                                                                                                           | —              | medium | —                                                                                                        |
