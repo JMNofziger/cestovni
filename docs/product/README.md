@@ -22,7 +22,7 @@ Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: `
 
 ## Delivery (Phase 3 / Stage 5)
 
-Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (includes **M0 status** — Flutter + Drift client in [`../../client/`](../../client/), SQL fixtures in [`../../tests/client-db/`](../../tests/client-db/)). Source for the Linear **`Delivery v1`** epic ([CES-35](https://linear.app/personal-interests-llc/issue/CES-35)); M0 verticals **CES-36** / **CES-37** reflect implementation in review.
+Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (includes **M0 status** — Flutter + Drift client in [`../../client/`](../../client/), SQL fixtures in [`../../tests/client-db/`](../../tests/client-db/)). Source for the Linear **`Delivery v1`** epic ([CES-35](https://linear.app/personal-interests-llc/issue/CES-35)); M0 verticals **CES-36** / **CES-37** are in **Done** and M1 execution (**CES-38**) is in progress.
 
 ## Specs
 

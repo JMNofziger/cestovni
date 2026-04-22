@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** flipped to **Done**, CTO review passed, `verify-full` green on `main`. M0 follow-ups tracked as **CES-48** (index test tightening), **CES-49** (`settings` DB invariant, blocks CES-42), **CES-50** (remove `_keepMigratorVisible` scaffold, blocks CES-47). **Next up: M1 / CES-38** (consumption math + golden tests). Source for Linear `[Delivery v1` epic (CES-35)](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** in **Done**, CTO review passed, `verify-full` green on `main`. **Current execution: M1 / CES-38 in progress** (consumption module Phase 1 landed with fixture harness and `tests/math/` set). M0 follow-ups tracked as **CES-48** (index test tightening), **CES-49** (`settings` DB invariant, blocks CES-42), **CES-50** (remove `_keepMigratorVisible` scaffold, blocks CES-47). M1 follow-ups tracked as **CES-51** (segment cost multi-currency rule) and **CES-52** (adapter dep-direction revisit). Source for Linear `[Delivery v1` epic (CES-35)](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -60,8 +60,8 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M1 — Local logging + math
 
-- 🟥 **M1 rollup** — offline logging usable end-to-end without a server.
-  - 🟥 **CES-38 — Consumption math + golden tests** — pure module + fixtures; home `tests/math/` (planned) per test matrix.
+- 🟨 **M1 rollup** — offline logging usable end-to-end without a server.
+  - 🟨 **CES-38 — Consumption math + golden tests** — module scaffold + rounding/unit coverage + fixture harness landed; full fixture assertions and validation paths still in progress.
   - 🟥 **CES-39 — Fill-up + vehicle UI** — core logging UX; depends on CES-37 + CES-38.
   - 🟥 **CES-40 — Photo pipeline** — per `[photo-pipeline.md](../specs/photo-pipeline.md)`; depends on CES-37.
 
@@ -102,11 +102,11 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)**. Every row below is a child of that epic with a literal `Spec:` line and `blockedBy` relations matching this table.
 
 
-| #   | Linear                                                           | Vertical                                 | Milestone | `Spec:`                                                                           | Depends on     | Effort | Repo status (2026-04-18)                                                       |
+| #   | Linear                                                           | Vertical                                 | Milestone | `Spec:`                                                                           | Depends on     | Effort | Repo status (2026-04-22)                                                       |
 | --- | ---------------------------------------------------------------- | ---------------------------------------- | --------- | --------------------------------------------------------------------------------- | -------------- | ------ | ------------------------------------------------------------------------------ |
 | 1   | [CES-36](https://linear.app/personal-interests-llc/issue/CES-36) | Mobile client bootstrap                  | M0        | `docs/specs/adr/003-mobile-stack.md`                                              | —              | medium | **In repo** — `client/`, `ci/client-build.yml`, telemetry check 2 active       |
 | 2   | [CES-37](https://linear.app/personal-interests-llc/issue/CES-37) | Client DB schema + migrations            | M0        | `docs/specs/data-model.md` + `docs/specs/si-units.md`                             | CES-36         | medium | **In repo** — `client/lib/db/`, `client/test/db/`, `tests/client-db/fixtures/` |
-| 3   | [CES-38](https://linear.app/personal-interests-llc/issue/CES-38) | Consumption math module + golden tests   | M1        | `docs/specs/consumption-math.md`                                                  | CES-37         | low    | —                                                                              |
+| 3   | [CES-38](https://linear.app/personal-interests-llc/issue/CES-38) | Consumption math module + golden tests   | M1        | `docs/specs/consumption-math.md`                                                  | CES-37         | low    | **In progress** — `client/lib/consumption/`, `client/test/consumption/`, `tests/math/` landed in Phase 1 |
 | 4   | [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) | Fill-up + vehicle UI (core logging)      | M1        | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md`                      | CES-37, CES-38 | high   | —                                                                              |
 | 5   | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation            | M1        | `docs/specs/photo-pipeline.md`                                                    | CES-37         | medium | —                                                                              |
 | 6   | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP                               | M2        | `docs/specs/export-v1.md`                                                         | CES-37         | medium | —                                                                              |
@@ -130,7 +130,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 
 | Risk area               | Primary spec                                                                                                                  | Test layer                                        | Home                                                                                                                           |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Integer math / rounding | `[consumption-math.md](../specs/consumption-math.md)`, `[si-units.md](../specs/si-units.md)`                                  | Pure-function unit tests + 8 golden fixtures      | Client repo, `tests/math/` (planned M1); **client DB INT64 round-trips** in `[client/test/db/](../../client/test/db/)` (M0)    |
+| Integer math / rounding | `[consumption-math.md](../specs/consumption-math.md)`, `[si-units.md](../specs/si-units.md)`                                  | Pure-function unit tests + 8 golden fixtures      | Client repo, `tests/math/` (landed; full fixture assertion completion in progress); **client DB INT64 round-trips** in `[client/test/db/](../../client/test/db/)` (M0)    |
 | RLS / roles             | `[data-model.md](../specs/data-model.md)`, [ADR 001](../specs/adr/001-backend-api-boundary.md)                                | SQL regression                                    | `[tests/rls/](../../tests/rls/)`, `[tests/roles/](../../tests/roles/)`, `[ci/rls-regression.yml](../../ci/rls-regression.yml)` |
 | API contract            | [ADR 001](../specs/adr/001-backend-api-boundary.md), `[sync-protocol.md](../specs/sync-protocol.md)`                          | Contract tests against managed + self-host        | `[tests/contract/](../../tests/contract/)`                                                                                     |
 | Backup / restore        | `[sync-protocol.md](../specs/sync-protocol.md)`, [ADR 002](../specs/adr/002-backup-sync-layer.md)                             | Integration (client+server)                       | `tests/backup/` (to land in M3)                                                                                                |
@@ -146,7 +146,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 Leading emoji tracks **exit** state (independent of per-vertical RYG above, but should converge at stage close).
 
 - 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47; M0 follow-ups CES-48/49/50 created 2026-04-22, linked to their downstream verticals via `blocks`.)*
-- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed 2026-04-22**: CES-36 + CES-37 in Done, CTO audit passed. M1 kickoff = CES-38.)*
+- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed 2026-04-22**: CES-36 + CES-37 in Done, CTO audit passed. **M1 active**: CES-38 in progress with Phase 1 scaffold landed.)*
 - 🟥 M2 lands: ZIP export round-trips for a representative fixture.
 - 🟥 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green.
 - 🟥 M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.

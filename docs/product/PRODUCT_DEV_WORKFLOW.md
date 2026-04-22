@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — see [`delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) for M0–M5 and exit emoji; M0 bootstrap + client DB **implemented in repo**; Linear CES-36/CES-37 in review. M1–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
+**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — see [`delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) for M0–M5 and exit emoji; M0 bootstrap + client DB **closed** in Linear (**CES-36/CES-37 Done**); Stage 5 execution is active (**CES-35 In Progress**, **CES-38 In Progress**). M1–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
 
 Update this percentage when a **stage exit** is fully met.
 
@@ -61,7 +61,7 @@ Complete **before** treating stack-dependent specs as final.
   - 🟩 v1 **backup/restore** direction — **hand-rolled outbox** selected: `[docs/specs/adr/002-backup-sync-layer.md](../specs/adr/002-backup-sync-layer.md)` (**Accepted** 2026-04-17)
   - 🟩 Candidates compared (hand-rolled vs PowerSync vs ElectricSQL); managed sync runtimes deferred to an explicit v1.x revisit gate in ADR 002
   - 🟩 Protocol primitives (server `row_version` sequence, per-table cursor, idempotent mutations, cursor-paginated restore) frozen in ADR 002 + `[sync-protocol.md](../specs/sync-protocol.md)` **spec pass 1**; v1.x field-level merge rules remain a roadmap pointer
-  - 🟩 **Accepted** + **CES-24** ready to close
+  - 🟩 **Accepted** + **CES-24** closed
 - 🟩 **Step 4: Architecture overview doc**
   - 🟩 `[docs/specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)` links both **Accepted** ADRs and the sync-protocol spec
   - 🟩 Ephemeral photo pipeline called out (+ link to `photo-pipeline.md`)
