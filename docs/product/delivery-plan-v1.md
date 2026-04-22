@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** M0 (**bootstrap + client DB**) is **implemented in repo** (2026-04-18): Flutter + Drift client under `[client/](../../client/)`, SQL fixtures under `[tests/client-db/](../../tests/client-db/)`, CI descriptors `[ci/client-build.yml](../../ci/client-build.yml)` + live telemetry client scan in `[ci/telemetry-gate.py](../../ci/telemetry-gate.py)`. Linear **CES-36** / **CES-37** track review/merge; remaining milestones **M1–M5** below. Source for Linear `[Delivery v1` epic (CES-35)](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** flipped to **Done**, CTO review passed, `verify-full` green on `main`. M0 follow-ups tracked as **CES-48** (index test tightening), **CES-49** (`settings` DB invariant, blocks CES-42), **CES-50** (remove `_keepMigratorVisible` scaffold, blocks CES-47). **Next up: M1 / CES-38** (consumption math + golden tests). Source for Linear `[Delivery v1` epic (CES-35)](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown) and per-vertical children. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -49,10 +49,14 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M0 — Bootstrap + client DB
 
-- 🟨 **M0 rollup** — client shell + Drift v1 + fixtures + CI; unblocks downstream milestones.
+- 🟩 **M0 rollup (closed 2026-04-22)** — client shell + Drift v1 + fixtures + CI; downstream milestones unblocked.
   - 🟩 **CES-36 — Mobile client bootstrap** — `[client/](../../client/)`, `[ci/client-build.yml](../../ci/client-build.yml)`; telemetry gate **check 2** scans `client/lib/**/*.dart` for literal `Telemetry.emit` names (`[ci/telemetry-gate.py](../../ci/telemetry-gate.py)`).
   - 🟩 **CES-37 — Client DB schema + migrations** — `client/lib/db/`, `client/test/db/`, `[tests/client-db/fixtures/](../../tests/client-db/fixtures/)`; indexes + INT64 round-trips per test matrix below.
-  - 🟨 **Merge / review closure** — CES-36 + CES-37 on Linear; treat M0 rollup 🟩 when both issues are **Done** on the board, not only when code exists on a branch.
+  - 🟩 **Merge / review closure (2026-04-22)** — code on `main` since 2026-04-18; CTO audit passed; `verify-full` + `verify-ios-weekly` green; both Linear issues in **Done**.
+  - 🟨 **M0 follow-ups (tracked, non-blocking):**
+    - **CES-48** — tighten `client/test/db/indexes_test.dart` to strict-equality set + note `v*_v*_noop.sql` replay semantics in `tests/client-db/README.md`. *Blocks CES-47.*
+    - **CES-49** — enforce `settings.id = user_id` at DB level on client + server (adds first post-`0001_init` migration step). *Blocks CES-42.*
+    - **CES-50** — remove `_keepMigratorVisible` scaffold from `client/lib/app/pages/debug_page.dart` when CES-47 lands rollback UI (or before, if CES-47 defers). *Blocks CES-47.*
 
 ### M1 — Local logging + math
 
@@ -141,8 +145,8 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 
 Leading emoji tracks **exit** state (independent of per-vertical RYG above, but should converge at stage close).
 
-- 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47.)*
-- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 code in repo** — merge/review CES-36/CES-37; M1 pending.)*
+- 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47; M0 follow-ups CES-48/49/50 created 2026-04-22, linked to their downstream verticals via `blocks`.)*
+- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed 2026-04-22**: CES-36 + CES-37 in Done, CTO audit passed. M1 kickoff = CES-38.)*
 - 🟥 M2 lands: ZIP export round-trips for a representative fixture.
 - 🟥 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green.
 - 🟥 M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.
