@@ -24,10 +24,10 @@ client/
       shell.dart                  # bottom nav: Home / Settings / Debug
       pages/                      # per-tab placeholders
     db/
-      app_database.dart           # @DriftDatabase; schema_version = 1
+      app_database.dart           # @DriftDatabase; schema_version = 2
       migrations/
         migration_runner.dart     # UP/DOWN step structure (CES-47 hook)
-        schema_steps.dart         # 0001_init
+        schema_steps.dart         # 0001_init, 0002_add_maintenance_events_category_shop
       tables/                     # one file per v1 table
   test/
     db/                           # migration + round-trip + constraints + indexes

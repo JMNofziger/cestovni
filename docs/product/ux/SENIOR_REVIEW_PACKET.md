@@ -12,7 +12,7 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 
 - Deterministic history ordering is explicit:
   - `event_datetime DESC`, then `created_at DESC`, then `id DESC`
-- Maintenance totals in metrics include only entries with date + cost.
+- Maintenance spend in metrics sums `cost_cents` on live events; blank cost in the form persists as `0` per `DATA_CONTRACTS.md` (see also §Metrics contract).
 - Date-only maintenance values are local calendar dates (no timezone shift).
 - Fill-up quality flags remain visible with helper text:
   - `isFull`, `missedBefore`, `odometerReset`
@@ -39,7 +39,7 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 - **Implementation gap tracker (blocks CES-39 until closed):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
 - Senior checklist: `docs/product/ux/SENIOR_REVIEW_CHECKLIST.md`
 - Delivery plan linkage: `docs/product/delivery-plan-v1.md` (M1 prerequisite + CES-39 row)
-- Linear: **CES-39** blocked by **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** (relations + comment; no separate **Blocked** workflow state on team)
+- Linear: **CES-39** still blocked by **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** until each is **Done**; **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)** is **resolved in repo** — set Linear workflow to **Done** and remove stale **blocks** edges if present (see issue comments on CES-39 / CES-53).
 
 ## Residual risks (not doc conflicts)
 
@@ -50,5 +50,5 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 ## Recommended sign-off decision
 
 - **Approve with follow-up issues** (implementation and test execution), not “approve as-is for ship”.
-- **CES-39** does not start until `UX_IMPLEMENTATION_GAPS.md` critical rows are closed (Linear blockers + doc updates).
+- **CES-39** does not start until every **Open** row under `UX_IMPLEMENTATION_GAPS.md` **Critical gaps** is closed in Linear (today: CES-54, CES-55, CES-56; CES-53 is **Done** in repo + tracker).
 - Use `SENIOR_REVIEW_CHECKLIST.md` as the gate in PR/issue reviews for CES-39 and related UI tickets.

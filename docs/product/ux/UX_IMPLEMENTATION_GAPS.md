@@ -62,23 +62,19 @@ Not automatic blockers for CES-39 unless product promotes them.
 
 Use team **Cestovni**, project **Cestovni**, labels **type:improvement** (or **type:spike** where noted), **effort:medium** unless adjusted. Add relation: **This issue blocks CES-39**.
 
-### Issue 1 — Maintenance contract alignment
+### Issue 1 — Maintenance contract alignment *(resolved 2026-04-22 — archive for imports / history)*
 
 **Title:** Align maintenance UX contract with data model (blocks CES-39)
 
 **TL;DR**
 
-- `DATA_CONTRACTS.md` describes fields and optionality that do not match `docs/specs/data-model.md` or `client/lib/db/tables/maintenance_events.dart`.
-- Resolve in one direction: update UX + product contracts **or** extend schema with migrations and export rules.
+- **Shipped:** additive Drift schema v2 (`0002_add_maintenance_events_category_shop`), `DATA_CONTRACTS.md` + `data-model.md` + `maintenance_events.dart` aligned; tracker row 1 = **Done**.
+- **Linear hygiene:** set issue **Done**, remove **blocks** relation to CES-39 if still wired (see issue comments on CES-53 / CES-39).
 
-**Current state**
+**What changed (summary)**
 
-- UX contract: `serviceAt`, optional odometer/cost/currency, required `category`, optional `shop`, reminder fields on the entry.
-- Model: `performed_at` NOT NULL, `odometer_m` / `cost_cents` / `currency_code` NOT NULL, no `category`/`shop`; cadence lives on `maintenance_rules`.
-
-**Expected outcome**
-
-- Single source of truth; `DATA_CONTRACTS.md` and `cestovni-views.md` maintenance section match the schema (or schema change is specified, migrated, and reflected in `data-model.md`).
+- `category` + `shop` on `maintenance_events`; `odometer_m` nullable; `cost_cents` / `currency_code` stay `NOT NULL` with form defaults (`0`, `settings.currency_code`); reminders stay on `maintenance_rules` per contract.
+- UX field names: `performedAt` in contracts (not `serviceAt`).
 
 **Spec:** `docs/specs/data-model.md`  
 **UX refs:** `docs/product/ux/DATA_CONTRACTS.md`, `docs/product/ux/cestovni-views.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`

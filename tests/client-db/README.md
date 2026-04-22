@@ -13,7 +13,7 @@ canonical values.
 
 | File | Scenario |
 |------|----------|
-| [`fixtures/v0_empty.sql`](fixtures/v0_empty.sql) | Pre-M0 state: no tables. Drift opens this as `schema_version 0` and runs `0001_init.up` to reach v1. Exercised by `client/test/db/migration_test.dart` ("v0 → v1 creates all 8 v1 tables"). |
+| [`fixtures/v0_empty.sql`](fixtures/v0_empty.sql) | Pre-M0 state: no tables — human-readable “empty DB” snapshot for review / future server tests. Dart DB tests use in-memory Drift directly (`client/test/db/`), not this file. |
 | [`fixtures/v1_smoke.sql`](fixtures/v1_smoke.sql) | Hand-written minimal v1 snapshot: one vehicle, one fill-up, one draft. Exercised by the round-trip suite and acts as a human-readable reference of the expected SI-INT64 values. |
 | [`fixtures/v1_v1_noop.sql`](fixtures/v1_v1_noop.sql) | Sentinel for "same schema version, no migration fires" — asserts the runner selects zero steps when `from == to`. |
 
