@@ -11,7 +11,7 @@ Concrete table list, column types, constraints, indexing, RLS shape, and migrati
 ## Conventions
 
 - **Canonical SI integers** per [`si-units.md`](si-units.md): volume in µL, distance in m, money in cents (+ currency code).
-- **Timestamps:** `TIMESTAMPTZ` (Postgres) / `TEXT ISO-8601 UTC` (SQLite).
+- **Timestamps:** `TIMESTAMPTZ` (Postgres) / `TEXT ISO-8601 UTC` (SQLite). The stored value is always a **single instant** in UTC. For **maintenance** `performed_at`, user-facing “date only” vs “date + time” and how that maps to the stored string, see the normative rules in [DATA_CONTRACTS.md § Performed time (maintenance)](../product/ux/DATA_CONTRACTS.md#performed-time-maintenance) (Product UX; ties to `settings.timezone` and export `performed_at_local` in [export-v1.md](export-v1.md)).
 - **UUIDs:** v4, client-generated, stable across devices.
 - **NOT NULL by default**; columns noted as nullable have explicit domain reasons.
 - **CHECK constraints** enforce non-negative canonical physical columns at the DB layer.
@@ -111,7 +111,7 @@ CREATE INDEX maintenance_rules_user_row_version_idx ON maintenance_rules (user_i
 | *(protocol cols)* | *(see above)*     |                                                                                                                      |                                                                                       |
 | `vehicle_id`      | `UUID`            | NOT NULL, FK → `vehicles.id`                                                                                         |                                                                                       |
 | `rule_id`         | `UUID NULL`       | FK → `maintenance_rules.id` (nullable — one-off events allowed)                                                      |                                                                                       |
-| `performed_at`    | `TIMESTAMPTZ`     | NOT NULL                                                                                                             |                                                                                       |
+| `performed_at`    | `TIMESTAMPTZ`     | NOT NULL                                                                                                             | One **instant** (same logical column on Postgres and client SQLite as ISO-8601 UTC text). The UX may collect **civil date only** or **local date+time**; both map to a stored UTC value per [DATA_CONTRACTS.md § Performed time (maintenance)](../product/ux/DATA_CONTRACTS.md#performed-time-maintenance). **No** separate `DATE` column. |
 | `odometer_m`      | `BIGINT NULL`     | `CHECK (odometer_m IS NULL OR odometer_m >= 0)`                                                                      | Optional — form allows leaving blank ([CES-53](https://linear.app/personal-interests-llc/issue/CES-53)). |
 | `cost_cents`      | `BIGINT`          | NOT NULL, `CHECK (cost_cents >= 0)` DEFAULT 0                                                                        | Form writes `0` when user leaves the field blank.                                     |
 | `currency_code`   | `CHAR(3)`         | NOT NULL, same check as `fill_ups.currency_code`                                                                     | Defaults to `settings.currency_code` when the form doesn't prompt.                    |

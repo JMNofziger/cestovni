@@ -6,7 +6,7 @@
 
 **Owner:** Product + CTO (engineering owns closure in code/specs).
 
-**Last reviewed:** 2026-04-22 (CES-53 closed; three blockers remain for CES-39)
+**Last reviewed:** 2026-04-24 (CES-53, CES-54 done in repo; two blockers remain for CES-39)
 
 ---
 
@@ -18,12 +18,12 @@ These are **preconditions for CES-39**. Each has a dedicated Linear issue that *
 | #   | Topic                                                                                                                                                                                         | Linear                                                                                                                              | Status |
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | 1   | Maintenance UX contract vs `data-model.md` / Drift — **resolved in schema v2**: `category` + `shop` added, `odometer_m` nullable, `cost_cents` / `currency_code` stay `NOT NULL` with form-side defaults; reminders remain on `maintenance_rules`. See [DATA_CONTRACTS.md §Maintenance entry contract](DATA_CONTRACTS.md#maintenance-entry-contract) and migration `0002_add_maintenance_events_category_shop` | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Done   |
-| 2   | Date-only maintenance vs `TIMESTAMPTZ` — explicit storage + display/filter rule (no phantom day shift)                                                                                        | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Open   |
+| 2   | Date-only maintenance vs `TIMESTAMPTZ` — **resolved:** single `performed_at` instant; see [DATA_CONTRACTS.md § Performed time (maintenance)](DATA_CONTRACTS.md#performed-time-maintenance) + [data-model.md](../../specs/data-model.md) § `maintenance_events` | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Done   |
 | 3   | Visual system bootstrap — semantic tokens, fonts (`pubspec`), `ThemeData` / dark default, `LedgerCard` / `LedgerTile` / hairline primitives per `cestovni-styling.md`                         | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Open   |
 | 4   | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings                                               | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Open   |
 
 
-**CES-39** has an in-thread note and is **blocked by** these four issues in Linear (relations + comment). There is no separate “Blocked” workflow state on the Cestovni team — use the blocking relations as the source of truth.
+**CES-39** is **blocked in Linear** by each **open** critical-gap issue below (and any upstream dependency such as **CES-37** / **CES-38** on the card), until the corresponding row is **Done** and relations are updated. There is no separate “Blocked” workflow state on the Cestovni team — use the blocking relations as the source of truth.
 
 **Closure criteria (per row):** Spec or UX doc updated to match the chosen implementation; any schema migration documented; linked PR merged; this table’s **Status** set to **Done**.
 
@@ -81,17 +81,17 @@ Use team **Cestovni**, project **Cestovni**, labels **type:improvement** (or **t
 
 ---
 
-### Issue 2 — Date-only maintenance
+### Issue 2 — Date-only maintenance *(resolved 2026-04-24 — archive for imports / history)*
 
 **Title:** Define date-only maintenance storage vs TIMESTAMPTZ (blocks CES-39)
 
 **TL;DR**
 
-- UX requires local calendar date with no timezone shift; DB uses `TIMESTAMPTZ` for `performed_at`.
-- Decide encoding (e.g. date-only TEXT vs UTC boundary rule) and document in contracts + implementation notes.
+- **Shipped:** one column `performed_at` (UTC instant); no `DATE` / parallel text column. Normative **date-only** and **date+time** write paths in `docs/product/ux/DATA_CONTRACTS.md` § *Performed time (maintenance)*; `docs/specs/data-model.md` § `maintenance_events` notes; tracker row 2 = **Done**.
+- **Linear hygiene:** set issue **Done**, remove **blocks** relation to **CES-39** if still wired.
 
 **Spec:** `docs/specs/data-model.md`  
-**UX refs:** `docs/product/ux/DATA_CONTRACTS.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
+**UX refs:** `docs/product/ux/DATA_CONTRACTS.md` § *Performed time (maintenance)*, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
 
 ---
 

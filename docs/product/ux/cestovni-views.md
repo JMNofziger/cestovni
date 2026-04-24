@@ -110,9 +110,9 @@ Screenshot: `screenshots/dark-midnight/metrics.png`
 Screenshot: `screenshots/dark-midnight/maint.png`
 
 - Form fields: `performedAt` (date/time), optional odometer, required category, optional shop, cost (blank → stored as `0` cents), optional notes — see `DATA_CONTRACTS.md` §Maintenance entry contract.
+- If the form collects **date only** (no clock), the stored `performed_at` instant follows `DATA_CONTRACTS.md` § [Performed time (maintenance)](DATA_CONTRACTS.md#performed-time-maintenance) (local noon anchor, date-only in the UI; no phantom calendar shift under an unchanged `settings.timezone`).
 - Optional reminders by distance and/or months — persisted on `maintenance_rules` (not as columns on `maintenance_events`).
 - Save writes maintenance entry to shared ledger; reminder cadence follows the rule row contract in `data-model.md`.
-- Date-only maintenance values are treated as local calendar dates (no timezone shifting).
 
 **Implementation note:** No maintenance form/history page exists yet. Data model + repository support should land before page build.
 
