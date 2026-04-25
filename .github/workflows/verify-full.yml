@@ -16,6 +16,7 @@ on:
   pull_request:
     paths:
       - 'client/**'
+      - 'tests/math/**'
       - '.github/workflows/verify-full.yml'
   push:
     branches:

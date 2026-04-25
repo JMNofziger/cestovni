@@ -68,18 +68,31 @@ Given fill-ups for one vehicle, ordered by `(filled_at ASC, id ASC)` as a stable
 3. A segment is **unknown** (excluded from trends) if **any** fill-up in the inclusive set `[prev_full exclusive, next_full inclusive]` has `missed_before = true`.
 4. A lineage's **leading partial tail** (partials before the first full fill-up) contributes nothing; a lineage's **trailing partial tail** (partials after the last full fill-up) contributes nothing until another full fill-up closes them.
 
+### Segment status (normative)
+
+Implementation: `client/lib/consumption/models.dart#SegmentStatus`. Every closed segment carries one of:
+
+| Wire value                  | Meaning                                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `known`                     | Both endpoints `is_full = true`, same lineage, no `missed_before` in the inclusive set, `D > 0`.              |
+| `unknown_missed`            | Any fill-up in the inclusive closing set has `missed_before = true`. Excluded from lifetime numerator + denominator. |
+| `unknown_reset_boundary`    | Defensive: closing-full odometer < opening-full odometer with no `odometer_reset` flag. Validation should block this in v1; the status exists so invariants are observable rather than silent. |
+| `degenerate_zero_distance`  | Two full fill-ups at the same odometer (`D == 0`). Surfaced to UX so the user can fix the entry.              |
+
+Only `known` segments contribute to lifetime / windowed L/100km. `cents_per_km_tenths` is emitted for every status with `distance_m > 0` (UX may choose to hide it for non-`known`); `l_per_100km_tenths` is null for non-`known`.
+
 ### Formulas (integer-safe)
 
 Throughout, let `V = segment_volume_uL`, `D = segment_distance_m`. Require `D > 0`; if `D == 0` a segment is degenerate (two full fill-ups at the same odometer — user error; flag as unknown and surface in UX).
 
 **L/100 km (display):**
-Mathematically: `(V / 1e6 L) / (D / 1e3 km) * 100 = V * 100 000 / (D * 1e6) = V / (D * 10)` in L/100km — but we want a **tenths-of-L/100km integer** for rounding:
+Mathematically: `(V / 1e6 L) / (D / 1e3 km) * 100 = V * 100 000 / (D * 1e6) = V / (D * 10)` in L/100km. We want a **tenths-of-L/100km integer**, which simplifies to `V / D` (the `× 10` for tenths and the `× 10` in the denominator cancel):
 
 ```
-l_per_100km_tenths = (V * 10 + D * 5) / (D * 10)
+l_per_100km_tenths = divideRoundHalfEven(V, D)
 ```
 
-Where `+ D*5` is integer half-round-to-nearest. (Banker's rounding variant in code: split the exact remainder path; see `tests/math/` fixtures.)
+Implementation: `client/lib/consumption/rounding.dart#divideRoundHalfEven` (banker's rounding / round-half-to-even at the integer division step). Pinned by fixtures `14_rounding_l_per_100km_tie_even.json` and `15_rounding_l_per_100km_tie_odd.json` in `tests/math/fixtures/`.
 
 Display as `l_per_100km_tenths / 10` with 1 decimal.
 
@@ -97,14 +110,18 @@ Equivalently, convert the L/100km result to MPG with the exact identity `MPG = 2
 **Cost per distance (display):**
 
 ```
-cents_per_km_tenths = (cost_cents * 10 000 + D / 2) / D   # using meters → km via * 1000
+cents_per_km_tenths = divideRoundHalfEven(cost_cents * 10_000, D)   # meters → km via * 1000, then × 10 for tenths
 ```
+
+Pinned by fixture `16_rounding_cents_per_km_tie.json`.
 
 ### Aggregation rules
 
-- **Vehicle lifetime consumption** = sum of all known-segment `V` divided by sum of all known-segment `D`, expressed via the same `l_per_100km_tenths` formula. Unknown segments are excluded from both numerator and denominator.
-- **Trailing 12-month consumption** = same as above but windowed by `filled_at` of the segment's closing fill-up.
-- **Price history** = scatter of `total_price_cents * 1_000_000 / volume_uL` (cents-per-liter-of-fuel), grouped per vehicle, filtered by currency. If currencies vary, surface a warning and drop out-of-currency entries from the chart.
+- **Vehicle lifetime consumption** = sum of all known-segment `V` divided by sum of all known-segment `D`, expressed via the same `l_per_100km_tenths` formula. Unknown / degenerate segments are excluded from both numerator and denominator.
+- **Lifetime total spend** = sum of `total_price_cents` across **every** non-soft-deleted fill-up for the vehicle, keyed by `currency_code`. Partials outside any closed segment, leading / trailing tails, and rows in unknown segments all contribute. Rationale: surfaces like "total spend" must not silently hide money that the user actually paid.
+- **Trailing 12-month consumption** = same as lifetime L/100km but windowed by `filled_at` of the segment's closing fill-up.
+- **Per-segment cost (`cost_cents`):** within a closed segment, only fill-ups whose `currency_code` matches the **closing-full's** currency contribute to `cost_cents` (and therefore `cents_per_km_tenths`). Partials in another currency drop out of segment cost but still appear in `price_history_by_currency` under their own key. The wider question of multi-currency cost normalisation is tracked in **CES-51**.
+- **Price history** = scatter of `total_price_cents * 10_000_000 / volume_uL` in **cents-per-litre-tenths**, grouped per vehicle, keyed by `currency_code`. Implementation: `client/lib/consumption/price_history.dart#computePriceHistory`. Fill-ups with `volume_uL == 0` are excluded (no price-per-volume defined). If currencies vary, the result map carries one entry per currency; chart surfaces render one series per key and document the split in the legend.
 
 ## Rounding policy
 
@@ -134,20 +151,21 @@ Math operates only on `complete` (non-soft-deleted) rows. Drafts are invisible t
 
 ## Golden test fixtures (acceptance)
 
-Landing alongside the code in `tests/consumption/fixtures/`. Each fixture is a list of fill-ups + expected segment outcomes. Eight fixtures are required for Stage 3 exit:
+Living set under [`tests/math/fixtures/`](../../tests/math/fixtures/) (kept outside `client/test/` so server-side ports under M3 can reuse the same canonical inputs without duplicating values). Twenty fixtures ship for the Stage 3 exit, grouped as:
 
-| # | Fixture name                     | Shape                                                                              | Expected outcome                                                                                      |
-| - | -------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 1 | `normal_full_to_full`            | 2 full fill-ups, 1 000 km apart, 50 L consumed.                                    | 1 segment; `5.0 L/100km`.                                                                             |
-| 2 | `partial_in_between`             | Full @ 0 km, partial @ 500 km (20 L), full @ 1 000 km (30 L).                      | 1 segment; `V = 50 L`, `D = 1 000 km`; `5.0 L/100km`.                                                 |
-| 3 | `two_partials_plus_full`         | Full @ 0, partial @ 300 (10 L), partial @ 600 (10 L), full @ 1 000 (30 L).         | 1 segment; `V = 50 L`, `D = 1 000 km`; `5.0 L/100km`.                                                 |
-| 4 | `missed_fill_marks_unknown`      | Full @ 0, full @ 1 000 (30 L) with `missed_before=true`.                           | 1 segment, flagged **unknown**; excluded from trends; lifetime math treats as absent.                  |
-| 5 | `regression_blocked`             | Full @ 1 000, then attempt to insert full @ 900 **without** `odometer_reset`.      | **Rejected** at client validation AND server; error surfaced with "Mark as odometer reset?" prompt.    |
-| 6 | `reset_accepted`                 | Full @ 1 000 (20 L), then full @ 100 (25 L) with `odometer_reset=true`.            | 2 lineages; first has no closed segment (only 1 full); second starts fresh; no unknown segment leaks. |
-| 7 | `first_fill_only`                | Single full fill-up.                                                               | 0 segments; lifetime consumption is "—" (not zero).                                                    |
-| 8 | `partials_only`                  | 3 partials, no full.                                                               | 0 segments; lifetime consumption is "—"; total spend still computes from `total_price_cents`.          |
+**Spec-derived (1–8):** the original eight from the §"Golden test fixtures" table — `normal_full_to_full`, `partial_in_between`, `two_partials_plus_full`, `missed_fill_marks_unknown`, `regression_blocked`, `reset_accepted`, `first_fill_only`, `partials_only`.
 
-Each fixture ships as a JSON file with an expected-output JSON next to it; the test runner is language-agnostic enough to be rerun under the chosen mobile stack.
+**Validation rejection coverage (9–13):** one fixture per remaining `ValidationErrorCode` so every wire code (`ODOMETER_NEGATIVE`, `VOLUME_NEGATIVE`, `PRICE_NEGATIVE`, `FILLED_AT_IN_FUTURE`, `RESET_ON_FIRST_FILLUP`) has an executable contract test that the server (M3) and any future port can replay.
+
+**Banker's rounding (14–16):** pin `divideRoundHalfEven` behaviour on `l_per_100km_tenths` (tie-even, tie-odd) and `cents_per_km_tenths`.
+
+**Defensive segment statuses (17–18):** `degenerate_zero_distance` (two fulls at the same odometer) and `unknown_reset_boundary` (closing-full odometer < opening-full with no reset flag).
+
+**Multi-currency + mixed lifetime (19–20):** `multi_currency` exercises the closing-currency cost-aggregation rule and multi-key `total_spend_cents_by_currency`; `mixed_known_unknown` confirms lifetime math sees only `known` segments while spend still sums everything.
+
+The runner ([`client/test/consumption/fixture_runner_test.dart`](../../client/test/consumption/fixture_runner_test.dart)) auto-discovers every `*.json` and dispatches on `expected.kind` (`segments` or `validation_rejection`); see [`tests/math/README.md`](../../tests/math/README.md) for the full file inventory and JSON schema. Adding a fixture is a one-file change — drop a numbered `NN_short_name.json` in the fixtures dir and the runner picks it up.
+
+Module purity invariant ("no Drift / no Flutter outside `adapters.dart`") is enforced at test time by [`client/test/consumption/module_purity_test.dart`](../../client/test/consumption/module_purity_test.dart). CI fixture coverage: both `verify-fast.yml` (default) and `verify-full.yml` trigger on `tests/math/**` so fixture-only PRs cannot bypass the matrix.
 
 ## Non-goals (v1)
 
