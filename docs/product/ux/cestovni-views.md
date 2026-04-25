@@ -10,22 +10,24 @@ Use this together with:
 ## Current implementation map (source of truth)
 
 - Shell and nav scaffold: `client/lib/app/shell.dart`
-- Vehicle list: `client/lib/app/pages/vehicle_list_page.dart`
-- Vehicle detail + fill-up list: `client/lib/app/pages/vehicle_detail_page.dart`
-- Fill-up form: `client/lib/app/pages/fill_up_form_page.dart`
-- Vehicle create/edit form: `client/lib/app/pages/vehicle_form_page.dart`
-- Settings: `client/lib/app/pages/settings_page.dart`
+- Active vehicle session state: `client/lib/app/active_vehicle.dart`
+- Tab page stubs (CES-39 will replace): `client/lib/app/pages/{log,history,metrics,maintenance}_page.dart`
+- Settings (stub): `client/lib/app/pages/settings_page.dart`
+- Debug (schema tools): `client/lib/app/pages/debug_page.dart`
+
+Vehicle CRUD pages, fill-up form, and history/metrics pages **do not exist yet** — they land with **CES-39**. The earlier draft of this doc referenced `vehicle_*_page.dart` / `fill_up_form_page.dart` files that were never committed; corrected during CES-39 kickoff.
 
 ## Delivery status by screen
 
 
-| Screen                      | UX target status | Implementation status | Primary file(s)                         |
-| --------------------------- | ---------------- | --------------------- | --------------------------------------- |
-| Log / fuel entry            | Defined          | Partial               | `fill_up_form_page.dart`                |
-| History timeline + flip     | Defined          | Not started           | New page required                       |
-| Metrics                     | Defined          | Not started           | New page required                       |
-| Maintenance entry + history | Defined          | Not started           | New page required                       |
-| Settings + vehicles         | Defined          | Partial               | `settings_page.dart`, `vehicle_*` pages |
+| Screen                      | UX target status | Implementation status | Primary file(s)                                           |
+| --------------------------- | ---------------- | --------------------- | --------------------------------------------------------- |
+| Log / fuel entry            | Defined          | Stub (CES-39 to ship) | `pages/log_page.dart` (placeholder)                       |
+| History timeline + flip     | Defined          | Stub (CES-39 to ship) | `pages/history_page.dart` (placeholder)                   |
+| Metrics                     | Defined          | Stub (CES-39 + later) | `pages/metrics_page.dart` (placeholder)                   |
+| Maintenance entry + history | Defined          | Stub (own vertical)   | `pages/maintenance_page.dart` (placeholder)               |
+| Settings                    | Defined          | Stub                  | `pages/settings_page.dart` (preferences not yet wired)    |
+| Vehicle CRUD                | Defined          | Not started           | New pages required (CES-39)                               |
 
 
 ---
