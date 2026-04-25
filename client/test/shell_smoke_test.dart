@@ -65,6 +65,10 @@ void main() {
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
     expect(find.text('Settings'), findsWidgets);
+    // CES-39 phase 2 lengthened Settings (vehicle CRUD section above
+    // preferences); scroll Debug into view before tapping it.
+    await tester.scrollUntilVisible(find.text('Debug'), 200);
+    await tester.pumpAndSettle();
     expect(find.text('Distance unit'), findsOneWidget);
 
     await tester.tap(find.text('Debug'));
@@ -93,7 +97,8 @@ void main() {
     await _drainAndClose(tester, db);
   });
 
-  testWidgets('shows NO VEHICLE chip when there are no live vehicles',
+  testWidgets(
+      'shows ADD VEHICLE empty-state CTA when there are no live vehicles',
       (tester) async {
     final db = AppDatabase.withExecutor(NativeDatabase.memory());
 
@@ -101,7 +106,14 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('NO VEHICLE'), findsOneWidget);
+    // CES-39 phase 2: the previous `NO VEHICLE` placeholder is now a
+    // tappable affordance that pushes the vehicle form. Tapping it
+    // opens the form so the user is never one step away from logging.
+    expect(find.text('ADD VEHICLE'), findsOneWidget);
+
+    await tester.tap(find.text('ADD VEHICLE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Add vehicle'), findsOneWidget);
 
     await _drainAndClose(tester, db);
   });

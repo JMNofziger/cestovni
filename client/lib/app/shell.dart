@@ -8,6 +8,7 @@ import 'pages/log_page.dart';
 import 'pages/maintenance_page.dart';
 import 'pages/metrics_page.dart';
 import 'pages/settings_page.dart';
+import 'pages/vehicle_form_page.dart';
 import 'theme/cestovni_primitives.dart';
 import 'theme/cestovni_theme.dart';
 import 'theme/cestovni_tokens.dart';
@@ -99,6 +100,7 @@ class _CestovniShellState extends State<CestovniShell> {
                       onToggleTheme: _toggleTheme,
                       themeMode: _themeMode,
                       onOpenSettings: () => _openSettings(innerContext),
+                      onAddVehicle: () => _openAddVehicle(innerContext),
                     ),
                     const HairlineDivider(),
                     Expanded(
@@ -133,10 +135,29 @@ class _CestovniShellState extends State<CestovniShell> {
           data: _themeMode == ThemeMode.dark
               ? CestovniTheme.dark()
               : CestovniTheme.light(),
-          child: SettingsPage(db: widget.db),
+          child: ActiveVehicleScope(
+            notifier: _activeVehicle,
+            child: SettingsPage(db: widget.db),
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _openAddVehicle(BuildContext context) async {
+    final newId = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
+        builder: (_) => Theme(
+          data: _themeMode == ThemeMode.dark
+              ? CestovniTheme.dark()
+              : CestovniTheme.light(),
+          child: VehicleFormPage(db: widget.db),
+        ),
+      ),
+    );
+    if (newId != null && _activeVehicle.vehicleId == null) {
+      _activeVehicle.setVehicleId(newId);
+    }
   }
 }
 
@@ -146,12 +167,14 @@ class _ShellHeader extends StatelessWidget {
     required this.onToggleTheme,
     required this.themeMode,
     required this.onOpenSettings,
+    required this.onAddVehicle,
   });
 
   final Stream<List<VehicleRow>> liveVehicles;
   final VoidCallback onToggleTheme;
   final ThemeMode themeMode;
   final VoidCallback onOpenSettings;
+  final VoidCallback onAddVehicle;
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +212,10 @@ class _ShellHeader extends StatelessWidget {
               ],
             ),
           ),
-          _VehicleSelector(liveVehicles: liveVehicles),
+          _VehicleSelector(
+            liveVehicles: liveVehicles,
+            onAddVehicle: onAddVehicle,
+          ),
           const SizedBox(width: 8),
           IconButton(
             tooltip: themeMode == ThemeMode.dark
@@ -224,9 +250,13 @@ class _ShellHeader extends StatelessWidget {
 }
 
 class _VehicleSelector extends StatelessWidget {
-  const _VehicleSelector({required this.liveVehicles});
+  const _VehicleSelector({
+    required this.liveVehicles,
+    required this.onAddVehicle,
+  });
 
   final Stream<List<VehicleRow>> liveVehicles;
+  final VoidCallback onAddVehicle;
 
   @override
   Widget build(BuildContext context) {
@@ -252,8 +282,8 @@ class _VehicleSelector extends StatelessWidget {
 
         if (list.isEmpty) {
           return _SelectorChip(
-            label: 'NO VEHICLE',
-            onTap: null,
+            label: 'ADD VEHICLE',
+            onTap: onAddVehicle,
             colors: colors,
           );
         }
