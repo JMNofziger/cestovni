@@ -6,7 +6,7 @@
 
 **Owner:** Product + CTO (engineering owns closure in code/specs).
 
-**Last reviewed:** 2026-04-25 (CES-53, CES-54, CES-55 done in repo; CES-56 remains for CES-39)
+**Last reviewed:** 2026-04-25 (CES-53, CES-54, CES-55, CES-56 done in repo — all CES-39 gate blockers cleared)
 
 ---
 
@@ -20,7 +20,7 @@ These are **preconditions for CES-39**. Each has a dedicated Linear issue that *
 | 1   | Maintenance UX contract vs `data-model.md` / Drift — **resolved in schema v2**: `category` + `shop` added, `odometer_m` nullable, `cost_cents` / `currency_code` stay `NOT NULL` with form-side defaults; reminders remain on `maintenance_rules`. See [DATA_CONTRACTS.md §Maintenance entry contract](DATA_CONTRACTS.md#maintenance-entry-contract) and migration `0002_add_maintenance_events_category_shop` | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Done   |
 | 2   | Date-only maintenance vs `TIMESTAMPTZ` — **resolved:** single `performed_at` instant; see [DATA_CONTRACTS.md § Performed time (maintenance)](DATA_CONTRACTS.md#performed-time-maintenance) + [data-model.md](../../specs/data-model.md) § `maintenance_events` | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Done   |
 | 3   | Visual system bootstrap — **resolved:** `CestovniColors` + `CestovniMetrics` tokens, `CestovniTypography` (Fraunces / Inter / JetBrains Mono via `google_fonts` deviation), `CestovniTheme.dark()` / `light()` (dark first-load), `LedgerCard` / `LedgerTile` / `HairlineDivider` primitives. See `client/lib/app/theme/` and `cestovni-styling.md`. | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Done   |
-| 4   | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings                                               | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Open   |
+| 4   | Shell navigation + **active vehicle** + default vehicle — **resolved:** four target tabs (Log / History / Metrics / Maint) in `client/lib/app/shell.dart`, header with brand + date + `_VehicleSelector` + theme toggle + gear-to-Settings, in-memory `ActiveVehicle` session state, Settings + Debug as pushed routes. `settings.default_vehicle_id` deferred to CES-39 follow-up (column not yet on schema). | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Done   |
 
 
 **CES-39** is **blocked in Linear** by each **open** critical-gap issue below (and any upstream dependency such as **CES-37** / **CES-38** on the card), until the corresponding row is **Done** and relations are updated. There is no separate “Blocked” workflow state on the Cestovni team — use the blocking relations as the source of truth.
@@ -110,14 +110,16 @@ Use team **Cestovni**, project **Cestovni**, labels **type:improvement** (or **t
 
 ---
 
-### Issue 4 — Shell + active vehicle
+### Issue 4 — Shell + active vehicle *(resolved 2026-04-25 — archive for imports / history)*
 
 **Title:** Shell tabs + active vehicle + default vehicle model (blocks CES-39)
 
 **TL;DR**
 
-- Target: Log / History / Metrics / Maint; current shell: Home / Settings / Debug.
-- Define where active vehicle is shown, how it persists, and how it interacts with default vehicle in settings.
+- **Shipped:** `client/lib/app/shell.dart` rewritten to four target tabs (Log / History / Metrics / Maint), shared header with brand + current date + `_VehicleSelector` + theme toggle + gear icon. Settings + Debug moved to pushed routes; Debug reachable from inside Settings. Stub pages under `client/lib/app/pages/{log,history,metrics,maintenance}_page.dart`. Active vehicle is in-memory session state via `ActiveVehicle` / `ActiveVehicleScope` (`client/lib/app/active_vehicle.dart`); seeds from first live vehicle on launch. Tracker row 4 = **Done**.
+- **Deferred (CES-39 follow-up):** `settings.default_vehicle_id` does not yet exist on the schema. Once added, threading it through `ActiveVehicle` is a small change.
+- **Linear hygiene:** issue set to **Done**; **blocks CES-39** edge should be removed if still attached.
+- See `docs/product/ux/cestovni-views.md` § *Active vehicle (session state)* for the normative behavior.
 
 **Spec:** `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md`  
 **UX refs:** `docs/product/ux/cestovni-views.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`

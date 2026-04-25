@@ -62,10 +62,8 @@ void main() {
 
   group('CestovniColors lerp', () {
     test('lerp at 0 returns this; at 1 returns other', () {
-      final result0 =
-          CestovniColors.dark.lerp(CestovniColors.light, 0) as CestovniColors;
-      final result1 =
-          CestovniColors.dark.lerp(CestovniColors.light, 1) as CestovniColors;
+      final result0 = CestovniColors.dark.lerp(CestovniColors.light, 0);
+      final result1 = CestovniColors.dark.lerp(CestovniColors.light, 1);
       expect(result0.paper, CestovniColors.dark.paper);
       expect(result1.paper, CestovniColors.light.paper);
     });

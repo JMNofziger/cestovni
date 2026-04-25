@@ -39,7 +39,7 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 - **Implementation gap tracker (blocks CES-39 until closed):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
 - Senior checklist: `docs/product/ux/SENIOR_REVIEW_CHECKLIST.md`
 - Delivery plan linkage: `docs/product/delivery-plan-v1.md` (M1 prerequisite + CES-39 row)
-- Linear: **CES-39** still blocked by **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** until **Done**; **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, and **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)** are **Done in repo** — set Linear workflow to **Done** and remove stale **blocks** edges if present (see issue comments on CES-39).
+- Linear: **CES-39** gate is clear in repo — **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, and **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** are **Done in repo**. Set each Linear workflow to **Done** and remove stale **blocks** edges if present (see issue comments on CES-39).
 
 ## Residual risks (not doc conflicts)
 
@@ -50,5 +50,5 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 ## Recommended sign-off decision
 
 - **Approve with follow-up issues** (implementation and test execution), not “approve as-is for ship”.
-- **CES-39** does not start until every **Open** row under `UX_IMPLEMENTATION_GAPS.md` **Critical gaps** is closed in Linear (today: CES-56; CES-53, CES-54, and CES-55 are **Done** in repo + tracker).
+- **CES-39** can start once Linear status + relations on CES-53, CES-54, CES-55, and CES-56 match the **Done in repo** state recorded in `UX_IMPLEMENTATION_GAPS.md`.
 - Use `SENIOR_REVIEW_CHECKLIST.md` as the gate in PR/issue reviews for CES-39 and related UI tickets.

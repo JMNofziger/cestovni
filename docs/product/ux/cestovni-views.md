@@ -37,7 +37,15 @@ Use this together with:
 - Visual style and component rules are defined in `cestovni-styling.md`.
 - Screenshot references are under `screenshots/dark-midnight/`.
 
-**Implementation note:** Current shell has three tabs (Home, Settings, Debug). Aligning shell nav to target tabs is a discrete development task in `client/lib/app/shell.dart`.
+**Implementation note:** Shell rewritten in CES-56 (`client/lib/app/shell.dart`) — four target tabs, header with brand + date + vehicle selector + theme toggle + gear-to-Settings, `LedgerCard` placeholders for History / Metrics / Maint until CES-39 follow-on. Settings (gear icon) is a pushed route; Debug is reachable from inside Settings. Theme toggle is local to the shell so the user can flip dark/light without restarting the app; first-load default stays **dark** per `cestovni-styling.md` §5.
+
+### Active vehicle (session state)
+
+- The header vehicle chip reads live vehicles from the `vehicles` table (`deleted_at IS NULL AND archived_at IS NULL`), ordered by `name`.
+- "Active vehicle" lives in memory for the session (`ActiveVehicle` / `ActiveVehicleScope` in `client/lib/app/active_vehicle.dart`). It persists across tab switches but resets on cold-start; that is the M1 contract.
+- On launch the first live vehicle is selected. If the active id no longer matches a live row (vehicle archived/deleted on another device → re-sync) the chip falls back to the first live vehicle on the next stream emission.
+- If there are no live vehicles the chip shows `NO VEHICLE`. The "Add vehicle" CTA lands with CES-39.
+- `settings.default_vehicle_id` is **not yet** in the schema. The default-vehicle preference is a planned follow-up (will be threaded through `ActiveVehicle` once the column exists; tracked under CES-39 vehicle CRUD).
 
 ---
 
