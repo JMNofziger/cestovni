@@ -45,16 +45,15 @@ class _CestovniShellState extends State<CestovniShell> {
     super.initState();
     _vehicles = VehicleRepository(widget.db);
     _activeVehicle = ActiveVehicle();
-    // `watchLiveVehicles()` returns a new stream on every call;
-    // memoize once so the StreamBuilder below is not re-subscribed on
-    // every rebuild (which would loop with the active-vehicle
-    // notifier below).
-    _liveVehicles = _vehicles.watchLiveVehicles();
+    // `watchLive()` returns a new stream on every call; memoize once
+    // so the StreamBuilder below is not re-subscribed on every
+    // rebuild (which would loop with the active-vehicle notifier).
+    _liveVehicles = _vehicles.watchLive();
     _seedActiveVehicle();
   }
 
   Future<void> _seedActiveVehicle() async {
-    final live = await _vehicles.liveVehiclesOnce();
+    final live = await _vehicles.liveOnce();
     if (!mounted || live.isEmpty) return;
     _activeVehicle.setVehicleId(live.first.id);
   }

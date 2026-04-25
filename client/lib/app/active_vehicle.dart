@@ -1,24 +1,31 @@
-// Active vehicle session state (CES-56).
+// Active vehicle session state (CES-56) + scope.
 //
 // Source of truth: `docs/product/ux/cestovni-views.md` § *Active
 // vehicle (session state)*.
 //
-// - Live vehicles only: `deleted_at IS NULL AND archived_at IS NULL`,
-//   ordered by `name` for a stable selector.
 // - "Active" is in-memory session state via [InheritedNotifier]. It
 //   persists across tab switches but resets on app cold-start.
 // - On launch the first live vehicle is selected; if none exist the
-//   selector renders a placeholder (real "Add vehicle" CTA lands
-//   with CES-39).
-// - When the eventually-added `settings.default_vehicle_id` column
-//   exists it should win over the ordering rule above; tracked as a
-//   follow-up under CES-39 since the column does not yet exist on
-//   `settings` (see `client/lib/db/tables/settings.dart`).
+//   selector renders a placeholder (the "Add vehicle" CTA lands with
+//   CES-39).
+// - When `settings.default_vehicle_id` (CES-57) exists it will win
+//   over the ordering rule; the column is not yet in the schema.
+//
+// The previous inline `VehicleRepository` here moved to
+// `client/lib/db/repositories/vehicles_repository.dart` during CES-39
+// kickoff. Re-exported below so existing call sites
+// (`shell.dart` -> `VehicleRepository`) keep working.
 
-import 'package:drift/drift.dart';
 import 'package:flutter/widgets.dart';
 
-import '../db/app_database.dart';
+import '../db/repositories/vehicles_repository.dart';
+
+export '../db/repositories/vehicles_repository.dart'
+    show VehiclesRepository, VehicleDraft, VehicleFuelType;
+
+/// Backwards-compatible alias for the pre-CES-39 inline class so
+/// `shell.dart` keeps compiling while the broader vertical lands.
+typedef VehicleRepository = VehiclesRepository;
 
 /// Mutable holder for the currently active vehicle id. Notifies
 /// listeners (the shell header + tab pages) when the user picks a
@@ -51,31 +58,5 @@ class ActiveVehicleScope extends InheritedNotifier<ActiveVehicle> {
         context.dependOnInheritedWidgetOfExactType<ActiveVehicleScope>();
     assert(scope != null, 'ActiveVehicleScope missing from widget tree');
     return scope!.notifier!;
-  }
-}
-
-/// Repository helper around the `vehicles` table for the shell. Kept
-/// thin; CES-39 will introduce a dedicated `VehiclesDao`.
-class VehicleRepository {
-  VehicleRepository(this._db);
-
-  final AppDatabase _db;
-
-  /// Streams live vehicles ordered by `name`. "Live" = not soft-
-  /// deleted, not archived.
-  Stream<List<VehicleRow>> watchLiveVehicles() {
-    final query = _db.select(_db.vehicles)
-      ..where((v) => v.deletedAt.isNull() & v.archivedAt.isNull())
-      ..orderBy([(v) => OrderingTerm.asc(v.name)]);
-    return query.watch();
-  }
-
-  /// One-shot lookup of live vehicles, used to seed the active
-  /// vehicle on app launch.
-  Future<List<VehicleRow>> liveVehiclesOnce() {
-    final query = _db.select(_db.vehicles)
-      ..where((v) => v.deletedAt.isNull() & v.archivedAt.isNull())
-      ..orderBy([(v) => OrderingTerm.asc(v.name)]);
-    return query.get();
   }
 }
