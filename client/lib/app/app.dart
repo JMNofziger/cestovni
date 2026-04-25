@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../db/app_database.dart';
 import 'shell.dart';
+import 'theme/cestovni_theme.dart';
 
 class CestovniApp extends StatelessWidget {
   const CestovniApp({super.key, required this.db});
@@ -12,10 +13,11 @@ class CestovniApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Cestovni',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF2E7D32),
-      ),
+      theme: CestovniTheme.light(),
+      darkTheme: CestovniTheme.dark(),
+      // Spec §1 / §5: dark is the first-load default. Light remains
+      // available for a future user toggle (CES-56+).
+      themeMode: ThemeMode.dark,
       home: CestovniShell(db: db),
     );
   }

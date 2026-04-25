@@ -2,7 +2,7 @@
 
 This document defines what must ship vs what can wait. Use it to prevent scope creep during implementation.
 
-**M1 / CES-39 gate:** Close every **Open** row under **Critical gaps** in [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md) (today: CES-55, CES-56; CES-53, CES-54 **Done** in repo + tracker) — see also [`../delivery-plan-v1.md`](../delivery-plan-v1.md) (§ M1 prerequisite).
+**M1 / CES-39 gate:** Close every **Open** row under **Critical gaps** in [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md) (today: CES-56; CES-53, CES-54, CES-55 **Done** in repo + tracker) — see also [`../delivery-plan-v1.md`](../delivery-plan-v1.md) (§ M1 prerequisite).
 
 ## Global acceptance gates
 

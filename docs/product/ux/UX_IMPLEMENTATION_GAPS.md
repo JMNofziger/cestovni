@@ -6,7 +6,7 @@
 
 **Owner:** Product + CTO (engineering owns closure in code/specs).
 
-**Last reviewed:** 2026-04-24 (CES-53, CES-54 done in repo; two blockers remain for CES-39)
+**Last reviewed:** 2026-04-25 (CES-53, CES-54, CES-55 done in repo; CES-56 remains for CES-39)
 
 ---
 
@@ -19,7 +19,7 @@ These are **preconditions for CES-39**. Each has a dedicated Linear issue that *
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | 1   | Maintenance UX contract vs `data-model.md` / Drift — **resolved in schema v2**: `category` + `shop` added, `odometer_m` nullable, `cost_cents` / `currency_code` stay `NOT NULL` with form-side defaults; reminders remain on `maintenance_rules`. See [DATA_CONTRACTS.md §Maintenance entry contract](DATA_CONTRACTS.md#maintenance-entry-contract) and migration `0002_add_maintenance_events_category_shop` | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Done   |
 | 2   | Date-only maintenance vs `TIMESTAMPTZ` — **resolved:** single `performed_at` instant; see [DATA_CONTRACTS.md § Performed time (maintenance)](DATA_CONTRACTS.md#performed-time-maintenance) + [data-model.md](../../specs/data-model.md) § `maintenance_events` | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Done   |
-| 3   | Visual system bootstrap — semantic tokens, fonts (`pubspec`), `ThemeData` / dark default, `LedgerCard` / `LedgerTile` / hairline primitives per `cestovni-styling.md`                         | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Open   |
+| 3   | Visual system bootstrap — **resolved:** `CestovniColors` + `CestovniMetrics` tokens, `CestovniTypography` (Fraunces / Inter / JetBrains Mono via `google_fonts` deviation), `CestovniTheme.dark()` / `light()` (dark first-load), `LedgerCard` / `LedgerTile` / `HairlineDivider` primitives. See `client/lib/app/theme/` and `cestovni-styling.md`. | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Done   |
 | 4   | Shell navigation + **active vehicle** + default vehicle — target tabs (Log / History / Metrics / Maint), persistence, interaction with settings                                               | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Open   |
 
 
@@ -95,21 +95,15 @@ Use team **Cestovni**, project **Cestovni**, labels **type:improvement** (or **t
 
 ---
 
-### Issue 3 — Visual system bootstrap
+### Issue 3 — Visual system bootstrap *(resolved 2026-04-25 — archive for imports / history)*
 
 **Title:** Flutter visual system bootstrap per cestovni-styling (blocks CES-39)
 
 **TL;DR**
 
-- App still uses generic `ThemeData(colorSchemeSeed: …)`; spec defines OKLCH tokens, fonts, ledger components, grain background.
-- Land shared theme + primitives so feature work does not fork ad-hoc styles.
-
-**Acceptance criteria**
-
-- Semantic color/text style tokens (light + dark) consumed by shell or a pilot screen.
-- Fonts declared in `pubspec.yaml` per spec (or documented deviation).
-- Reusable primitives: ledger card/tile + hairline divider (names can match spec).
-- No feature-level raw hex for semantic roles.
+- **Shipped:** `client/lib/app/theme/` with `CestovniColors` (light + dark, ThemeExtension), `CestovniMetrics` (radius / spacing constants), `CestovniTypography` (Fraunces serif / Inter sans / JetBrains Mono + `labelMono` token), `CestovniTheme.dark()` / `light()` (`themeMode: dark` default), `LedgerCard` / `LedgerTile` / `HairlineDivider` primitives. Smoke test in `test/app/theme/cestovni_theme_test.dart`. Tracker row 3 = **Done**.
+- **Deviation:** fonts loaded via `google_fonts` runtime fetcher rather than bundled into `assets/fonts/` to keep the repo binary-free during design iteration; switch to bundled assets in Stage 6 polish.
+- **Linear hygiene:** set issue **Done**, remove **blocks** relation to **CES-39** if still wired.
 
 **Spec:** `docs/specs/adr/003-mobile-stack.md`  
 **UX refs:** `docs/product/ux/cestovni-styling.md`, `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`

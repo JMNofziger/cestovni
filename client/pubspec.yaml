@@ -20,6 +20,14 @@ dependencies:
   path: ^1.9.0
   uuid: ^4.4.0
 
+  # Visual system fonts (CES-55) — Fraunces (serif), Inter (sans),
+  # JetBrains Mono (mono). Per cestovni-styling.md §2 / §14 with
+  # documented deviation: fonts loaded via google_fonts at runtime
+  # rather than bundled into assets/, to keep the repo binary-free
+  # while the design system is still iterating. Switch to bundled
+  # fonts when the visual language stabilizes (Stage 6 polish).
+  google_fonts: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
