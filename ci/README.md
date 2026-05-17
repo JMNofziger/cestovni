@@ -10,6 +10,9 @@ Stubs and working gates for Cestovni. All `.yml` files are shaped for GitHub Act
 | [`telemetry-gate.py`](telemetry-gate.py) | Validator script invoked by the telemetry-gate workflow | **Live** (client scanner active as of CES-36 / M0-01) | same |
 | [`telemetry-schema.json`](telemetry-schema.json) | JSON Schema for `telemetry-events.v1.yaml`; bans `identifier` / `freetext` | **Live** | same |
 | [`client-build.yml`](client-build.yml) | Flutter test + Android/iOS debug build lanes | **Live** (M0-01) | [ADR 003](../docs/specs/adr/003-mobile-stack.md) |
+| [`paused/verify-ios-weekly.yml`](paused/verify-ios-weekly.yml) | Native iOS debug build (weekly) | **Paused** (2026-05-17) | [ADR 005](../docs/specs/adr/005-distribution-channels.md) |
+
+**Live GitHub Actions** live under [`.github/workflows/`](../.github/workflows/) (`verify-full.yml`, etc.). Paused workflows are kept under [`paused/`](paused/) so they are not registered.
 
 ## Running the telemetry gate locally
 
@@ -27,7 +30,7 @@ telemetry-gate: starting
 [1/4] YAML parsed: N events.
 [3/4] JSON Schema validation passed (identifier/freetext classes banned at schema level).
 [2/4] client scan passed: M Dart file(s), K literal emit call(s), 0 unknown.
-[4/4] SKIP — Apple PrivacyInfo.xcprivacy not present yet; will compare category totals when the mobile client ships.
+[4/4] SKIP — Apple PrivacyInfo.xcprivacy not present yet; App Store deferred (ADR 005). Re-enable when native iOS store submission is scoped.
 telemetry-gate: PASS
 ```
 

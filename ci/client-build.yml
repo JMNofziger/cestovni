@@ -3,7 +3,7 @@
 # Linear: CES-36
 #
 # Live GitHub Actions: .github/workflows/verify-full.yml (client-* jobs) plus
-# verify-ios-weekly.yml for scheduled iOS when full skips macOS on main push.
+# Native iOS weekly CI paused (ADR 005) — see ci/paused/verify-ios-weekly.yml.
 # This file stays in ci/ as the parked spec / reference for triggers and
 # acceptance notes (CES-36); edit those workflows when changing CI behavior.
 #

@@ -6,8 +6,9 @@
 # - Pushes to main use the same doc-only paths-ignore list as verify-fast.yml
 #   (keep both in sync) so prose-only merges do not run this workflow.
 # - iOS is skipped on push to main (PR already exercised iOS for client
-#   changes; merges that skip PR are rare). Re-run iOS via workflow_dispatch
-#   or verify-ios-weekly.yml if needed.
+#   changes; merges that skip PR are rare). Re-run iOS via workflow_dispatch.
+# - Weekly native iOS workflow is PAUSED (ADR 005): see ci/paused/verify-ios-weekly.yml
+#   — no triggers until App Store distribution is re-scoped.
 # - Caches Pub, Gradle, and Flutter SDK where supported.
 
 name: 'Verify (full)'

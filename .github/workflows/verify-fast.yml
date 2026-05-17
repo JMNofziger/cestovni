@@ -7,7 +7,7 @@
 # Telemetry contracts (YAML + allow-list prose) are NOT ignored — keep those
 # lines in sync with verify-full.yml doc-only paths-ignore.
 #
-# Native debug builds: verify-full.yml + verify-ios-weekly.yml
+# Native debug builds: verify-full.yml (weekly iOS paused — ci/paused/, ADR 005)
 
 name: 'Verify (fast)'
 

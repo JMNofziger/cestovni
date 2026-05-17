@@ -4,7 +4,7 @@
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
-**Architecture:** `[../specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)`, [ADR 001](../specs/adr/001-backend-api-boundary.md) (backend boundary), [ADR 002](../specs/adr/002-backup-sync-layer.md) (backup/sync), [ADR 003](../specs/adr/003-mobile-stack.md) (mobile stack), [ADR 004](../specs/adr/004-telemetry-crash-sdk.md) (telemetry/crash SDK).
+**Architecture:** `[../specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)`, [ADR 001](../specs/adr/001-backend-api-boundary.md) (backend boundary), [ADR 002](../specs/adr/002-backup-sync-layer.md) (backup/sync), [ADR 003](../specs/adr/003-mobile-stack.md) (mobile stack), [ADR 004](../specs/adr/004-telemetry-crash-sdk.md) (telemetry/crash SDK), [ADR 005](../specs/adr/005-distribution-channels.md) (Stage 1 distribution).
 
 Stage 5 exit (copied from workflow): **running build with test strategy tied to spec risks (math, backup, export).** Stage 5 is **not** launch — that's Stage 6.
 
@@ -69,7 +69,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 - 🟩 **M0 rollup (closed 2026-04-22)** — client shell + Drift v1 + fixtures + CI; downstream milestones unblocked.
   - 🟩 **CES-36 — Mobile client bootstrap** — `[client/](../../client/)`, `[ci/client-build.yml](../../ci/client-build.yml)`; telemetry gate **check 2** scans `client/lib/**/*.dart` for literal `Telemetry.emit` names (`[ci/telemetry-gate.py](../../ci/telemetry-gate.py)`).
   - 🟩 **CES-37 — Client DB schema + migrations** — `client/lib/db/`, `client/test/db/`, `[tests/client-db/fixtures/](../../tests/client-db/fixtures/)`; indexes + INT64 round-trips per test matrix below.
-  - 🟩 **Merge / review closure (2026-04-22)** — code on `main` since 2026-04-18; CTO audit passed; `verify-full` + `verify-ios-weekly` green; both Linear issues in **Done**.
+  - 🟩 **Merge / review closure (2026-04-22)** — code on `main` since 2026-04-18; CTO audit passed; `verify-full` green; both Linear issues in **Done**. *(Weekly native iOS CI paused 2026-05-17 — see M-dist.)*
   - 🟨 **M0 follow-ups (tracked, non-blocking):**
     - **CES-48** — tighten `client/test/db/indexes_test.dart` to strict-equality set + note `v*_v*_noop.sql` replay semantics in `tests/client-db/README.md`. *Blocks CES-47.*
     - **CES-49** — enforce `settings.id = user_id` at DB level on client + server (adds first post-`0001_init` migration step). *Blocks CES-42.*
@@ -101,6 +101,19 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 - 🟥 **M4 rollup** — allow-listed client emits + CI green end-to-end.
   - 🟥 **CES-46 — Telemetry client wiring** — `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)` + ADR 004.
   - 🟨 `**ci/telemetry-gate.`* in repo** — YAML + schema + Python gate + client Dart scan live; **Apple `PrivacyInfo.xcprivacy` drift check** still skipped until that file exists (see non-verticals below).
+
+### M-dist — Distribution (parallel, non-blocking)
+
+Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones.
+
+- 🟨 **M-dist rollup** — Stage 1 install paths documented; spike in flight or complete.
+  - 🟩 **ADR 005 + brief + Glitchtip addendum** — accepted 2026-05-17.
+  - 🟩 **Weekly native iOS CI paused** — [`ci/paused/verify-ios-weekly.yml`](../../ci/paused/verify-ios-weekly.yml) (no GitHub triggers until App Store re-scoped).
+  - 🟥 **PWA offline spike** — [`spike-pwa-offline.md`](../specs/spike-pwa-offline.md); prompt [`prompts/pwa-offline-spike.md`](prompts/pwa-offline-spike.md).
+  - 🟥 **Android APK tag release + install doc** — [`install-android.md`](install-android.md) stub; CI release job TBD.
+  - 🟥 **iOS PWA deploy + install doc** — blocked on spike **GO**; [`install-ios.md`](install-ios.md) stub.
+  - 🟥 **CI `client-web` job** — after spike GO.
+  - 🟥 **Compliance / launch-copy** — direct-install + PWA disclosures (Stage 6 overlap OK for counsel).
 
 ### M5 — Hardening + rollback tooling
 

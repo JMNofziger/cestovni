@@ -26,7 +26,22 @@
 | Backup / sync layer | [`adr/002-backup-sync-layer.md`](adr/002-backup-sync-layer.md) | Accepted |
 | Mobile client stack | [`adr/003-mobile-stack.md`](adr/003-mobile-stack.md) | Accepted |
 | Telemetry / crash SDK | [`adr/004-telemetry-crash-sdk.md`](adr/004-telemetry-crash-sdk.md) | Accepted |
+| Telemetry transport (Stage 1) | [`adr/004-addendum-glitchtip-transport.md`](adr/004-addendum-glitchtip-transport.md) | Accepted |
+| Stage 1 distribution | [`adr/005-distribution-channels.md`](adr/005-distribution-channels.md) | Accepted |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
+
+## Stage 1 client distribution (2026-05-17)
+
+Per [ADR 005](adr/005-distribution-channels.md):
+
+```text
+[Android ~70%]  Flutter native APK (optional Play $25 once)
+[iPhone ~30%]   Flutter web PWA (Add to Home Screen) — pending spike GO
+[Deferred]      App Store native iOS ($99/yr)
+```
+
+- Spike charter: [`spike-pwa-offline.md`](spike-pwa-offline.md).
+- Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 
 ## Deployment modes (continuity)
 

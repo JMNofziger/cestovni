@@ -44,9 +44,13 @@ Why (short form):
 
 ## Non-goals
 
-- Desktop or web targets in v1.
+- **Desktop** or **Flutter web for full v1 feature parity** (export background jobs, native photo sandbox parity, etc.).
 - Custom rendering / 3D.
 - Shared business-logic core in Rust/C++ (reconsider only if a second client is green-lit).
+
+## Distribution channel note (2026-05-17, ADR 005)
+
+**Flutter web as an iOS distribution channel is in scope for Stage 1** with documented limitations — not a second product, but the installable PWA path for iPhone users while the App Store is deferred. Android remains the **primary native** target ([`005-distribution-channels.md`](005-distribution-channels.md)). Spike gate: [`spike-pwa-offline.md`](../spike-pwa-offline.md).
 
 ## Revisit gates (when to re-open this ADR)
 
@@ -66,6 +70,7 @@ Why (short form):
 
 ## Related
 
+- [`005-distribution-channels.md`](005-distribution-channels.md) — Android APK + iOS PWA; App Store deferred.
 - [`PRODUCT_DEV_WORKFLOW.md`](../../product/PRODUCT_DEV_WORKFLOW.md) — stage gates.
 - [`../../product/delivery-plan-v1.md`](../../product/delivery-plan-v1.md) — M0 bootstrap depends on this ADR.
 - [`data-model.md`](../data-model.md), [`photo-pipeline.md`](../photo-pipeline.md), [`sync-protocol.md`](../sync-protocol.md) — specs this ADR unblocks.

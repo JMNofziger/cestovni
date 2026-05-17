@@ -62,6 +62,7 @@
 
 ## Related
 
+- [`004-addendum-glitchtip-transport.md`](004-addendum-glitchtip-transport.md) — Stage 1 Glitchtip self-host (accepted 2026-05-17).
 - [`telemetry-allowlist.md`](../telemetry-allowlist.md) — principles, allow-list, CI gate.
 - [`telemetry-events.v1.yaml`](../telemetry-events.v1.yaml) — authoritative catalogue.
 - [`platform-compliance-v1.md`](../platform-compliance-v1.md) §5.3, §7, §8 — retention, third-party disclosure, store mapping.

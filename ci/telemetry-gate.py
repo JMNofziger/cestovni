@@ -201,7 +201,7 @@ def check_4_apple_manifest(doc: dict[str, Any]) -> None:
     if manifest_path is None:
         print(
             "[4/4] SKIP — Apple PrivacyInfo.xcprivacy not present yet; "
-            "will compare category totals when the mobile client ships."
+            "App Store deferred (ADR 005). Re-enable when native iOS store submission is scoped."
         )
         return
     categories = {evt["category"] for evt in doc.get("events", [])}
