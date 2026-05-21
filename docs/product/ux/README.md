@@ -12,7 +12,7 @@ Canonical UX reference artifacts for product and engineering live in this folder
 - UX data contracts: [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md)
 - Senior review checklist: [`SENIOR_REVIEW_CHECKLIST.md`](SENIOR_REVIEW_CHECKLIST.md)
 - Senior review packet: [`SENIOR_REVIEW_PACKET.md`](SENIOR_REVIEW_PACKET.md)
-- UX gap closure tracker (M1 / CES-39 gate): [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md)
+- UX gap closure tracker (gate closed; CES-39 in progress): [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md)
 - Screenshot update process: [`SCREENSHOT_UPDATE.md`](SCREENSHOT_UPDATE.md)
 - Screenshot sets: [`screenshots/`](screenshots/)
 
@@ -38,5 +38,5 @@ Current sets:
 ## Ownership and refresh
 
 - Owner: Product + Design
-- Last refreshed: 2026-04-22 (added light-parchment full-scroll set + `cestovni-full-views.md` + `cestovni-add-vehicle-cta.md`)
+- Last refreshed: 2026-05-21 (implementation map synced for CES-39 Log/History/vehicle CRUD)
 

@@ -36,19 +36,20 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 - Data semantics contract: `docs/product/ux/DATA_CONTRACTS.md`
 - Must-ship gates and tests: `docs/product/ux/DELIVERY_ACCEPTANCE.md`
 - Visual system reference: `docs/product/ux/cestovni-styling.md`
-- **Implementation gap tracker (blocks CES-39 until closed):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
+- **Implementation gap tracker (gate closed; CES-39 underway):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
 - Senior checklist: `docs/product/ux/SENIOR_REVIEW_CHECKLIST.md`
 - Delivery plan linkage: `docs/product/delivery-plan-v1.md` (M1 prerequisite + CES-39 row)
 - Linear: **CES-39** gate is clear in repo — **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, and **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** are **Done in repo**. Set each Linear workflow to **Done** and remove stale **blocks** edges if present (see issue comments on CES-39).
 
 ## Residual risks (not doc conflicts)
 
-- History, metrics, and maintenance pages are still not implemented; contracts are ready but code work remains.
-- Test readiness items in the checklist are intentionally pending until implementation lands.
-- Metrics behavior around low-data placeholders is defined but still requires explicit widget/repository coverage in M1/M2 execution.
+- **Metrics** and **Maint** tab UI still stubs; History is fuel-only until maintenance repository lands.
+- **CES-39 phase 3** (Log + History) on branch — merge to `main` before PWA-lite gate checklist.
+- Settings units/currency/default vehicle (**CES-57**) not wired; metric hardcoded km/L/EUR in Log for now.
+- Metrics low-data placeholder behavior still needs widget/repository coverage when Metrics tab ships.
 
 ## Recommended sign-off decision
 
-- **Approve with follow-up issues** (implementation and test execution), not “approve as-is for ship”.
-- **CES-39** can start once Linear status + relations on CES-53, CES-54, CES-55, and CES-56 match the **Done in repo** state recorded in `UX_IMPLEMENTATION_GAPS.md`.
-- Use `SENIOR_REVIEW_CHECKLIST.md` as the gate in PR/issue reviews for CES-39 and related UI tickets.
+- **Approve with follow-up issues** for remaining M1 surfaces (Metrics, Maint, photo, settings prefs).
+- **CES-39** prerequisite gate is **closed in repo**; align Linear blocks-CES-39 edges.
+- Use `SENIOR_REVIEW_CHECKLIST.md` for CES-39 PR reviews; track rollup in `delivery-plan-v1.md` RYG.

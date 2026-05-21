@@ -1,7 +1,7 @@
 # Cestovni — mobile client
 
-**Stack:** Flutter + Drift (ADR 003).
-**Milestone:** M0 — Bootstrap + DB (CES-36 + CES-37).
+**Stack:** Flutter + Drift (ADR 003).  
+**Milestones:** M0 closed (CES-36, CES-37). M1 in progress — CES-38 consumption math **done**; CES-39 Log/History/vehicle UI **in progress** (see [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md)).
 
 ## Quick start
 
@@ -9,6 +9,7 @@
 cd client
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
+flutter analyze
 flutter test
 flutter run
 ```
@@ -18,39 +19,42 @@ flutter run
 ```
 client/
   lib/
-    main.dart                     # entrypoint
+    main.dart
     app/
-      app.dart                    # MaterialApp + theme
-      shell.dart                  # bottom nav: Home / Settings / Debug
-      pages/                      # per-tab placeholders
+      app.dart                    # MaterialApp + CestovniTheme
+      shell.dart                  # 4 tabs: Log / History / Metrics / Maint
+      active_vehicle.dart         # session-scoped vehicle id
+      pages/
+        log_page.dart             # fill-up form + drafts (CES-39)
+        history_page.dart         # fill-up timeline (CES-39)
+        vehicle_form_page.dart    # add/edit vehicle (CES-39)
+        settings_page.dart        # vehicle list; prefs stub (CES-57)
+        metrics_page.dart         # stub
+        maintenance_page.dart     # stub
+        debug_page.dart
+      theme/                      # CES-55 visual system
+    consumption/                  # CES-38 math + validation
     db/
-      app_database.dart           # @DriftDatabase; schema_version = 2
+      app_database.dart           # schema_version = 2
+      repositories/               # vehicles, fill-ups, drafts, settings
       migrations/
-        migration_runner.dart     # UP/DOWN step structure (CES-47 hook)
-        schema_steps.dart         # 0001_init, 0002_add_maintenance_events_category_shop
-      tables/                     # one file per v1 table
+      tables/
   test/
-    db/                           # migration + round-trip + constraints + indexes
-    shell_smoke_test.dart         # Home / Settings / Debug switchable
+    app/                          # log, history, settings, vehicle form widgets
+    consumption/                  # golden fixtures + module purity
+    db/
+    shell_smoke_test.dart
 ```
 
 ## Spec alignment
 
-- Canonical SI-INT64 columns per [`docs/specs/si-units.md`](../docs/specs/si-units.md).
-- Every backed-up table carries the ADR 002 protocol columns
-  (`id`, `user_id`, `row_version`, `updated_at`, `deleted_at`,
-  `mutation_id`) via the `ProtocolColumns` mixin.
-- Indexes match [`docs/specs/data-model.md`](../docs/specs/data-model.md)
-  and are verified by `test/db/indexes_test.dart`.
-- Client-only tables (`drafts`, `outbox`, `photo_refs`) carry no
-  protocol columns and are excluded from the outbox / export pipelines
-  (M2 / M3 enforce that, not M0).
+- SI-INT64 columns per [`docs/specs/si-units.md`](../docs/specs/si-units.md).
+- Protocol columns on backed-up tables (ADR 002).
+- Fill-up save paths call `validateInsert` before `FillUpsRepository.create` / `amend`.
+- Golden math fixtures: [`tests/math/`](../tests/math/) (20 JSON files, runner in `test/consumption/`).
 
 ## CI
 
-`ci/client-build.yml` — `test` + `android` + `ios` lanes; both platform
-builds must be green before closing CES-36 per the acceptance checklist.
+`ci/client-build.yml` — analyze, test, Android debug APK, iOS debug no-codesign.
 
-`ci/telemetry-gate.py` check 2 (client source scan) was activated by
-CES-36: every literal `Telemetry.emit('name', …)` under `client/lib/`
-is verified against `docs/specs/telemetry-events.v1.yaml`.
+`ci/telemetry-gate.py` check 2 scans `client/lib/**/*.dart` for allow-listed `Telemetry.emit` names.

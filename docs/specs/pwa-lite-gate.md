@@ -10,8 +10,8 @@ PWA-lite iPhone engineering **must not start** until every checklist item below 
 
 PWA-lite work may start when **all** are true on `main`:
 
-- [ ] CES-39: Android Log form saves fill-up locally with full DATA_CONTRACTS validation.
-- [ ] CES-39: Android History lists fill-ups for active vehicle.
+- [ ] CES-39: Android Log form saves fill-up locally with full DATA_CONTRACTS validation. *(Implemented on branch `docs/android-first-sequencing` — merge required.)*
+- [ ] CES-39: Android History lists fill-ups for active vehicle. *(Same — merge phase 3 to `main`.)*
 - [ ] M3 client slice: save enqueues `outbox` row; flush worker calls API.
 - [ ] M3 server slice: `POST /api/v1/mutations` + `GET /api/v1/changes` accept fill-up insert (dev or staging OK).
 - [ ] **E2E proof documented:** airplane-mode fill-up on Android → online → mutation `applied` → row returned by `GET /changes`.

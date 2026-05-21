@@ -9,25 +9,29 @@ Use this together with:
 
 ## Current implementation map (source of truth)
 
-- Shell and nav scaffold: `client/lib/app/shell.dart`
-- Active vehicle session state: `client/lib/app/active_vehicle.dart`
-- Tab page stubs (CES-39 will replace): `client/lib/app/pages/{log,history,metrics,maintenance}_page.dart`
-- Settings (stub): `client/lib/app/pages/settings_page.dart`
-- Debug (schema tools): `client/lib/app/pages/debug_page.dart`
+**Last synced:** 2026-05-21 (CES-39 phases 1–3; phase 3 on branch `docs/android-first-sequencing`, merge to `main` pending).
 
-Vehicle CRUD pages, fill-up form, and history/metrics pages **do not exist yet** — they land with **CES-39**. The earlier draft of this doc referenced `vehicle_*_page.dart` / `fill_up_form_page.dart` files that were never committed; corrected during CES-39 kickoff.
+- Shell and nav: `client/lib/app/shell.dart` (Log / History / Metrics / Maint + header)
+- Active vehicle: `client/lib/app/active_vehicle.dart`
+- Repositories: `client/lib/db/repositories/` (vehicles, fill-ups, drafts, settings)
+- Consumption validation: `client/lib/consumption/` (wired on Log save + History amend)
+- Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 phase 3)
+- Vehicle CRUD: `pages/vehicle_form_page.dart` + list in `pages/settings_page.dart` (phase 2)
+- Settings: vehicle list wired; units/currency/default vehicle deferred (**CES-57**)
+- Metrics / Maint tabs: `pages/metrics_page.dart`, `pages/maintenance_page.dart` (stubs)
+- Debug: `pages/debug_page.dart`
 
 ## Delivery status by screen
 
 
 | Screen                      | UX target status | Implementation status | Primary file(s)                                           |
 | --------------------------- | ---------------- | --------------------- | --------------------------------------------------------- |
-| Log / fuel entry            | Defined          | Stub (CES-39 to ship) | `pages/log_page.dart` (placeholder)                       |
-| History timeline + flip     | Defined          | Stub (CES-39 to ship) | `pages/history_page.dart` (placeholder)                   |
-| Metrics                     | Defined          | Stub (CES-39 + later) | `pages/metrics_page.dart` (placeholder)                   |
-| Maintenance entry + history | Defined          | Stub (own vertical)   | `pages/maintenance_page.dart` (placeholder)               |
-| Settings                    | Defined          | Stub                  | `pages/settings_page.dart` (preferences not yet wired)    |
-| Vehicle CRUD                | Defined          | Not started           | New pages required (CES-39)                               |
+| Log / fuel entry            | Defined          | **Shipped** (phase 3) | `pages/log_page.dart` — form, draft, `validateInsert`     |
+| History timeline            | Defined          | **Shipped** (fuel)    | `pages/history_page.dart` — list, detail, edit, delete; MAINT chip disabled; flip mode later |
+| Metrics                     | Defined          | Stub                  | `pages/metrics_page.dart`                                 |
+| Maintenance entry + history | Defined          | Stub                  | `pages/maintenance_page.dart`                             |
+| Settings                    | Defined          | Partial               | `pages/settings_page.dart` — vehicle CRUD; prefs **CES-57** |
+| Vehicle CRUD                | Defined          | **Shipped** (phase 2) | `pages/vehicle_form_page.dart`                            |
 
 
 ---
@@ -39,15 +43,15 @@ Vehicle CRUD pages, fill-up form, and history/metrics pages **do not exist yet**
 - Visual style and component rules are defined in `cestovni-styling.md`.
 - Screenshot references are under `screenshots/dark-midnight/`.
 
-**Implementation note:** Shell rewritten in CES-56 (`client/lib/app/shell.dart`) — four target tabs, header with brand + date + vehicle selector + theme toggle + gear-to-Settings, `LedgerCard` placeholders for History / Metrics / Maint until CES-39 follow-on. Settings (gear icon) is a pushed route; Debug is reachable from inside Settings. Theme toggle is local to the shell so the user can flip dark/light without restarting the app; first-load default stays **dark** per `cestovni-styling.md` §5.
+**Implementation note:** Shell from CES-56; Log and History tabs are live (CES-39 phase 3). Metrics and Maint remain stub pages. Settings (gear) is a pushed route; Debug from Settings. Theme toggle is local; first-load default **dark** per `cestovni-styling.md` §5.
 
 ### Active vehicle (session state)
 
 - The header vehicle chip reads live vehicles from the `vehicles` table (`deleted_at IS NULL AND archived_at IS NULL`), ordered by `name`.
 - "Active vehicle" lives in memory for the session (`ActiveVehicle` / `ActiveVehicleScope` in `client/lib/app/active_vehicle.dart`). It persists across tab switches but resets on cold-start; that is the M1 contract.
 - On launch the first live vehicle is selected. If the active id no longer matches a live row (vehicle archived/deleted on another device → re-sync) the chip falls back to the first live vehicle on the next stream emission.
-- If there are no live vehicles the chip shows `NO VEHICLE`. The "Add vehicle" CTA lands with CES-39.
-- `settings.default_vehicle_id` is **not yet** in the schema. The default-vehicle preference is a planned follow-up (will be threaded through `ActiveVehicle` once the column exists; tracked under CES-39 vehicle CRUD).
+- If there are no live vehicles the chip shows `NO VEHICLE`. Log/History show **GO TO SETTINGS** empty state (CES-39).
+- `settings.default_vehicle_id` is **not yet** in the schema — tracked as **CES-57** follow-up.
 
 ---
 

@@ -1,6 +1,6 @@
 # Cestovni — product development workflow checklist
 
-**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — see `[delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) for M0–M5 and exit emoji; M0 bootstrap + client DB **closed** in Linear (**CES-36/CES-37 Done**); Stage 5 execution is active (**CES-35 In Progress**, **CES-38 In Progress**). M1–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
+**Overall Progress:** ~96% *(Stages 0–4 closed. Stage 5 Step 10 closed; **Step 11 in progress** — see `[delivery-plan-v1.md` § Implementation checklist (RYG)](delivery-plan-v1.md#implementation-checklist-ryg) for M0–M5 and exit emoji; M0 **closed** (**CES-36/CES-37 Done**); **CES-38 Done in repo**; **CES-39 in progress**; M2–M5 remain. Residual compliance — Apple/Play submission-time forms, external counsel privacy policy — Stage 6 / launch follow-ups unless otherwise tracked.)*
 
 Update this percentage when a **stage exit** is fully met.
 

@@ -15,7 +15,7 @@ This is a **framework-agnostic design reference**. Cestovni is a Flutter + Drift
 - **Theme:** these captures are the **light-parchment** reference. First-load default is **dark** per [cestovni-styling.md](cestovni-styling.md) §5 — pair with [screenshots/dark-midnight/](screenshots/dark-midnight/) for dark parity.
 - **Components:** names like "card", "tile", "pill", "hairline" map to the Flutter primitives in [cestovni-styling.md](cestovni-styling.md) §6 (`LedgerCard`, `LedgerTile`, `HairlineDivider`).
 - **Routes:** paths like `/`, `/history`, `/metrics`, `/maintenance`, `/settings` are **logical tab names** for the shell nav defined by [CES-56](https://linear.app/personal-interests-llc/issue/CES-56), not literal URL routes.
-- **Scope:** this is a visual reference for the screens [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) will build. It does not override contract docs — see [cestovni-views.md](cestovni-views.md), [DATA_CONTRACTS.md](DATA_CONTRACTS.md), and [DELIVERY_ACCEPTANCE.md](DELIVERY_ACCEPTANCE.md) for must-ship behavior.
+- **Scope:** visual reference for target screens. **Repo:** Log, History, and vehicle flows are implemented (CES-39); Metrics/Maint still stubs. Does not override contract docs — see [cestovni-views.md](cestovni-views.md), [DATA_CONTRACTS.md](DATA_CONTRACTS.md), and [DELIVERY_ACCEPTANCE.md](DELIVERY_ACCEPTANCE.md).
 
 ---
 

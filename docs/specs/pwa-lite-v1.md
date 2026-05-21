@@ -115,7 +115,7 @@ PWA-lite chrome (vs full Flutter shell): **header** with brand + date subtitle +
 
 ## 2. Log screen — field map
 
-**Implementation status:** `client/lib/app/pages/log_page.dart` is a **CES-39 stub** (placeholder card). Normative field contract is [`../product/ux/DATA_CONTRACTS.md`](../product/ux/DATA_CONTRACTS.md) §Fill-up entry + [`../product/ux/cestovni-views.md`](../product/ux/cestovni-views.md) §Log a Fuel-Up.
+**Implementation status:** `client/lib/app/pages/log_page.dart` and `history_page.dart` implement the Android contract (CES-39 phase 3; merge to `main` before PWA-lite gate). Normative fields: [`../product/ux/DATA_CONTRACTS.md`](../product/ux/DATA_CONTRACTS.md) §Fill-up entry + [`../product/ux/cestovni-views.md`](../product/ux/cestovni-views.md).
 
 ### Fields (display order for PWA-lite)
 

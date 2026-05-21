@@ -2,7 +2,7 @@
 
 This document defines what must ship vs what can wait. Use it to prevent scope creep during implementation.
 
-**M1 / CES-39 gate:** All four **Critical gaps** rows are **Done in repo** as of 2026-04-25 (CES-53, CES-54, CES-55, CES-56). The gate is clear once Linear status + relations match — see [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md) and [`../delivery-plan-v1.md`](../delivery-plan-v1.md) (§ M1 prerequisite).
+**M1 / CES-39:** Prerequisite gate **closed in repo** (CES-53–CES-56). **CES-39 in progress** — Log + History + vehicle CRUD landed (phase 3 merge to `main` pending); Metrics/Maint tabs, photo, and settings prefs still open per sections below. See [`../delivery-plan-v1.md`](../delivery-plan-v1.md) and [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md).
 
 ## Global acceptance gates
 

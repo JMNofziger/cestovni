@@ -2,11 +2,11 @@
 
 **Purpose:** Track documentation and product gaps discovered before M1 UI execution so they do not leak into implementation as silent contradictions.
 
-**Gate:** **CES-39** (Fill-up + vehicle UI) must not move to **In Progress** / implementation until every row under [Critical gaps — Linear blockers](#critical-gaps--linear-blockers) is **Done** and this file’s status column is updated. Dependent M1 work that assumes resolved contracts (shell nav, maintenance forms, metrics tied to maintenance rows) stays behind the same gate.
+**Gate (closed in repo):** Every row under [Critical gaps — Linear blockers](#critical-gaps--linear-blockers) is **Done**. **CES-39** implementation is **underway** (see [`delivery-plan-v1.md`](../delivery-plan-v1.md) M1 checklist). **Linear hygiene:** mark CES-53–CES-56 **Done** and remove stale **blocks CES-39** edges. Metrics/Maint tab UI and maintenance-backed History filter remain separate M1 work.
 
 **Owner:** Product + CTO (engineering owns closure in code/specs).
 
-**Last reviewed:** 2026-04-25 (CES-53, CES-54, CES-55, CES-56 done in repo — all CES-39 gate blockers cleared)
+**Last reviewed:** 2026-05-21 (gate rows Done; CES-39 phases 1–2 on `main`, phase 3 Log/History on branch pending merge)
 
 ---
 
@@ -20,10 +20,10 @@ These are **preconditions for CES-39**. Each has a dedicated Linear issue that *
 | 1   | Maintenance UX contract vs `data-model.md` / Drift — **resolved in schema v2**: `category` + `shop` added, `odometer_m` nullable, `cost_cents` / `currency_code` stay `NOT NULL` with form-side defaults; reminders remain on `maintenance_rules`. See [DATA_CONTRACTS.md §Maintenance entry contract](DATA_CONTRACTS.md#maintenance-entry-contract) and migration `0002_add_maintenance_events_category_shop` | [CES-53](https://linear.app/personal-interests-llc/issue/CES-53/align-maintenance-ux-contract-with-data-model-blocks-ces-39)        | Done   |
 | 2   | Date-only maintenance vs `TIMESTAMPTZ` — **resolved:** single `performed_at` instant; see [DATA_CONTRACTS.md § Performed time (maintenance)](DATA_CONTRACTS.md#performed-time-maintenance) + [data-model.md](../../specs/data-model.md) § `maintenance_events` | [CES-54](https://linear.app/personal-interests-llc/issue/CES-54/define-date-only-maintenance-vs-timestamptz-blocks-ces-39)          | Done   |
 | 3   | Visual system bootstrap — **resolved:** `CestovniColors` + `CestovniMetrics` tokens, `CestovniTypography` (Fraunces / Inter / JetBrains Mono via `google_fonts` deviation), `CestovniTheme.dark()` / `light()` (dark first-load), `LedgerCard` / `LedgerTile` / `HairlineDivider` primitives. See `client/lib/app/theme/` and `cestovni-styling.md`. | [CES-55](https://linear.app/personal-interests-llc/issue/CES-55/flutter-visual-system-bootstrap-per-cestovni-styling-blocks-ces-39) | Done   |
-| 4   | Shell navigation + **active vehicle** + default vehicle — **resolved:** four target tabs (Log / History / Metrics / Maint) in `client/lib/app/shell.dart`, header with brand + date + `_VehicleSelector` + theme toggle + gear-to-Settings, in-memory `ActiveVehicle` session state, Settings + Debug as pushed routes. `settings.default_vehicle_id` deferred to CES-39 follow-up (column not yet on schema). | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Done   |
+| 4   | Shell navigation + **active vehicle** + default vehicle — **resolved:** four target tabs in `shell.dart`, `ActiveVehicle` session state, Settings + Debug pushed routes. Log/History live (CES-39 phase 3). `settings.default_vehicle_id` deferred (**CES-57**). | [CES-56](https://linear.app/personal-interests-llc/issue/CES-56/shell-tabs-active-vehicle-default-vehicle-model-blocks-ces-39)      | Done   |
 
 
-**CES-39** is **blocked in Linear** by each **open** critical-gap issue below (and any upstream dependency such as **CES-37** / **CES-38** on the card), until the corresponding row is **Done** and relations are updated. There is no separate “Blocked” workflow state on the Cestovni team — use the blocking relations as the source of truth.
+**Historical:** Critical-gap issues **blocked CES-39** until each row was **Done** (2026-04-22 – 2026-04-25). All four are **Done in repo**; if Linear still shows **blocks CES-39**, that is stale — update relations. **CES-38** is **Done on `main`**; **CES-39** no longer waits on prerequisites.
 
 **Closure criteria (per row):** Spec or UX doc updated to match the chosen implementation; any schema migration documented; linked PR merged; this table’s **Status** set to **Done**.
 
