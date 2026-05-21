@@ -17,9 +17,13 @@ Amend Stage 1 iPhone distribution:
 |------------------|----------------------|
 | Flutter **web** PWA | **PWA-lite** — vanilla HTML + JS + IndexedDB at `client/web-lite/` |
 | Single Flutter codebase for iPhone | Thin iPhone capture surface + Flutter **native on Android only** |
-| Spike gate before M-dist | Spike complete; engineering proceeds on [`pwa-lite-v1.md`](../pwa-lite-v1.md) |
+| Spike gate before M-dist | Spike complete; PWA-lite **blocked** on Android E2E gate |
 
 Android (~70%), hosting costs ($0), and App Store deferral are unchanged.
+
+## Sequencing (Option B, 2026-05-21)
+
+PWA-lite iPhone work starts **after** Android proves offline → online → server round-trip. Order: CES-39 (Log + History) → minimal M3 client outbox (CES-44 slice) → minimal M3 API (CES-43 slice) → documented E2E on `main` → PWA-lite ports the **proven** contract from code. Gate: [`../pwa-lite-gate.md`](../pwa-lite-gate.md). Execution prompt [`../../product/prompts/pwa-lite-phase1-2.md`](../../product/prompts/pwa-lite-phase1-2.md) is **PAUSED**.
 
 ## iOS capability matrix (revised)
 

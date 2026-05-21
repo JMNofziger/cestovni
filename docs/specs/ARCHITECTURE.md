@@ -35,12 +35,13 @@
 Per [ADR 005](adr/005-distribution-channels.md):
 
 ```text
-[Android ~70%]  Flutter native APK (optional Play $25 once)
-[iPhone ~30%]   PWA-lite (Add to Home Screen) — see pwa-lite-v1.md
+[Android ~70%]  Flutter native APK — Log/History + sync proof first (CES-39 → M3 slice → E2E)
+[iPhone ~30%]   PWA-lite (Add to Home Screen) — after Android E2E gate; see pwa-lite-gate.md
 [Deferred]      App Store native iOS ($99/yr)
 ```
 
-- Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md).
+- Gate: [`pwa-lite-gate.md`](pwa-lite-gate.md) — PWA-lite blocked until Android offline → sync E2E on `main`.
+- Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md) (blocked).
 - Spike archive: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 - Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 

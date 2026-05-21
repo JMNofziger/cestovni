@@ -1,9 +1,9 @@
 # PWA-lite — iPhone offline fill-up capture (v1)
 
-**Status:** Phase 0 complete — ready for Phase 1+2 execution
+**Status:** **Blocked — awaiting Android E2E gate** ([`pwa-lite-gate.md`](pwa-lite-gate.md))
 **ADR:** [005-addendum-pwa-lite-ios.md](adr/005-addendum-pwa-lite-ios.md)
-**Discovery prompt:** [`../product/prompts/pwa-lite-discovery.md`](../product/prompts/pwa-lite-discovery.md)
-**Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md)
+**Discovery prompt:** [`../product/prompts/pwa-lite-discovery.md`](../product/prompts/pwa-lite-discovery.md) (complete)
+**Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — **PAUSED** until gate passes
 **Spike archive:** [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/)
 
 ## Goal
@@ -321,27 +321,24 @@ PWA-lite **should** implement: SI unit conversion at save/display, `validateInse
 
 ---
 
-## 8. Open questions for product
+## Gate criteria
 
-**Count: 9**
+See [`pwa-lite-gate.md`](pwa-lite-gate.md) for the testable checklist. PWA-lite starts only after Android E2E proof on `main`.
 
-1. **Log field scope:** DATA_CONTRACTS requires price + currency + `isFull`. Earlier PWA-lite sketch omitted price. Confirm Phase 1+2 includes **total price + currency** and **`isFull` toggle** (not just liters + odometer + notes).
+## Constraints from Android
 
-2. **Vehicle list on iPhone:** No vehicle CRUD on PWA-lite. Should vehicles be **pulled from backend on first online visit** (`GET /changes?table=vehicles`), with offline picker using last-synced cache — and zero vehicles shows "Add a vehicle in the Android app"?
+Filled when the gate passes — copy from **running Android + M3 slice code**, not speculation:
 
-3. **Backend for Phase 2:** No API server exists in repo. Does Phase 2 **implement a minimal `POST /mutations` handler** (new `server/` or Cloudflare Worker), or ship **client-only** with queue + mock integration until backend epic lands?
+| Topic | Source (at gate) | Value |
+|-------|------------------|-------|
+| Mutation payload shape | TBD | |
+| Auth header / token storage | TBD | |
+| API path prefix | TBD | |
+| Error codes / retry behavior | TBD | |
 
-4. **Auth for PWA-lite:** No Flutter HTTP/auth code exists. What is the Stage 1 login flow for iPhone — email magic link, dev bearer token pasted in Settings, or shared JWT from Android pairing?
+## 8. Open questions (deferred to gate)
 
-5. **History cross-device:** Should History show **only fill-ups captured on this iPhone**, or also rows **pulled from backend** (`GET /changes?table=fill_ups`) so drivers see Android-entered history too?
-
-6. **API path prefix:** Is the mutations URL `POST /mutations` or `POST /api/v1/mutations`? (Runbook uses `/api/v1/vehicles`; sync-protocol omits prefix.)
-
-7. **Advanced flags UX:** Show `missedBefore` + `odometerReset` toggles with helper text on Log form, or hide behind "Advanced" disclosure with defaults `false`?
-
-8. **Default settings when offline-first:** If no `settings` row cached yet, use hardcoded defaults (`km`, `L`, `EUR`, `Europe/Prague`) or block Log until first online settings pull?
-
-9. **Icons source:** Copy PWA icons from archived `spike/pwa-offline` branch, or generate new from Android launcher assets?
+Discovery captured nine product questions in [`../product/prompts/pwa-lite-discovery.md`](../product/prompts/pwa-lite-discovery.md). **Do not guess** — resolve each from Android implementation when the gate passes; record answers in § Constraints from Android above.
 
 ---
 
@@ -372,6 +369,7 @@ PWA-lite **should** implement: SI unit conversion at save/display, `validateInse
 
 | Phase | Deliverable | Gate |
 |-------|-------------|------|
-| 0 | This document | Open questions resolved |
-| 1 + 2 | UI + IndexedDB + sync | Offline capture → online sync → row in backend/Android |
+| 0 | This document + discovery | Complete |
+| Gate | Android E2E + constraints doc | [`pwa-lite-gate.md`](pwa-lite-gate.md) all items on `main` |
+| 1 + 2 | UI + IndexedDB + sync | **Blocked** until gate; then offline capture → sync (prompt PAUSED) |
 | 3 | Receipt photos | After Phase 1+2 on iPhone |

@@ -1,5 +1,7 @@
 # Cursor execution prompt — PWA-lite Phase 1+2 (iPhone)
 
+> **PAUSED — do not execute** until all criteria in [`docs/specs/pwa-lite-gate.md`](../../specs/pwa-lite-gate.md) are met on `main`. Option B (2026-05-21): Android E2E proof first.
+
 **Branch:** `main` (create feature branch `feat/pwa-lite-ios` before editing)
 **Spec:** [`docs/specs/pwa-lite-v1.md`](../../specs/pwa-lite-v1.md) — Phase 0 discovery complete (**9 open questions**; defaults below unless product overrides)
 **ADR:** [`docs/specs/adr/005-addendum-pwa-lite-ios.md`](../../specs/adr/005-addendum-pwa-lite-ios.md)
