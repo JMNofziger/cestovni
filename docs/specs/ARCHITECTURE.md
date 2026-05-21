@@ -36,11 +36,12 @@ Per [ADR 005](adr/005-distribution-channels.md):
 
 ```text
 [Android ~70%]  Flutter native APK (optional Play $25 once)
-[iPhone ~30%]   Flutter web PWA (Add to Home Screen) — pending spike GO
+[iPhone ~30%]   PWA-lite (Add to Home Screen) — see pwa-lite-v1.md
 [Deferred]      App Store native iOS ($99/yr)
 ```
 
-- Spike charter: [`spike-pwa-offline.md`](spike-pwa-offline.md).
+- Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md).
+- Spike archive: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 - Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 
 ## Deployment modes (continuity)

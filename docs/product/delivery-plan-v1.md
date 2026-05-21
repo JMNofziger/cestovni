@@ -106,13 +106,14 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones.
 
-- 🟨 **M-dist rollup** — Stage 1 install paths documented; spike in flight or complete.
+- 🟨 **M-dist rollup** — Stage 1 install paths documented; PWA-lite in progress.
   - 🟩 **ADR 005 + brief + Glitchtip addendum** — accepted 2026-05-17.
   - 🟩 **Weekly native iOS CI paused** — [`ci/paused/verify-ios-weekly.yml`](../../ci/paused/verify-ios-weekly.yml) (no GitHub triggers until App Store re-scoped).
-  - 🟥 **PWA offline spike** — [`spike-pwa-offline.md`](../specs/spike-pwa-offline.md); prompt [`prompts/pwa-offline-spike.md`](prompts/pwa-offline-spike.md).
+  - 🟩 **PWA offline spike** — NO-GO; archived [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
+  - 🟥 **PWA-lite (iPhone)** — [`pwa-lite-v1.md`](../specs/pwa-lite-v1.md); discovery [`prompts/pwa-lite-discovery.md`](prompts/pwa-lite-discovery.md).
   - 🟥 **Android APK tag release + install doc** — [`install-android.md`](install-android.md) stub; CI release job TBD.
-  - 🟥 **iOS PWA deploy + install doc** — blocked on spike **GO**; [`install-ios.md`](install-ios.md) stub.
-  - 🟥 **CI `client-web` job** — after spike GO.
+  - 🟥 **iOS PWA-lite deploy + install doc** — [`install-ios.md`](install-ios.md) stub.
+  - 🟥 **CI web-lite deploy job** — after PWA-lite Phase 1+2.
   - 🟥 **Compliance / launch-copy** — direct-install + PWA disclosures (Stage 6 overlap OK for counsel).
 
 ### M5 — Hardening + rollback tooling
