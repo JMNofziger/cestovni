@@ -106,11 +106,19 @@ class _CestovniShellState extends State<CestovniShell> {
                     Expanded(
                       child: IndexedStack(
                         index: _index,
-                        children: const [
-                          LogPage(),
-                          HistoryPage(),
-                          MetricsPage(),
-                          MaintenancePage(),
+                        children: [
+                          LogPage(
+                            db: widget.db,
+                            onOpenSettings: () =>
+                                _openSettings(innerContext),
+                          ),
+                          HistoryPage(
+                            db: widget.db,
+                            onOpenSettings: () =>
+                                _openSettings(innerContext),
+                          ),
+                          const MetricsPage(),
+                          const MaintenancePage(),
                         ],
                       ),
                     ),

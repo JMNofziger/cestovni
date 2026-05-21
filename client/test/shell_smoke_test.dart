@@ -34,7 +34,7 @@ void main() {
     expect(find.text('METRICS'), findsOneWidget);
     expect(find.text('MAINT.'), findsOneWidget);
     expect(find.text('Cestovni'), findsOneWidget);
-    expect(find.text('Log a fuel-up'), findsOneWidget);
+    expect(find.text('Log a Fuel-Up'), findsOneWidget);
 
     await tester.tap(find.text('HISTORY'));
     await tester.pump();
