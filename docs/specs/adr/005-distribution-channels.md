@@ -34,20 +34,21 @@
 | Audience | Channel | Platform fee | Client surface |
 |----------|---------|--------------|----------------|
 | Android (~70%) | **Direct APK** (primary); Play Store optional ($25 once) | $0 recurring (APK); $25 one-time if Play | Flutter **native** (existing `client/android/`) |
-| iPhone (~30%) | **Installable PWA** (Add to Home Screen) | $0 store | Flutter **web** build + static hosting |
+| iPhone (~30%) | **Installable PWA-lite** (Add to Home Screen) | $0 store | Vanilla HTML + IndexedDB — [`pwa-lite-v1.md`](../pwa-lite-v1.md) |
 | Native iOS App Store | **Deferred** | $99/year when accepted | Native `client/ios/` compile may continue in PR CI only; **no weekly iOS CI** until re-scoped |
 
-**PWA feasibility is not assumed.** A timeboxed spike ([`spike-pwa-offline.md`](../spike-pwa-offline.md)) must pass before M-dist iOS PWA engineering is treated as GO.
+**Flutter web PWA offline spike:** NO-GO (2026-05-21). iPhone engineering follows [005-addendum-pwa-lite-ios.md](005-addendum-pwa-lite-ios.md). Spike record: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 
 ## iOS PWA capability matrix (user-visible)
 
 Engineering and in-app copy must reflect this table; do not silently degrade.
 
-| Capability | Android native | iOS PWA (Flutter web) | Stage 1 |
-|------------|----------------|----------------------|---------|
-| Offline structured data (Drift) | Full | WASM + OPFS — **spike gate** | Spike → GO/NO-GO |
-| Receipt photos + TTL | [`photo-pipeline.md`](../photo-pipeline.md) | Camera + OPFS; OS TTL not enforced | Spike scopes: full / limited / deferred |
-| ZIP export (foreground) | [`export-v1.md`](../export-v1.md) | Browser download; no background job | Limited on iOS PWA |
+| Capability | Android native | iPhone PWA-lite | Stage 1 |
+|------------|----------------|-----------------|---------|
+| Offline fill-up log + history | Full | IndexedDB — per [addendum](005-addendum-pwa-lite-ios.md) | **GO** |
+| Full app (metrics, maintenance, export) | Full | Not on iPhone | Android only |
+| Receipt photos + TTL | [`photo-pipeline.md`](../photo-pipeline.md) | Deferred (PWA-lite Phase 3) | Limited on iPhone |
+| ZIP export (foreground) | [`export-v1.md`](../export-v1.md) | Not on iPhone | Android only |
 | Background export notification | Native | Not available | Out of scope on iOS PWA |
 | Share export | Native intent | Web Share API (iOS 15+) | Supported where API exists |
 | Home screen icon | Launcher | Add to Home Screen | Supported |
@@ -58,32 +59,25 @@ Engineering and in-app copy must reflect this table; do not silently degrade.
 |-----------|------|-------|
 | Apple Developer / App Store | **$0** | Deferred |
 | Google Play | **$0** (APK) or **$25 once** | Optional discoverability |
-| PWA static hosting | **$0** | Cloudflare Pages free tier; requires `_headers` for OPFS (not GitHub Pages) |
+| PWA static hosting | **$0** | Cloudflare Pages free tier for `client/web-lite/` |
 | Crash / telemetry backend | **$0** at low volume | [Glitchtip](https://glitchtip.com) self-host per [ADR 004 addendum](004-addendum-glitchtip-transport.md); SaaS free tier acceptable for earliest betas |
 | Backup API | Managed free tier or self-host | [ADR 001](001-backend-api-boundary.md) — separate from store fees |
 
-## Technical prerequisites (PWA spike)
+## Technical note (post-spike)
 
-Documented blockers the spike must address:
-
-1. [`client/lib/db/app_database.dart`](../../../client/lib/db/app_database.dart) imports `dart:io` and uses `NativeDatabase` — **web build fails** until a platform-conditional open path exists.
-2. [`client/pubspec.yaml`](../../../client/pubspec.yaml) has `sqlite3_flutter_libs` (native only); web needs `drift_flutter` (WASM + OPFS).
-3. No [`client/web/`](../../../client/web/) tree yet — first `flutter build web` scaffolds it.
-4. Photo pipeline uses app-sandbox filesystem paths — web needs OPFS or scoped deferral ([`photo-pipeline.md`](../photo-pipeline.md)).
-
-Spike charter: [`spike-pwa-offline.md`](../spike-pwa-offline.md). Execution prompt: [`../../product/prompts/pwa-offline-spike.md`](../../product/prompts/pwa-offline-spike.md).
+Flutter web + Drift WASM/OPFS was explored and rejected for iPhone offline. PWA-lite uses IndexedDB only — no `client/web/` Flutter scaffold, no `drift_flutter` web path. See [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 
 ## CI posture
 
 - **Paused:** weekly native iOS workflow moved to [`ci/paused/verify-ios-weekly.yml`](../../../ci/paused/verify-ios-weekly.yml) — **no GitHub triggers** until native iOS distribution returns.
 - **PR / dispatch:** [`verify-full.yml`](../../../.github/workflows/verify-full.yml) may still build iOS on PRs for compile health; that is **not** a distribution channel.
-- **Future:** `client-web` job in verify-full when web target is enabled (after spike).
+- **Future:** deploy job for `client/web-lite/` when PWA-lite ships.
 
 ## Consequences
 
-- **Positive:** $0 recurring store fees; Android lane unblocked; iPhone users get an install path if spike passes.
-- **Negative:** two platform surfaces (native vs web); M2 export and M1 photo work need narrow `kIsWeb` guards; App Store polish deferred.
-- **Risk:** PWA offline fails on Safari — mitigate with spike NO-GO path and honest iOS messaging.
+- **Positive:** $0 recurring store fees; Android lane unblocked; iPhone gets offline fill-up capture via PWA-lite.
+- **Negative:** two client surfaces (Flutter native + PWA-lite); theming alignment required.
+- **Risk:** iOS storage eviction — backend is canonical; sync status must be visible.
 
 ## Revisit gates (native iOS App Store)
 
@@ -91,13 +85,16 @@ Re-open this ADR when **any** of:
 
 - Product accepts **$99/year** Apple Developer Program as sustainable.
 - EU / alt-store rules make non–App Store native distribution viable at our scale.
-- PWA spike is **NO-GO** and product requires full native parity on iPhone.
+- PWA-lite fails on Safari in production and product requires full native parity on iPhone (App Store fee must be accepted first).
 
 On revisit: restore [`ci/paused/verify-ios-weekly.yml`](../../../ci/paused/verify-ios-weekly.yml) to `.github/workflows/`, update compliance store sections, and schedule App Store submission work under Stage 6.
 
 ## Related
 
-- [ADR 003](003-mobile-stack.md) — Flutter + Drift (amended for web-as-distribution-channel).
+- [ADR 003](003-mobile-stack.md) — Flutter + Drift (Android native).
+- [005-addendum-pwa-lite-ios.md](005-addendum-pwa-lite-ios.md) — iPhone PWA-lite decision (post-spike).
+- [`../pwa-lite-v1.md`](../pwa-lite-v1.md) — implementation spec.
+- [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/) — spike record.
 - [ADR 004](004-telemetry-crash-sdk.md) + [addendum](004-addendum-glitchtip-transport.md) — Glitchtip transport.
 - [`../../product/delivery-plan-v1.md`](../../product/delivery-plan-v1.md) — **M-dist** parallel track.
 - [`../../product/PRODUCT_BRIEF.md`](../../product/PRODUCT_BRIEF.md) — change log 2026-05-17.

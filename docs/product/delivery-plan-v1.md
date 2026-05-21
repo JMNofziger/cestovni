@@ -79,7 +79,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 - 🟨 **M1 rollup** — offline logging usable end-to-end without a server.
   - 🟨 **CES-38 — Consumption math + golden tests** — module scaffold + rounding/unit coverage + fixture harness landed; full fixture assertions and validation paths still in progress.
-  - 🟥 **CES-39 — Fill-up + vehicle UI** — core logging UX; depends on CES-37 + CES-38; **gate clear in repo** — confirm Linear status + relations on CES-53–CES-56 (tracker: [`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)). Begin as soon as CES-38 consumption math backs History / Metrics displays.
+  - 🟨 **CES-39 — Fill-up + vehicle UI** — **current M1 priority**; blocks PWA-lite ([`pwa-lite-gate.md`](../specs/pwa-lite-gate.md)). Log + History define contract PWA-lite mirrors. Depends on CES-37 + CES-38 (CES-53–CES-56 Done in repo).
   - 🟥 **CES-40 — Photo pipeline** — per `[photo-pipeline.md](../specs/photo-pipeline.md)`; depends on CES-37.
   - 🟩 **M1 UX gap closure (blocks CES-39):** 🟩 **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)** maintenance contract — **repo Done** · 🟩 **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)** date-only vs `TIMESTAMPTZ` — **repo Done** (2026-04-24) · 🟩 **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)** visual bootstrap — **repo Done** (2026-04-25) · 🟩 **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** shell + active vehicle — **repo Done** (2026-04-25) — parent epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**.
 
@@ -104,15 +104,26 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M-dist — Distribution (parallel, non-blocking)
 
-Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones.
+Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **Sequencing (2026-05-21, Option B):** Android path first (CES-39 → minimal M3 client/server → E2E proof); iPhone PWA-lite **blocked** until [PWA-lite gate](../specs/pwa-lite-gate.md) passes.
 
-- 🟨 **M-dist rollup** — Stage 1 install paths documented; spike in flight or complete.
+**M1 priority:** [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) is the active M1 execution focus; it **blocks** PWA-lite.
+
+#### PWA-lite gate
+
+Do not start PWA-lite iPhone work until every item in [`pwa-lite-gate.md`](../specs/pwa-lite-gate.md) is checked on `main`. Execution prompt [`prompts/pwa-lite-phase1-2.md`](prompts/pwa-lite-phase1-2.md) is **PAUSED**.
+
+- 🟨 **M-dist rollup** — Android-first; PWA-lite blocked on Android E2E gate.
   - 🟩 **ADR 005 + brief + Glitchtip addendum** — accepted 2026-05-17.
   - 🟩 **Weekly native iOS CI paused** — [`ci/paused/verify-ios-weekly.yml`](../../ci/paused/verify-ios-weekly.yml) (no GitHub triggers until App Store re-scoped).
-  - 🟥 **PWA offline spike** — [`spike-pwa-offline.md`](../specs/spike-pwa-offline.md); prompt [`prompts/pwa-offline-spike.md`](prompts/pwa-offline-spike.md).
+  - 🟩 **PWA offline spike** — NO-GO; archived [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
+  - 🟨 **CES-39 — Android Log + History** — current M1 priority; defines contract PWA-lite will mirror ([`DATA_CONTRACTS.md`](ux/DATA_CONTRACTS.md)).
+  - 🟥 **Minimal M3 client slice** — outbox enqueue on fill-up save + flush ([CES-44](https://linear.app/personal-interests-llc/issue/CES-44)); pulled forward for gate only.
+  - 🟥 **Minimal M3 server slice** — `POST /api/v1/mutations` + `GET /api/v1/changes` for `fill_ups` ([CES-43](https://linear.app/personal-interests-llc/issue/CES-43)); dev/staging OK.
+  - 🟥 **Android E2E proof** — offline fill-up → sync → row on server; documented per gate doc.
+  - 🟥 **PWA-lite (iPhone)** — **blocked** on gate; spec [`pwa-lite-v1.md`](../specs/pwa-lite-v1.md).
   - 🟥 **Android APK tag release + install doc** — [`install-android.md`](install-android.md) stub; CI release job TBD.
-  - 🟥 **iOS PWA deploy + install doc** — blocked on spike **GO**; [`install-ios.md`](install-ios.md) stub.
-  - 🟥 **CI `client-web` job** — after spike GO.
+  - 🟥 **iOS PWA-lite deploy + install doc** — [`install-ios.md`](install-ios.md); after gate + implementation.
+  - 🟥 **CI web-lite deploy job** — after PWA-lite ships (post-gate).
   - 🟥 **Compliance / launch-copy** — direct-install + PWA disclosures (Stage 6 overlap OK for counsel).
 
 ### M5 — Hardening + rollback tooling

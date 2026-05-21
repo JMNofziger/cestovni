@@ -50,7 +50,7 @@ Why (short form):
 
 ## Distribution channel note (2026-05-17, ADR 005)
 
-**Flutter web as an iOS distribution channel is in scope for Stage 1** with documented limitations — not a second product, but the installable PWA path for iPhone users while the App Store is deferred. Android remains the **primary native** target ([`005-distribution-channels.md`](005-distribution-channels.md)). Spike gate: [`spike-pwa-offline.md`](../spike-pwa-offline.md).
+**Flutter web is not the iPhone distribution channel.** Stage 1 iPhone uses PWA-lite ([`pwa-lite-v1.md`](../pwa-lite-v1.md), [005 addendum](005-addendum-pwa-lite-ios.md)). Android remains the **primary native** target ([`005-distribution-channels.md`](005-distribution-channels.md)).
 
 ## Revisit gates (when to re-open this ADR)
 
