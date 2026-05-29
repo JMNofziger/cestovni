@@ -1,9 +1,9 @@
 # PWA-lite — iPhone offline fill-up capture (v1)
 
-**Status:** **Blocked — awaiting Android E2E gate** ([`pwa-lite-gate.md`](pwa-lite-gate.md))
+**Status:** **Phase 1 in progress** — gate passed 2026-05-29; offline shell on `feat/pwa-lite-phase1` ([`pwa-lite-gate.md`](pwa-lite-gate.md))
 **ADR:** [005-addendum-pwa-lite-ios.md](adr/005-addendum-pwa-lite-ios.md)
 **Discovery prompt:** [`../product/prompts/pwa-lite-discovery.md`](../product/prompts/pwa-lite-discovery.md) (complete)
-**Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — **PAUSED** until gate passes
+**Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — Phase 1 executing; Phase 2 (sync) deferred
 **Spike archive:** [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/)
 
 ## Goal

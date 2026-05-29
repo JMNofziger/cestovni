@@ -1,8 +1,8 @@
 # Cursor execution prompt — PWA-lite Phase 1+2 (iPhone)
 
-> **PAUSED — do not execute** until all criteria in [`docs/specs/pwa-lite-gate.md`](../../specs/pwa-lite-gate.md) are met on `main`. Option B (2026-05-21): Android E2E proof first.
+> **Gate passed 2026-05-29** (Android E2E proof landed on `feat/m3-outbox-gate-slice`). **Phase 1 executing** on branch `feat/pwa-lite-phase1`; Phase 2 (sync push/pull) deferred to a follow-up.
 
-**Branch:** `main` (create feature branch `feat/pwa-lite-ios` before editing)
+**Branch:** `feat/pwa-lite-phase1` (cut from `feat/m3-outbox-gate-slice`)
 **Spec:** [`docs/specs/pwa-lite-v1.md`](../../specs/pwa-lite-v1.md) — Phase 0 discovery complete (**9 open questions**; defaults below unless product overrides)
 **ADR:** [`docs/specs/adr/005-addendum-pwa-lite-ios.md`](../../specs/adr/005-addendum-pwa-lite-ios.md)
 
@@ -97,6 +97,30 @@ Deploy: `wrangler pages deploy client/web-lite --project-name cestovni-pwa --bra
 - iPhone T1 (offline cold start + log + history): pass/fail + notes
 - Deviations from spec: [none | list]
 - Blockers for Phase 2: [list]
+```
+
+### Phase 1 status — filled (2026-05-29, `feat/pwa-lite-phase1`)
+
+```markdown
+## Phase 1 status
+- Files created: client/web-lite/{index.html, styles.css, app.js, idb.js, sw.js,
+  manifest.json, _headers}, client/web-lite/icons/* (4 PNGs from spike/pwa-offline),
+  client/web-lite/fonts/README.md
+- IndexedDB stores: vehicles, fill_ups (idx vehicle_id, filled_at), outbox
+  (autoinc id, idx row_id), settings (singleton), sync_meta
+- LOC estimate: ~720 (app.js ~390, styles.css ~290, idb.js ~125, index.html ~50, sw.js ~55)
+- Deploy URL: not deployed (Cloudflare Pages deferred; serve locally with
+  `python3 -m http.server` from client/web-lite/)
+- iPhone T1 (offline cold start + log + history): not run on device; desktop
+  smoke pass (SW registers, offline reload serves shell, save → PENDING row)
+- Deviations from spec:
+  - Self-hosted woff2 fonts deferred — CSS uses spec fallback stacks (see fonts/README.md)
+  - Dev-only `?devseed=1` URL param seeds one demo vehicle (no Phase 2 pull yet);
+    without it, zero vehicles correctly shows the blocking empty state
+  - History sync pill stub: PENDING when outbox row exists, else SYNCED (no real
+    flush in Phase 1); header label shows OFFLINE / N PENDING only
+- Blockers for Phase 2: none — outbox rows already carry the frozen Android
+  envelope/payload, ready for POST /api/v1/mutations flush against dev-sync-stub
 ```
 
 ---
