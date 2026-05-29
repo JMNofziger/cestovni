@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1F1B16" />
+    <title>Cestovni</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icons/Icon-192.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand-block">
+          <span class="brand">Cestovni</span>
+          <span id="header-date" class="label-mono"></span>
+        </div>
+        <div class="header-actions">
+          <span id="sync-label" class="label-mono sync-label">OFFLINE</span>
+          <button id="theme-toggle" class="btn-ghost-icon" aria-label="Toggle theme">◐</button>
+        </div>
+      </div>
+      <label class="vehicle-picker">
+        <span class="label-mono">Vehicle</span>
+        <select id="vehicle-select" class="select"></select>
+      </label>
+    </header>
+
+    <main id="app" class="content"></main>
+
+    <nav class="tab-bar">
+      <button id="tab-log" class="tab active">Log</button>
+      <button id="tab-history" class="tab">History</button>
+    </nav>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

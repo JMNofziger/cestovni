@@ -1,0 +1,5 @@
+# Cloudflare Pages headers. Spec: docs/specs/pwa-lite-v1.md §6.
+# Allow the service worker to control the whole origin.
+# Deliberately NO COOP/COEP — those broke iOS offline in the spike.
+/sw.js
+  Service-Worker-Allowed: /
