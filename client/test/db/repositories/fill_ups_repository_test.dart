@@ -4,6 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../_harness.dart';
 
+// Outbox shape + coalescing is covered exhaustively in
+// `outbox_repository_test.dart`; the assertions below are the
+// FillUpsRepository-side contract that each write enqueues exactly
+// one outbox transition (CES-44 gate slice).
+
 void main() {
   group('FillUpsRepository', () {
     test('create() persists every column and respects FK to vehicles',
@@ -162,6 +167,59 @@ void main() {
       );
       expect(wroteAfterDelete, isFalse,
           reason: 'soft-deleted rows are immutable from the UI');
+    });
+
+    test('create / amend / softDelete each enqueue exactly one outbox row '
+        '(CES-44 gate slice)', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      final vehicles = VehiclesRepository(db);
+      final repo = FillUpsRepository(db);
+
+      final vehicleId = await vehicles.create(
+        const VehicleDraft(name: 'A', fuelType: VehicleFuelType.gasoline),
+      );
+
+      final id = await repo.create(
+        FillUpDraft(
+          vehicleId: vehicleId,
+          filledAt: DateTime.utc(2026, 5, 1),
+          odometerM: 1_000_000,
+          volumeUL: 30_000_000,
+          totalPriceCents: 5_000,
+          currencyCode: 'EUR',
+          isFull: true,
+        ),
+      );
+      var rows = await db.select(db.outbox).get();
+      expect(rows.map((r) => r.op), ['insert'],
+          reason: 'exactly one insert row after create');
+
+      // Drain (simulate a successful flush) so the amend/softDelete
+      // assertions read against an empty outbox.
+      await db.delete(db.outbox).go();
+
+      await repo.amend(
+        id,
+        FillUpDraft(
+          vehicleId: vehicleId,
+          filledAt: DateTime.utc(2026, 5, 1),
+          odometerM: 1_000_000,
+          volumeUL: 31_000_000,
+          totalPriceCents: 5_100,
+          currencyCode: 'EUR',
+          isFull: true,
+        ),
+      );
+      rows = await db.select(db.outbox).get();
+      expect(rows.map((r) => r.op), ['update'],
+          reason: 'amend after a synced row enqueues a fresh update');
+
+      await db.delete(db.outbox).go();
+      await repo.softDelete(id);
+      rows = await db.select(db.outbox).get();
+      expect(rows.map((r) => r.op), ['soft_delete']);
+      expect(rows.single.payloadJson, isNull);
     });
   });
 }

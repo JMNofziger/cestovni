@@ -15,6 +15,7 @@ library;
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import 'outbox_repository.dart';
 import 'protocol_writes.dart';
 
 /// Form-time inputs for inserting a fill-up. All canonical SI-INT64
@@ -48,15 +49,22 @@ class FillUpDraft {
 
 class FillUpsRepository {
   FillUpsRepository(
-    this._db, {
+    AppDatabase db, {
     String Function()? newId,
     String Function()? now,
-  })  : _newId = newId ?? newUuid,
-        _now = now ?? nowIsoUtc;
+    OutboxRepository? outbox,
+  })  : _db = db,
+        _newId = newId ?? newUuid,
+        _now = now ?? nowIsoUtc,
+        _outbox = outbox ?? OutboxRepository(db, newId: newId, now: now);
 
   final AppDatabase _db;
   final String Function() _newId;
   final String Function() _now;
+  final OutboxRepository _outbox;
+
+  /// Logical wire name for the outbox `table` column + server payload.
+  static const String _wireTable = 'fill_ups';
 
   // --------------------------------------------------------------- read
 
@@ -98,67 +106,154 @@ class FillUpsRepository {
 
   /// Insert a new fill-up. Caller must have already validated via
   /// `validateInsert` from the consumption module. Returns the new id.
+  ///
+  /// Wraps the local insert + outbox enqueue in a single Drift
+  /// transaction so a crash between them cannot leak a fill-up that
+  /// was never queued for backup (per `sync-protocol.md` §"Fill-up
+  /// lifecycle" `complete` transition).
   Future<String> create(FillUpDraft draft) async {
     final id = _newId();
-    await _db.into(_db.fillUps).insert(
-          FillUpsCompanion(
-            id: Value(id),
-            vehicleId: Value(draft.vehicleId),
-            filledAt: Value(draft.filledAt.toUtc().toIso8601String()),
-            odometerM: Value(draft.odometerM),
-            volumeUL: Value(draft.volumeUL),
-            totalPriceCents: Value(draft.totalPriceCents),
-            currencyCode: Value(draft.currencyCode),
-            isFull: Value(draft.isFull),
-            missedBefore: Value(draft.missedBefore),
-            odometerReset: Value(draft.odometerReset),
-            notes: Value(draft.notes),
-            updatedAt: Value(_now()),
-            mutationId: Value(_newId()),
-          ),
-        );
+    final updatedAt = _now();
+    final rowMutationId = _newId();
+
+    await _db.transaction(() async {
+      await _db.into(_db.fillUps).insert(
+            FillUpsCompanion(
+              id: Value(id),
+              vehicleId: Value(draft.vehicleId),
+              filledAt: Value(draft.filledAt.toUtc().toIso8601String()),
+              odometerM: Value(draft.odometerM),
+              volumeUL: Value(draft.volumeUL),
+              totalPriceCents: Value(draft.totalPriceCents),
+              currencyCode: Value(draft.currencyCode),
+              isFull: Value(draft.isFull),
+              missedBefore: Value(draft.missedBefore),
+              odometerReset: Value(draft.odometerReset),
+              notes: Value(draft.notes),
+              updatedAt: Value(updatedAt),
+              mutationId: Value(rowMutationId),
+            ),
+          );
+      await _outbox.enqueueInsert(
+        table: _wireTable,
+        rowId: id,
+        payload: _payload(
+          id: id,
+          draft: draft,
+          updatedAt: updatedAt,
+          rowMutationId: rowMutationId,
+          deletedAt: null,
+        ),
+      );
+    });
     return id;
   }
 
   /// Amend an existing live fill-up. Returns true if a row was
   /// updated; false if the row is missing or already soft-deleted.
   /// Caller is responsible for re-running validation before calling.
+  ///
+  /// Local update + outbox enqueue happen in one transaction. Pending
+  /// `insert`/`update` rows for the same `row_id` are coalesced inside
+  /// `OutboxRepository.enqueueUpdate` per `sync-protocol.md` §"Fill-up
+  /// lifecycle".
   Future<bool> amend(String id, FillUpDraft draft) async {
-    final updated = await (_db.update(_db.fillUps)
-          ..where((f) => f.id.equals(id) & f.deletedAt.isNull()))
-        .write(
-      FillUpsCompanion(
-        vehicleId: Value(draft.vehicleId),
-        filledAt: Value(draft.filledAt.toUtc().toIso8601String()),
-        odometerM: Value(draft.odometerM),
-        volumeUL: Value(draft.volumeUL),
-        totalPriceCents: Value(draft.totalPriceCents),
-        currencyCode: Value(draft.currencyCode),
-        isFull: Value(draft.isFull),
-        missedBefore: Value(draft.missedBefore),
-        odometerReset: Value(draft.odometerReset),
-        notes: Value(draft.notes),
-        updatedAt: Value(_now()),
-        mutationId: Value(_newId()),
-      ),
-    );
-    return updated > 0;
+    final updatedAt = _now();
+    final rowMutationId = _newId();
+
+    return _db.transaction(() async {
+      final wrote = await (_db.update(_db.fillUps)
+            ..where((f) => f.id.equals(id) & f.deletedAt.isNull()))
+          .write(
+        FillUpsCompanion(
+          vehicleId: Value(draft.vehicleId),
+          filledAt: Value(draft.filledAt.toUtc().toIso8601String()),
+          odometerM: Value(draft.odometerM),
+          volumeUL: Value(draft.volumeUL),
+          totalPriceCents: Value(draft.totalPriceCents),
+          currencyCode: Value(draft.currencyCode),
+          isFull: Value(draft.isFull),
+          missedBefore: Value(draft.missedBefore),
+          odometerReset: Value(draft.odometerReset),
+          notes: Value(draft.notes),
+          updatedAt: Value(updatedAt),
+          mutationId: Value(rowMutationId),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _outbox.enqueueUpdate(
+        table: _wireTable,
+        rowId: id,
+        payload: _payload(
+          id: id,
+          draft: draft,
+          updatedAt: updatedAt,
+          rowMutationId: rowMutationId,
+          deletedAt: null,
+        ),
+      );
+      return true;
+    });
   }
 
   /// Soft-delete: set `deleted_at`. The row stays for export but
   /// drops out of math (per `consumption-math.md` §"Fill-up
   /// lifecycle") and history feeds.
+  ///
+  /// Enqueues an `op=soft_delete` outbox row (payload null) in the
+  /// same transaction. Pending insert/update rows for the same
+  /// `row_id` are dropped before send (a never-synced row needn't
+  /// round-trip insert + delete).
   Future<bool> softDelete(String id) async {
     final ts = _now();
-    final updated = await (_db.update(_db.fillUps)
-          ..where((f) => f.id.equals(id) & f.deletedAt.isNull()))
-        .write(
-      FillUpsCompanion(
-        deletedAt: Value(ts),
-        updatedAt: Value(ts),
-        mutationId: Value(_newId()),
-      ),
-    );
-    return updated > 0;
+    return _db.transaction(() async {
+      final wrote = await (_db.update(_db.fillUps)
+            ..where((f) => f.id.equals(id) & f.deletedAt.isNull()))
+          .write(
+        FillUpsCompanion(
+          deletedAt: Value(ts),
+          updatedAt: Value(ts),
+          mutationId: Value(_newId()),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _outbox.enqueueSoftDelete(
+        table: _wireTable,
+        rowId: id,
+      );
+      return true;
+    });
+  }
+
+  // ----------------------------------------------------------- payload
+
+  /// Build the canonical snake_case JSON-ready payload for `POST
+  /// /mutations` per `docs/specs/sync-protocol.md` §POST /mutations
+  /// example + `pwa-lite-v1.md` §"fill_ups row". Server-hydrated
+  /// columns (`user_id`, `row_version`) are not sent — server assigns
+  /// them.
+  Map<String, dynamic> _payload({
+    required String id,
+    required FillUpDraft draft,
+    required String updatedAt,
+    required String rowMutationId,
+    required String? deletedAt,
+  }) {
+    return <String, dynamic>{
+      'id': id,
+      'vehicle_id': draft.vehicleId,
+      'filled_at': draft.filledAt.toUtc().toIso8601String(),
+      'odometer_m': draft.odometerM,
+      'volume_uL': draft.volumeUL,
+      'total_price_cents': draft.totalPriceCents,
+      'currency_code': draft.currencyCode,
+      'is_full': draft.isFull,
+      'missed_before': draft.missedBefore,
+      'odometer_reset': draft.odometerReset,
+      'notes': draft.notes,
+      'updated_at': updatedAt,
+      'deleted_at': deletedAt,
+      'mutation_id': rowMutationId,
+    };
   }
 }

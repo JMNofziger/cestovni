@@ -115,7 +115,7 @@ PWA-lite chrome (vs full Flutter shell): **header** with brand + date subtitle +
 
 ## 2. Log screen — field map
 
-**Implementation status:** `client/lib/app/pages/log_page.dart` and `history_page.dart` implement the Android contract (CES-39 phase 3; merge to `main` before PWA-lite gate). Normative fields: [`../product/ux/DATA_CONTRACTS.md`](../product/ux/DATA_CONTRACTS.md) §Fill-up entry + [`../product/ux/cestovni-views.md`](../product/ux/cestovni-views.md).
+**Implementation status:** `client/lib/app/pages/log_page.dart` and `history_page.dart` implement the Android contract on `main` (CES-39 phase 3 landed 2026-05). Normative fields: [`../product/ux/DATA_CONTRACTS.md`](../product/ux/DATA_CONTRACTS.md) §Fill-up entry + [`../product/ux/cestovni-views.md`](../product/ux/cestovni-views.md).
 
 ### Fields (display order for PWA-lite)
 
@@ -229,7 +229,7 @@ Mirrors `client/lib/db/tables/outbox.dart` + `sync-protocol.md`:
 | `attempts` | integer | Increment on retry |
 | `last_error` | string \| null | |
 
-**Android status:** `FillUpsRepository.create` writes `fill_ups` only — **does not enqueue outbox yet** (`VehiclesRepository` comment: "M3 will layer the outbox-enqueue side-effect"). PWA-lite will be the first client to implement enqueue + flush.
+**Android status:** `FillUpsRepository.create` / `amend` / `softDelete` now write `fill_ups` **and** enqueue the outbox in a single Drift transaction (CES-44 gate slice, 2026-05-29). `OutboxRepository` coalesces pending updates per `sync-protocol.md` §"Fill-up lifecycle". `vehicles` / `settings` outbox wiring is deferred until after the gate (still no enqueue from `VehiclesRepository`).
 
 **Idempotency:** Protocol uses `mutation_id` in JSON body (`POST /mutations`), **not** an `Idempotency-Key` HTTP header. Server dedupes by `mutation_id`.
 
@@ -327,14 +327,97 @@ See [`pwa-lite-gate.md`](pwa-lite-gate.md) for the testable checklist. PWA-lite 
 
 ## Constraints from Android
 
-Filled when the gate passes — copy from **running Android + M3 slice code**, not speculation:
+Captured at gate pass (2026-05-29) from running Android slice code; PWA-lite must mirror these byte-for-byte so server idempotency works across surfaces.
 
-| Topic | Source (at gate) | Value |
-|-------|------------------|-------|
-| Mutation payload shape | TBD | |
-| Auth header / token storage | TBD | |
-| API path prefix | TBD | |
-| Error codes / retry behavior | TBD | |
+### Mutation payload shape (per `FillUpsRepository._payload`)
+
+Source: `client/lib/db/repositories/fill_ups_repository.dart` (CES-44). Each `mutations[].payload` for `op=insert`/`update` carries these keys; `op=soft_delete` sends `payload: null`.
+
+```json
+{
+  "id": "<uuid v4>",
+  "vehicle_id": "<uuid v4>",
+  "filled_at": "2026-05-29T10:30:00.000Z",
+  "odometer_m": 123456000,
+  "volume_uL": 41500000,
+  "total_price_cents": 5876,
+  "currency_code": "EUR",
+  "is_full": true,
+  "missed_before": false,
+  "odometer_reset": false,
+  "notes": "free text or null",
+  "updated_at": "2026-05-29T10:30:00.000Z",
+  "deleted_at": null,
+  "mutation_id": "<row-level uuid — distinct from outbox enqueue id>"
+}
+```
+
+- All canonical physical columns are **INT64** (`odometer_m`, `volume_uL`, `total_price_cents`) per `si-units.md`. Never JSON-encoded as decimals.
+- `currency_code` matches `GLOB '[A-Z][A-Z][A-Z]'` (Drift CHECK constraint).
+- `notes` is nullable up to 500 chars (DB CHECK).
+- `user_id` and `row_version` are **server-assigned** and never sent by the client.
+
+### Envelope (per `SyncClient._serialize`)
+
+Source: `client/lib/sync/sync_client.dart`. Outbox-derived envelope, batch ≤100 mutations per request:
+
+```json
+{
+  "mutations": [
+    {
+      "mutation_id": "<outbox enqueue id — generated once in OutboxRepository._insertRow, reused on retry>",
+      "table": "fill_ups",
+      "op": "insert | update | soft_delete",
+      "row_id": "<fill_ups.id>",
+      "payload": { /* see above; omitted entirely for soft_delete */ }
+    }
+  ]
+}
+```
+
+### Auth header / token storage
+
+Source: `client/lib/sync/sync_client.dart#postMutations` + `client/lib/sync/sync_config.dart`.
+
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+- Token sourced from compile-time defines (Android M3 slice): `--dart-define=CESTOVNI_SYNC_TOKEN=<bearer>` + `--dart-define=CESTOVNI_SYNC_URL=<base>`. PWA-lite stores its token in `localStorage` (`pwa-lite-phase1-2.md` default #4); same `Authorization: Bearer …` header on the wire.
+- No `Idempotency-Key` HTTP header — idempotency is body-only via `mutation_id`, matching `sync-protocol.md` §"Client outbox" + server stub.
+
+### API paths
+
+| Method | Path                                            | Used by      |
+|--------|-------------------------------------------------|--------------|
+| POST   | `/api/v1/mutations`                             | Push (CES-44 flush worker) |
+| GET    | `/api/v1/changes?table=fill_ups&since=N&limit=N` | Pull (PWA-lite bootstrap) |
+
+Base URL is configurable. Android emulator → host: `http://10.0.2.2:<port>`. Physical Android → laptop on LAN: `http://<host-ip>:<port>` (must use `adb reverse tcp:<port> tcp:<port>` or LAN address; the loopback alias does not apply to USB-tethered devices).
+
+### Error codes / retry behavior
+
+Source: `client/lib/sync/sync_client.dart#_isStatusRetriable` + `outbox_flush_worker.dart`.
+
+| HTTP status | Action                                          |
+|-------------|-------------------------------------------------|
+| 200         | Per-result `applied` / `duplicate` → delete outbox row; `rejected` → record `last_error`, retain row (dead-letter UX is CES-45) |
+| 401         | Retriable (token refresh path) — record `last_error`, retain row |
+| 4xx (others) | Non-retriable — retain row + record error; CES-45 surfaces dead-letter UI |
+| 429         | Retriable — record `last_error`, retain row (no `Retry-After` parsing in gate slice) |
+| 5xx         | Retriable — record `last_error`, retain row    |
+| transport error (no response) | Retriable                          |
+
+PWA-lite must reproduce this matrix and persist `attempts` + `last_error` on each retry attempt.
+
+### Lifecycle coalescing
+
+Source: `OutboxRepository.enqueueUpdate` / `enqueueSoftDelete`.
+
+- Pending **insert** + later **update** for same `row_id` → in-place payload rewrite (server only sees the final snapshot; original `mutation_id` retained).
+- Pending **insert/update** + **soft_delete** for same `row_id` → drop the pending rows, enqueue a fresh `soft_delete` (no point inserting + deleting across the wire if nothing synced).
+- Successful flush deletes the outbox row; future `amend` on the now-synced row enqueues a fresh `update` (no coalescing across the sync boundary).
 
 ## 8. Open questions (deferred to gate)
 
