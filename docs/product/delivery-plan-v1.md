@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** in **Done**, CTO review passed, `verify-full` green on `main`. **Current execution: M1 core done; PWA-lite gate slice in flight.** **CES-38 Done in repo** on `main` (consumption module + 20 golden fixtures + `client/test/consumption/` runner). **CES-39 Done in repo** on `main` (repositories, vehicle CRUD/settings, Log + History UI; 121+ widget/DB tests). **Active:** minimal M3 client/server slice (CES-43/CES-44 gate slice) per [`../specs/pwa-lite-gate.md`](../specs/pwa-lite-gate.md). **CES-39 gate prerequisites Done in repo** — [§ M1 prerequisite — UX gap closure](#m1-prerequisite--ux-gap-closure-blocks-ces-39) (**CES-53**–**CES-56**). **Linear hygiene:** mark gate issues **Done** + drop stale **blocks CES-39** edges. **Still open under M1 (not CES-39 alone):** **CES-40** photo, Metrics/Maint tab UI, settings units/currency (**CES-57**). Parent **CES-35**. M0 follow-ups: **CES-48**, **CES-49** (blocks CES-42), **CES-50** (blocks CES-47). M1 follow-ups: **CES-51**, **CES-52**. Source: Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)**. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** in **Done**, CTO review passed, `verify-full` green on `main`. **M1 core done; PWA-lite Phase 1+2 merged to `main`** (PR #3 + #4, 2026-05-29). **CES-38 Done in repo** on `main` (consumption module + 20 golden fixtures + `client/test/consumption/` runner). **CES-39 Done in repo** on `main` (repositories, vehicle CRUD/settings, Log + History UI; 121+ widget/DB tests). **Active (M-dist):** PWA-lite Pages deploy — [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md). **M3 gate slice done:** dev stub + Android/PWA-lite flush; full **CES-43** / **CES-44** / **CES-45** remain. **CES-39 gate prerequisites Done in repo** — [§ M1 prerequisite — UX gap closure](#m1-prerequisite--ux-gap-closure-blocks-ces-39) (**CES-53**–**CES-56**). **Linear hygiene:** mark gate issues **Done** + drop stale **blocks CES-39** edges. **Still open under M1 (not CES-39 alone):** **CES-40** photo, Metrics/Maint tab UI, settings units/currency (**CES-57**). Parent **CES-35**. M0 follow-ups: **CES-48**, **CES-49** (blocks CES-42), **CES-50** (blocks CES-47). M1 follow-ups: **CES-51**, **CES-52**. Source: Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)**. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -110,9 +110,9 @@ Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.
 
 #### PWA-lite gate
 
-Do not start PWA-lite iPhone work until every item in [`pwa-lite-gate.md`](../specs/pwa-lite-gate.md) is checked on `main`. Execution prompt [`prompts/pwa-lite-phase1-2.md`](prompts/pwa-lite-phase1-2.md) is **PAUSED**.
+PWA-lite gate passed 2026-05-29; **Phase 1+2 merged to `main`** (PR #3 + PR #4). Active execution: [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md). Phase 1+2 prompt [`prompts/pwa-lite-phase1-2.md`](prompts/pwa-lite-phase1-2.md) is **complete** (do not re-run).
 
-- 🟨 **M-dist rollup** — Android-first; **PWA-lite gate passed 2026-05-29** (dev stub + flush worker); APK release + iPhone PWA-lite implementation still ahead.
+- 🟨 **M-dist rollup** — Android-first; gate + PWA-lite Phase 1+2 done; **Pages deploy + install doc** next; production API (CES-43) parallel track.
   - 🟩 **ADR 005 + brief + Glitchtip addendum** — accepted 2026-05-17.
   - 🟩 **Weekly native iOS CI paused** — [`ci/paused/verify-ios-weekly.yml`](../../ci/paused/verify-ios-weekly.yml) (no GitHub triggers until App Store re-scoped).
   - 🟩 **PWA offline spike** — NO-GO; archived [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
@@ -120,10 +120,10 @@ Do not start PWA-lite iPhone work until every item in [`pwa-lite-gate.md`](../sp
   - 🟩 **Minimal M3 client slice** — outbox enqueue on fill-up save + flush ([CES-44](https://linear.app/personal-interests-llc/issue/CES-44)); landed on branch `feat/m3-outbox-gate-slice` (2026-05-29). Files: `client/lib/db/repositories/outbox_repository.dart`, `client/lib/sync/{sync_client,sync_config,outbox_flush_worker}.dart`, Debug Sync-now button.
   - 🟩 **Minimal M3 server slice** — `POST /api/v1/mutations` + `GET /api/v1/changes` for `fill_ups` ([CES-43](https://linear.app/personal-interests-llc/issue/CES-43)) — `server/dev-sync-stub/` Node, zero-dep dev stub (2026-05-29); real M3 server still TBD.
   - 🟩 **Android E2E proof** — offline fill-up → flush → row on server; recorded in [`pwa-lite-gate.md`](../specs/pwa-lite-gate.md) §"Recorded proof"; reproducible via `CESTOVNI_E2E=1 flutter test test/sync/e2e_against_stub_test.dart`.
-  - 🟨 **PWA-lite (iPhone)** — **unblocked** (gate passed 2026-05-29); execution prompt [`prompts/pwa-lite-phase1-2.md`](prompts/pwa-lite-phase1-2.md) remains PAUSED until product unpauses.
+  - 🟩 **PWA-lite Phase 1+2 (iPhone)** — **Done in repo on `main`** (2026-05-29): `client/web-lite/` offline Log + History + sync (`sync.js`); PR #3 + #4; desktop E2E vs dev stub. Linear [CES-62](https://linear.app/personal-interests-llc/issue/CES-62) — implementation complete; iPhone T1 + deploy remain.
+  - 🟨 **iOS PWA-lite deploy + install doc** — [`install-ios.md`](install-ios.md) + [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md); Cloudflare Pages preview; wire `CESTOVNI_API_BASE` to reachable stub/API.
+  - 🟥 **CI web-lite deploy job** — after preview URL is stable (same phase as deploy prompt).
   - 🟥 **Android APK tag release + install doc** — [`install-android.md`](install-android.md) stub; CI release job TBD.
-  - 🟥 **iOS PWA-lite deploy + install doc** — [`install-ios.md`](install-ios.md); after gate + implementation.
-  - 🟥 **CI web-lite deploy job** — after PWA-lite ships (post-gate).
   - 🟥 **Compliance / launch-copy** — direct-install + PWA disclosures (Stage 6 overlap OK for counsel).
 
 ### M5 — Hardening + rollback tooling

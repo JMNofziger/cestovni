@@ -1,6 +1,6 @@
 # Installing Cestovni on iPhone (Stage 1 PWA-lite)
 
-**Status:** **Blocked** — available after [`pwa-lite-gate.md`](../specs/pwa-lite-gate.md) passes and PWA-lite implementation ships ([`pwa-lite-v1.md`](../specs/pwa-lite-v1.md)).
+**Status:** **Draft** — PWA-lite Phase 1+2 shipped on `main` (PR #3 + #4). Finalize this doc when Cloudflare Pages preview deploy lands ([`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md)).
 
 iPhone users install Cestovni as a **web app** (Add to Home Screen), not from the App Store. See [ADR 005 addendum](../specs/adr/005-addendum-pwa-lite-ios.md) for capability limits vs Android native.
 

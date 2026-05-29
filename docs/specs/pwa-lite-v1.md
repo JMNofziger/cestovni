@@ -1,9 +1,9 @@
 # PWA-lite — iPhone offline fill-up capture (v1)
 
-**Status:** **Phase 2 (sync) in progress** — Phase 1 offline shell merged to `main` (PR #3, `d10c115`); Phase 2 push/pull on `feat/pwa-lite-phase2` ([`pwa-lite-gate.md`](pwa-lite-gate.md))
+**Status:** **Phase 1+2 complete on `main`** (2026-05-29) — PR #3 (`d10c115`) offline shell; PR #4 (`8c1f1a8`) sync push/pull vs `server/dev-sync-stub/`. **Next:** Cloudflare Pages preview deploy + iPhone install doc ([`pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md)); production API remains CES-43.
 **ADR:** [005-addendum-pwa-lite-ios.md](adr/005-addendum-pwa-lite-ios.md)
 **Discovery prompt:** [`../product/prompts/pwa-lite-discovery.md`](../product/prompts/pwa-lite-discovery.md) (complete)
-**Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — Phase 1 executing; Phase 2 (sync) deferred
+**Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) (Phase 1+2 — **complete**); [`../product/prompts/pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) (deploy — **active**)
 **Spike archive:** [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/)
 
 ## Goal
@@ -455,5 +455,6 @@ Discovery captured nine product questions in [`../product/prompts/pwa-lite-disco
 | 0 | This document + discovery | Complete |
 | Gate | Android E2E + constraints doc | [`pwa-lite-gate.md`](pwa-lite-gate.md) all items on `main` |
 | 1 | UI + IndexedDB offline shell | **Done** — merged to `main` (PR #3, `d10c115`) |
-| 2 | Sync push/pull (`POST /mutations`, `GET /changes`) | **In progress** — `feat/pwa-lite-phase2`; offline capture → online drain → `SYNCED` verified against `server/dev-sync-stub/` |
-| 3 | Receipt photos | After Phase 1+2 on iPhone |
+| 2 | Sync push/pull (`POST /mutations`, `GET /changes`) | **Done** — merged `main` PR #4 (`8c1f1a8`); desktop E2E vs dev stub; iPhone T1 validated separately by product |
+| 2b | Pages preview deploy + install doc | **Next** — [`pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md); Linear child of CES-62 |
+| 3 | Receipt photos | After deploy + iPhone smoke |

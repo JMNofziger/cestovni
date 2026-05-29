@@ -1,8 +1,8 @@
 # Cursor execution prompt — PWA-lite Phase 1+2 (iPhone)
 
-> **Gate passed 2026-05-29** (Android E2E proof landed on `feat/m3-outbox-gate-slice`). **Phase 1 executing** on branch `feat/pwa-lite-phase1`; Phase 2 (sync push/pull) deferred to a follow-up.
+> **Gate passed 2026-05-29** (Android E2E proof landed on `feat/m3-outbox-gate-slice`). **Phase 1+2 complete on `main`** (PR #3 `d10c115`, PR #4 `8c1f1a8`). **Next execution prompt:** [`pwa-lite-phase3-deploy.md`](pwa-lite-phase3-deploy.md).
 
-**Branch:** `feat/pwa-lite-phase1` (cut from `feat/m3-outbox-gate-slice`)
+**Branch:** merged to `main` — do not re-run Phase 1+2 unless regressing
 **Spec:** [`docs/specs/pwa-lite-v1.md`](../../specs/pwa-lite-v1.md) — Phase 0 discovery complete (**9 open questions**; defaults below unless product overrides)
 **ADR:** [`docs/specs/adr/005-addendum-pwa-lite-ios.md`](../../specs/adr/005-addendum-pwa-lite-ios.md)
 

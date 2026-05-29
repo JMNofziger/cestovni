@@ -51,8 +51,19 @@ Reproducible via `CESTOVNI_E2E=1 flutter test test/sync/e2e_against_stub_test.da
 | Outbox enqueue + flush (minimal) | [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) | Fill-up save → outbox → `POST /mutations` only; full restore/dead-letter (CES-45) after gate |
 | API + auth (minimal) | [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) | `POST /api/v1/mutations` + `GET /api/v1/changes` for `fill_ups` + bearer; full M3 scope remains on issue |
 
+## PWA-lite implementation status (post-gate)
+
+| Phase | Status | Merge |
+|-------|--------|-------|
+| Phase 1 — offline shell | **Done** | PR #3 (`d10c115`) |
+| Phase 2 — sync push/pull | **Done** | PR #4 (`8c1f1a8`) |
+| Phase 2b — Pages deploy + install doc | **Next** | [`pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) |
+
+Desktop proof (2026-05-29): save → outbox → `POST /api/v1/mutations` → `row_version` hydrate → History pill `SYNCED`; transport retry + header-tap manual retry verified. iPhone T1 (airplane mode round-trip) — product validates separately.
+
 ## Related
 
-- [`pwa-lite-v1.md`](pwa-lite-v1.md) — blocked until gate passes
-- [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — **PAUSED**; do not execute
+- [`pwa-lite-v1.md`](pwa-lite-v1.md) — spec + phases table
+- [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — Phase 1+2 execution (**complete**)
+- [`../product/prompts/pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) — deploy execution (**active**)
 - [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/) — Flutter web NO-GO (historical)

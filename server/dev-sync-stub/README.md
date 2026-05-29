@@ -124,6 +124,12 @@ curl -fsS "http://127.0.0.1:8787/api/v1/changes?table=fill_ups&since=0" \
   -H "Authorization: Bearer $TOK"
 ```
 
+## PWA-lite client
+
+`client/web-lite/sync.js` flushes the IndexedDB outbox to this stub by default (`CESTOVNI_API_BASE = http://127.0.0.1:8787`, bearer `dev-cestovni-token` in `localStorage` key `cestovni_token` or `?token=`). CORS is enabled for local static servers and Cloudflare Pages preview origins.
+
+Contract test: `node server/dev-sync-stub/contract.test.js` (spawns stub, posts reference gate IDs, asserts `applied` → `duplicate`).
+
 ## Scope
 
 In scope for the gate (CES-43 gate slice):
