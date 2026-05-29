@@ -24,6 +24,7 @@
 /// ```
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -86,6 +87,24 @@ void main() {
     print('row_id      : $rowId');
     // ignore: avoid_print
     print('mutation_id : $mutationId');
+
+    // Preflight: fail fast with an actionable message if the stub is down.
+    try {
+      final health = await http
+          .get(Uri.parse('$baseUrl/healthz'))
+          .timeout(const Duration(seconds: 2));
+      expect(health.statusCode, 200, reason: 'stub /healthz must return 200');
+    } on SocketException catch (e) {
+      fail(
+        'dev-sync-stub is not reachable at $baseUrl ($e).\n'
+        'Start it first: cd server/dev-sync-stub && node server.js',
+      );
+    } on TimeoutException {
+      fail(
+        'dev-sync-stub did not respond at $baseUrl within 2s.\n'
+        'Start it first: cd server/dev-sync-stub && node server.js',
+      );
+    }
 
     // Step 2: drain the outbox against the running stub.
     final client = SyncClient(baseUrl: baseUrl, bearerToken: bearer);
