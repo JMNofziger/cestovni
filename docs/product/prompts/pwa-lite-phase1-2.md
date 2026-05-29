@@ -167,6 +167,37 @@ Deploy: `wrangler pages deploy client/web-lite --project-name cestovni-pwa --bra
 - Remaining for production (CES-43): [list]
 ```
 
+### Phase 2 status — filled (2026-05-29, `feat/pwa-lite-phase2`)
+
+```markdown
+## Phase 2 status
+- Sync client: done — client/web-lite/sync.js (push drain ≤100 oldest-first +
+  retry matrix/backoff 1s→30s, pull bootstrap settings/vehicles/fill_ups,
+  config CESTOVNI_API_BASE + localStorage cestovni_token + ?token=). Wired in
+  app.js: triggers (online, foreground/visibilitychange, load, after-save,
+  header-tap manual retry), header label SYNCED / N PENDING / OFFLINE — N
+  PENDING, History pills PENDING/SYNCED/ERROR.
+- Dev stub path: server/dev-sync-stub/server.js — added permissive CORS +
+  OPTIONS preflight (local + Pages preview origins); endpoints unchanged.
+- E2E curl proof: contract test (server/dev-sync-stub/contract.test.js) —
+  mutation_id=3b7cea29-7e59-4d11-8842-fe563149b9bf
+  row_id=2ed68a63-2347-4813-9d6e-f903426fa705 row_version=1 (applied → duplicate).
+- iPhone round-trip: not run on device (product validates T1 separately).
+  Desktop browser E2E PASS against running stub: save online → outbox drained,
+  fill_ups.row_version hydrated, label SYNCED; stub-down save → row retained
+  PENDING with attempts=2 + last_error="transport: Failed to fetch" (retriable);
+  stub-up + header-tap retry → outbox drained → History pills flip SYNCED.
+- Files changed: client/web-lite/{sync.js (new), app.js, idb.js, sw.js (v2
+  precache + sync.js), styles.css (.pill-bad)}, server/dev-sync-stub/{server.js,
+  contract.test.js (new)}, docs/specs/pwa-lite-v1.md, this file.
+- Deviations: getToken() falls back to the dev bearer so a clean checkout
+  flushes against the stub without manual token setup; real deployments set
+  localStorage / ?token=. ERROR pill is minimal (dead-letter UX is CES-45).
+- Remaining for production (CES-43): real JWT/OIDC + per-user RLS, Postgres
+  persistence, 429 Retry-After parsing, dead-letter retry sheet (CES-45),
+  Cloudflare Pages deploy + CESTOVNI_API_BASE wiring to the real backend.
+```
+
 ---
 
 ## Testing checklist

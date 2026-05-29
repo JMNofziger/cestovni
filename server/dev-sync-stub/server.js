@@ -272,9 +272,27 @@ function handleChanges(req, res, parsed) {
   });
 }
 
+// Permissive CORS for local dev + Cloudflare Pages previews. The PWA-lite
+// client runs from a different origin (file://localhost http server, Pages
+// preview URL) than the stub, so browser fetch() needs these headers and a
+// preflight handler. Not production-shaped — real CES-43 backend pins origins.
+function setCors(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400');
+}
+
 const server = http.createServer(async (req, res) => {
   const parsed = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const path = parsed.pathname;
+
+  setCors(req, res);
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    return res.end();
+  }
 
   if (req.method === 'GET' && path === '/healthz') {
     return sendJson(res, 200, { ok: true, row_version: rowVersionSeq });

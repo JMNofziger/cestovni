@@ -103,6 +103,62 @@ export async function pendingRowIds() {
   return new Set(rows.map((r) => r.row_id));
 }
 
+// --------------------------------------------------------------------------
+// Phase 2 — sync helpers (push drain, pull upsert, sync_meta, hydrate).
+// Spec: docs/specs/pwa-lite-v1.md §5 + §"Constraints from Android".
+// --------------------------------------------------------------------------
+
+export async function deleteFrom(store, key) {
+  const db = await openDb();
+  const t = tx(db, store, 'readwrite');
+  t.objectStore(store).delete(key);
+  return txDone(t);
+}
+
+// sync_meta value shape: { table, last_since }.
+export async function getSince(table) {
+  const row = await get('sync_meta', table);
+  return row ? row.last_since || 0 : 0;
+}
+
+export async function setSince(table, lastSince) {
+  return put('sync_meta', { table, last_since: lastSince });
+}
+
+// Oldest-first batch of pushable outbox rows (dead-lettered rows excluded so
+// they neither block the queue nor retry forever). Keyed by autoincrement id,
+// which getAll returns in ascending key order — i.e. enqueue order.
+export async function outboxBatch(limit = 100) {
+  const rows = await getAll('outbox');
+  return rows.filter((r) => !r.dead).slice(0, limit);
+}
+
+// Classify outbox rows by row_id for History pills + header label.
+export async function outboxStates() {
+  const rows = await getAll('outbox');
+  const pending = new Set();
+  const dead = new Set();
+  for (const r of rows) {
+    if (r.dead) dead.add(r.row_id);
+    else pending.add(r.row_id);
+  }
+  return { pending, dead, count: rows.length };
+}
+
+// Hydrate server-assigned row_version (+ updated_at) onto a synced local row.
+export async function hydrateRowVersion(store, rowId, rowVersion, serverUpdatedAt) {
+  const db = await openDb();
+  const t = tx(db, store, 'readwrite');
+  const os = t.objectStore(store);
+  const existing = await reqToPromise(os.get(rowId));
+  if (existing) {
+    existing.row_version = rowVersion;
+    if (serverUpdatedAt) existing.updated_at = serverUpdatedAt;
+    os.put(existing);
+  }
+  return txDone(t);
+}
+
 export async function fillUpsForVehicle(vehicleId) {
   const db = await openDb();
   const index = tx(db, 'fill_ups', 'readonly')

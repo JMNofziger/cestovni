@@ -260,6 +260,9 @@ body {
 .pill-good {
   color: var(--c-good);
 }
+.pill-bad {
+  color: var(--c-bad);
+}
 .empty-state p {
   margin: 0 0 8px;
 }

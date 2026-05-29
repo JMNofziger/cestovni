@@ -5,9 +5,10 @@ import {
   get,
   put,
   saveFillUpWithOutbox,
-  pendingRowIds,
+  outboxStates,
   fillUpsForVehicle,
 } from './idb.js';
+import { flushPush, syncNow } from './sync.js';
 
 // ---------------------------------------------------------------------------
 // SI conversion (docs/specs/si-units.md). Canonical = INT64 integers only.
@@ -195,10 +196,17 @@ function renderHeader() {
 }
 
 async function renderSyncLabel() {
-  const ids = await pendingRowIds();
+  const { count } = await outboxStates();
   const el = $('#sync-label');
-  // Phase 1: no network flush. Show OFFLINE / N PENDING only.
-  el.textContent = ids.size > 0 ? `${ids.size} PENDING` : 'OFFLINE';
+  const online = navigator.onLine !== false;
+  // SYNCED / N PENDING / OFFLINE — N PENDING (spec §"Header label").
+  if (count === 0) {
+    el.textContent = 'SYNCED';
+  } else if (online) {
+    el.textContent = `${count} PENDING`;
+  } else {
+    el.textContent = `OFFLINE — ${count} PENDING`;
+  }
 }
 
 function emptyVehicleState() {
@@ -278,7 +286,7 @@ async function renderHistory() {
     </div>`;
     return;
   }
-  const pending = await pendingRowIds();
+  const { pending, dead } = await outboxStates();
   const s = state.settings;
   const vname =
     state.vehicles.find((v) => v.id === state.activeVehicleId)?.name || '';
@@ -292,9 +300,11 @@ async function renderHistory() {
         minute: '2-digit',
         timeZone: s.timezone,
       });
-      const pill = pending.has(r.id)
-        ? '<span class="pill pill-warn">PENDING</span>'
-        : '<span class="pill pill-good">SYNCED</span>';
+      const pill = dead.has(r.id)
+        ? '<span class="pill pill-bad">ERROR</span>'
+        : pending.has(r.id)
+          ? '<span class="pill pill-warn">PENDING</span>'
+          : '<span class="pill pill-good">SYNCED</span>';
       return `<div class="ledger-tile history-row">
         <div class="history-top">
           <span class="label-mono">${date}</span>
@@ -399,6 +409,25 @@ async function onSave(event) {
   okEl.textContent = 'Saved — pending sync.';
   form.querySelector('input[name="odometer"]').focus();
   renderSyncLabel();
+
+  // Offline-first: save never blocks on network. Flush opportunistically.
+  if (navigator.onLine !== false) {
+    flushPush({ onChange: onSyncChange });
+  }
+}
+
+// Re-render the active surface + label after a sync drain/pull updates IDB.
+async function onSyncChange() {
+  await renderSyncLabel();
+  if (state.tab === 'history') await renderHistory();
+}
+
+// Pull caches (vehicles/settings/fill_ups) then refresh vehicle picker, so the
+// zero-vehicle empty state resolves once online without ?devseed=1.
+async function onPullChange() {
+  await loadState();
+  renderHeader();
+  render();
 }
 
 // ---------------------------------------------------------------------------
@@ -448,6 +477,11 @@ async function init() {
     setActiveVehicle(e.target.value),
   );
 
+  // Manual retry: tap the header sync label (no toast spam — spec §"Triggers").
+  $('#sync-label').addEventListener('click', () => {
+    syncNow({ onChange: onPullChange });
+  });
+
   await maybeDevSeed();
   await loadState();
   renderHeader();
@@ -456,6 +490,15 @@ async function init() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
+
+  // Sync triggers: page load/foreground, regained connectivity (spec §"Triggers").
+  syncNow({ onChange: onPullChange });
+  window.addEventListener('online', () => syncNow({ onChange: onPullChange }));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      syncNow({ onChange: onPullChange });
+    }
+  });
 }
 
 init();
