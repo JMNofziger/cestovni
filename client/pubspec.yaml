@@ -28,6 +28,11 @@ dependencies:
   # fonts when the visual language stabilizes (Stage 6 polish).
   google_fonts: ^6.2.1
 
+  # HTTP client for the M3 outbox flush worker (CES-44 gate slice).
+  # Targets the dev sync stub at `server/dev-sync-stub/`; replaced by
+  # the real M3 client once CES-43 lands.
+  http: ^1.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
