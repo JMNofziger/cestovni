@@ -17,7 +17,7 @@ Use this together with:
 - Consumption validation: `client/lib/consumption/` (wired on Log save + History amend)
 - Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 phase 3)
 - Vehicle CRUD: `pages/vehicle_form_page.dart` + list in `pages/settings_page.dart` (phase 2)
-- Settings: vehicle list wired; units/currency/default vehicle deferred (**CES-57**)
+- Settings: vehicle list wired; units/currency/default vehicle wired (**CES-57**)
 - Metrics / Maint tabs: `pages/metrics_page.dart`, `pages/maintenance_page.dart` (stubs)
 - Debug: `pages/debug_page.dart`
 
@@ -30,7 +30,7 @@ Use this together with:
 | History timeline            | Defined          | **Shipped** (fuel)    | `pages/history_page.dart` — list, detail, edit, delete; MAINT chip disabled; flip mode later |
 | Metrics                     | Defined          | Stub                  | `pages/metrics_page.dart`                                 |
 | Maintenance entry + history | Defined          | Stub                  | `pages/maintenance_page.dart`                             |
-| Settings                    | Defined          | Partial               | `pages/settings_page.dart` — vehicle CRUD; prefs **CES-57** |
+| Settings                    | Defined          | **Shipped** (CES-57)  | `pages/settings_page.dart` — vehicle CRUD + units/currency/timezone/default vehicle |
 | Vehicle CRUD                | Defined          | **Shipped** (phase 2) | `pages/vehicle_form_page.dart`                            |
 
 
@@ -49,9 +49,9 @@ Use this together with:
 
 - The header vehicle chip reads live vehicles from the `vehicles` table (`deleted_at IS NULL AND archived_at IS NULL`), ordered by `name`.
 - "Active vehicle" lives in memory for the session (`ActiveVehicle` / `ActiveVehicleScope` in `client/lib/app/active_vehicle.dart`). It persists across tab switches but resets on cold-start; that is the M1 contract.
-- On launch the first live vehicle is selected. If the active id no longer matches a live row (vehicle archived/deleted on another device → re-sync) the chip falls back to the first live vehicle on the next stream emission.
+- On launch `settings.default_vehicle_id` (CES-57) is selected if it still resolves to a live vehicle; otherwise the first live vehicle (alphabetical) wins. See `client/lib/app/shell.dart#_seedActiveVehicle`. If the active id no longer matches a live row (vehicle archived/deleted on another device → re-sync) the chip falls back to the first live vehicle on the next stream emission.
 - If there are no live vehicles the chip shows `NO VEHICLE`. Log/History show **GO TO SETTINGS** empty state (CES-39).
-- `settings.default_vehicle_id` is **not yet** in the schema — tracked as **CES-57** follow-up.
+- `settings.default_vehicle_id` is set from Settings → Preferences → **Default vehicle** (CES-57).
 
 ---
 

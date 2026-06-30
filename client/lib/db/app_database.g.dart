@@ -3631,6 +3631,21 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _defaultVehicleIdMeta = const VerificationMeta(
+    'defaultVehicleId',
+  );
+  @override
+  late final GeneratedColumn<String> defaultVehicleId = GeneratedColumn<String>(
+    'default_vehicle_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 36,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3643,6 +3658,7 @@ class $AppSettingsTable extends AppSettings
     preferredVolumeUnit,
     currencyCode,
     timezone,
+    defaultVehicleId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3736,6 +3752,15 @@ class $AppSettingsTable extends AppSettings
     } else if (isInserting) {
       context.missing(_timezoneMeta);
     }
+    if (data.containsKey('default_vehicle_id')) {
+      context.handle(
+        _defaultVehicleIdMeta,
+        defaultVehicleId.isAcceptableOrUnknown(
+          data['default_vehicle_id']!,
+          _defaultVehicleIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3785,6 +3810,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.string,
         data['${effectivePrefix}timezone'],
       )!,
+      defaultVehicleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_vehicle_id'],
+      ),
     );
   }
 
@@ -3819,6 +3848,14 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   final String preferredVolumeUnit;
   final String currencyCode;
   final String timezone;
+
+  /// Optional FK-by-convention to `vehicles.id` (CES-57). No SQLite FK
+  /// constraint on purpose: a stale id (vehicle later soft-deleted or
+  /// archived) must remain a legal value here rather than blocking a
+  /// settings write. `shell.dart#_seedActiveVehicle` re-validates
+  /// against the live vehicle list before honoring it, falling back
+  /// to "first vehicle alphabetically" otherwise.
+  final String? defaultVehicleId;
   const SettingsRow({
     required this.id,
     this.userId,
@@ -3830,6 +3867,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     required this.preferredVolumeUnit,
     required this.currencyCode,
     required this.timezone,
+    this.defaultVehicleId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3850,6 +3888,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     map['preferred_volume_unit'] = Variable<String>(preferredVolumeUnit);
     map['currency_code'] = Variable<String>(currencyCode);
     map['timezone'] = Variable<String>(timezone);
+    if (!nullToAbsent || defaultVehicleId != null) {
+      map['default_vehicle_id'] = Variable<String>(defaultVehicleId);
+    }
     return map;
   }
 
@@ -3871,6 +3912,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       preferredVolumeUnit: Value(preferredVolumeUnit),
       currencyCode: Value(currencyCode),
       timezone: Value(timezone),
+      defaultVehicleId: defaultVehicleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(defaultVehicleId),
     );
   }
 
@@ -3894,6 +3938,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       ),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
       timezone: serializer.fromJson<String>(json['timezone']),
+      defaultVehicleId: serializer.fromJson<String?>(json['defaultVehicleId']),
     );
   }
   @override
@@ -3910,6 +3955,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'preferredVolumeUnit': serializer.toJson<String>(preferredVolumeUnit),
       'currencyCode': serializer.toJson<String>(currencyCode),
       'timezone': serializer.toJson<String>(timezone),
+      'defaultVehicleId': serializer.toJson<String?>(defaultVehicleId),
     };
   }
 
@@ -3924,6 +3970,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     String? preferredVolumeUnit,
     String? currencyCode,
     String? timezone,
+    Value<String?> defaultVehicleId = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     userId: userId.present ? userId.value : this.userId,
@@ -3935,6 +3982,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     preferredVolumeUnit: preferredVolumeUnit ?? this.preferredVolumeUnit,
     currencyCode: currencyCode ?? this.currencyCode,
     timezone: timezone ?? this.timezone,
+    defaultVehicleId: defaultVehicleId.present
+        ? defaultVehicleId.value
+        : this.defaultVehicleId,
   );
   SettingsRow copyWithCompanion(AppSettingsCompanion data) {
     return SettingsRow(
@@ -3958,6 +4008,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ? data.currencyCode.value
           : this.currencyCode,
       timezone: data.timezone.present ? data.timezone.value : this.timezone,
+      defaultVehicleId: data.defaultVehicleId.present
+          ? data.defaultVehicleId.value
+          : this.defaultVehicleId,
     );
   }
 
@@ -3973,7 +4026,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('preferredDistanceUnit: $preferredDistanceUnit, ')
           ..write('preferredVolumeUnit: $preferredVolumeUnit, ')
           ..write('currencyCode: $currencyCode, ')
-          ..write('timezone: $timezone')
+          ..write('timezone: $timezone, ')
+          ..write('defaultVehicleId: $defaultVehicleId')
           ..write(')'))
         .toString();
   }
@@ -3990,6 +4044,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     preferredVolumeUnit,
     currencyCode,
     timezone,
+    defaultVehicleId,
   );
   @override
   bool operator ==(Object other) =>
@@ -4004,7 +4059,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.preferredDistanceUnit == this.preferredDistanceUnit &&
           other.preferredVolumeUnit == this.preferredVolumeUnit &&
           other.currencyCode == this.currencyCode &&
-          other.timezone == this.timezone);
+          other.timezone == this.timezone &&
+          other.defaultVehicleId == this.defaultVehicleId);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -4018,6 +4074,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<String> preferredVolumeUnit;
   final Value<String> currencyCode;
   final Value<String> timezone;
+  final Value<String?> defaultVehicleId;
   final Value<int> rowid;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
@@ -4030,6 +4087,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.preferredVolumeUnit = const Value.absent(),
     this.currencyCode = const Value.absent(),
     this.timezone = const Value.absent(),
+    this.defaultVehicleId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AppSettingsCompanion.insert({
@@ -4043,6 +4101,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     required String preferredVolumeUnit,
     required String currencyCode,
     required String timezone,
+    this.defaultVehicleId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        updatedAt = Value(updatedAt),
@@ -4062,6 +4121,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<String>? preferredVolumeUnit,
     Expression<String>? currencyCode,
     Expression<String>? timezone,
+    Expression<String>? defaultVehicleId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4077,6 +4137,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
         'preferred_volume_unit': preferredVolumeUnit,
       if (currencyCode != null) 'currency_code': currencyCode,
       if (timezone != null) 'timezone': timezone,
+      if (defaultVehicleId != null) 'default_vehicle_id': defaultVehicleId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4092,6 +4153,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<String>? preferredVolumeUnit,
     Value<String>? currencyCode,
     Value<String>? timezone,
+    Value<String?>? defaultVehicleId,
     Value<int>? rowid,
   }) {
     return AppSettingsCompanion(
@@ -4106,6 +4168,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       preferredVolumeUnit: preferredVolumeUnit ?? this.preferredVolumeUnit,
       currencyCode: currencyCode ?? this.currencyCode,
       timezone: timezone ?? this.timezone,
+      defaultVehicleId: defaultVehicleId ?? this.defaultVehicleId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4147,6 +4210,9 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     if (timezone.present) {
       map['timezone'] = Variable<String>(timezone.value);
     }
+    if (defaultVehicleId.present) {
+      map['default_vehicle_id'] = Variable<String>(defaultVehicleId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4166,6 +4232,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('preferredVolumeUnit: $preferredVolumeUnit, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('timezone: $timezone, ')
+          ..write('defaultVehicleId: $defaultVehicleId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8444,6 +8511,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       required String preferredVolumeUnit,
       required String currencyCode,
       required String timezone,
+      Value<String?> defaultVehicleId,
       Value<int> rowid,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
@@ -8458,6 +8526,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> preferredVolumeUnit,
       Value<String> currencyCode,
       Value<String> timezone,
+      Value<String?> defaultVehicleId,
       Value<int> rowid,
     });
 
@@ -8517,6 +8586,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get timezone => $composableBuilder(
     column: $table.timezone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultVehicleId => $composableBuilder(
+    column: $table.defaultVehicleId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -8579,6 +8653,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.timezone,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get defaultVehicleId => $composableBuilder(
+    column: $table.defaultVehicleId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -8629,6 +8708,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get timezone =>
       $composableBuilder(column: $table.timezone, builder: (column) => column);
+
+  GeneratedColumn<String> get defaultVehicleId => $composableBuilder(
+    column: $table.defaultVehicleId,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -8672,6 +8756,7 @@ class $$AppSettingsTableTableManager
                 Value<String> preferredVolumeUnit = const Value.absent(),
                 Value<String> currencyCode = const Value.absent(),
                 Value<String> timezone = const Value.absent(),
+                Value<String?> defaultVehicleId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
@@ -8684,6 +8769,7 @@ class $$AppSettingsTableTableManager
                 preferredVolumeUnit: preferredVolumeUnit,
                 currencyCode: currencyCode,
                 timezone: timezone,
+                defaultVehicleId: defaultVehicleId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8698,6 +8784,7 @@ class $$AppSettingsTableTableManager
                 required String preferredVolumeUnit,
                 required String currencyCode,
                 required String timezone,
+                Value<String?> defaultVehicleId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
@@ -8710,6 +8797,7 @@ class $$AppSettingsTableTableManager
                 preferredVolumeUnit: preferredVolumeUnit,
                 currencyCode: currencyCode,
                 timezone: timezone,
+                defaultVehicleId: defaultVehicleId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

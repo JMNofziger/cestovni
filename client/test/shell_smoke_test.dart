@@ -2,6 +2,7 @@ import 'package:cestovni/app/app.dart';
 import 'package:cestovni/app/active_vehicle.dart';
 import 'package:cestovni/app/theme/cestovni_typography.dart';
 import 'package:cestovni/db/app_database.dart';
+import 'package:cestovni/db/repositories/settings_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -93,6 +94,63 @@ void main() {
     await tester.pump();
 
     expect(find.text('DAILY DRIVER'), findsOneWidget);
+
+    await _drainAndClose(tester, db);
+  });
+
+  testWidgets(
+      'CES-57: settings.defaultVehicleId wins over first-alphabetically '
+      'when it resolves to a live vehicle', (tester) async {
+    final db = AppDatabase.withExecutor(NativeDatabase.memory());
+    await db.into(db.vehicles).insert(VehiclesCompanion.insert(
+          id: '11111111-1111-4111-8111-111111111111',
+          name: 'Alpha',
+          fuelType: 'gasoline',
+          updatedAt: DateTime.now().toUtc().toIso8601String(),
+          mutationId: '22222222-2222-4222-8222-222222222222',
+        ));
+    await db.into(db.vehicles).insert(VehiclesCompanion.insert(
+          id: '33333333-3333-4333-8333-333333333333',
+          name: 'Zulu',
+          fuelType: 'gasoline',
+          updatedAt: DateTime.now().toUtc().toIso8601String(),
+          mutationId: '44444444-4444-4444-8444-444444444444',
+        ));
+    await SettingsRepository(db).update(
+      defaultVehicleId: '33333333-3333-4333-8333-333333333333',
+    );
+
+    await tester.pumpWidget(CestovniApp(db: db));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('ZULU'), findsOneWidget,
+        reason: 'default vehicle wins over "Alpha" despite alpha order');
+
+    await _drainAndClose(tester, db);
+  });
+
+  testWidgets(
+      'CES-57: a stale defaultVehicleId (no longer live) falls back to '
+      'first vehicle alphabetically', (tester) async {
+    final db = AppDatabase.withExecutor(NativeDatabase.memory());
+    await db.into(db.vehicles).insert(VehiclesCompanion.insert(
+          id: '11111111-1111-4111-8111-111111111111',
+          name: 'Daily Driver',
+          fuelType: 'gasoline',
+          updatedAt: DateTime.now().toUtc().toIso8601String(),
+          mutationId: '22222222-2222-4222-8222-222222222222',
+        ));
+    await SettingsRepository(db).update(
+      defaultVehicleId: '99999999-9999-4999-8999-999999999999',
+    );
+
+    await tester.pumpWidget(CestovniApp(db: db));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('DAILY DRIVER'), findsOneWidget,
+        reason: 'stale id ignored; first live vehicle wins');
 
     await _drainAndClose(tester, db);
   });

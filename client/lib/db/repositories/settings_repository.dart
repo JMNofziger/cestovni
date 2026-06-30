@@ -23,6 +23,16 @@ const _defaultVolumeUnit = 'L';
 const _defaultCurrencyCode = 'EUR';
 const _defaultTimezone = 'UTC';
 
+/// Sentinel for [SettingsRepository.update]'s `defaultVehicleId` param
+/// so callers can distinguish three states with one nullable field:
+/// omit the arg ("leave unchanged"), pass `null` explicitly ("clear
+/// to no default"), or pass an id ("set"). `VehiclesRepository` solves
+/// the same ambiguity for `archivedAt` with a dedicated `unarchive()`
+/// method; a sentinel default is used here instead because this is a
+/// single optional field on a multi-field `update()`, not its own
+/// verb-shaped method.
+const Object _unset = Object();
+
 class SettingsRepository {
   SettingsRepository(
     this._db, {
@@ -50,14 +60,21 @@ class SettingsRepository {
     return _db.select(_db.appSettings).watchSingleOrNull();
   }
 
-  /// Update preferences in place. Pass `null` to leave a field
-  /// unchanged. Bootstraps the row first if necessary so the UI never
-  /// has to special-case "settings not yet created".
+  /// Update preferences in place. Pass `null` to leave
+  /// `preferredDistanceUnit` / `preferredVolumeUnit` / `currencyCode` /
+  /// `timezone` unchanged (those four columns are NOT NULL, so there
+  /// is no "clear" state to represent). `defaultVehicleId` is nullable
+  /// in the schema, so it follows a three-state convention instead:
+  /// omit the argument to leave it unchanged, pass `null` to explicitly
+  /// clear it, or pass an id to set it (see `_unset` sentinel above).
+  /// Bootstraps the row first if necessary so the UI never has to
+  /// special-case "settings not yet created".
   Future<SettingsRow> update({
     String? preferredDistanceUnit,
     String? preferredVolumeUnit,
     String? currencyCode,
     String? timezone,
+    Object? defaultVehicleId = _unset,
   }) async {
     final row = await getOrBootstrap();
     await (_db.update(_db.appSettings)..where((s) => s.id.equals(row.id)))
@@ -74,6 +91,9 @@ class SettingsRepository {
             : Value(currencyCode),
         timezone:
             timezone == null ? const Value.absent() : Value(timezone),
+        defaultVehicleId: identical(defaultVehicleId, _unset)
+            ? const Value.absent()
+            : Value(defaultVehicleId as String?),
         updatedAt: Value(_now()),
         mutationId: Value(_newId()),
       ),
