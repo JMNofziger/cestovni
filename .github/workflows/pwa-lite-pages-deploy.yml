@@ -1,0 +1,44 @@
+# Cloudflare Pages deploy for the build-step-free PWA-lite client.
+#
+# Minute discipline: scoped via `paths` to client/web-lite/** only — does not
+# run for any other change, and is fully independent of verify-fast.yml /
+# verify-full.yml (Flutter + telemetry gates are untouched and unblocked by
+# this workflow either passing or failing).
+#
+# Pushes to a feature branch (or a pull_request) get a Cloudflare-generated
+# preview URL; pushes to `main` deploy to the production alias for the
+# `cestovni-pwa` Pages project. See docs/product/pwa-lite-deploy-runbook.md
+# for the manual deploy path and required secrets.
+
+name: 'PWA-lite Pages deploy'
+
+on:
+  push:
+    paths:
+      - 'client/web-lite/**'
+  pull_request:
+    paths:
+      - 'client/web-lite/**'
+  workflow_dispatch:
+
+concurrency:
+  group: pwa-lite-pages-deploy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy client/web-lite to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy client/web-lite --project-name=cestovni-pwa
