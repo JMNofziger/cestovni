@@ -136,5 +136,25 @@ List<MigrationStep> schemaSteps(Iterable<TableInfo> allTables) {
         );
       },
     ),
+    MigrationStep(
+      from: 2,
+      to: 3,
+      name: '0003_settings_default_vehicle_id',
+      // Closes CES-57 — see docs/specs/data-model.md §settings and
+      // client/lib/db/tables/settings.dart. A plain nullable column
+      // add: no NOT NULL/CHECK relaxation is involved (contrast 0002),
+      // so a simple ALTER suffices and no table rebuild is needed.
+      up: (m) async {
+        await m.database.customStatement(
+          'ALTER TABLE settings ADD COLUMN default_vehicle_id TEXT NULL',
+        );
+      },
+      // Rollback hook for CES-47.
+      down: (m) async {
+        await m.database.customStatement(
+          'ALTER TABLE settings DROP COLUMN default_vehicle_id',
+        );
+      },
+    ),
   ];
 }

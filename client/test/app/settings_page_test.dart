@@ -2,6 +2,7 @@ import 'package:cestovni/app/active_vehicle.dart';
 import 'package:cestovni/app/pages/settings_page.dart';
 import 'package:cestovni/app/theme/cestovni_typography.dart';
 import 'package:cestovni/db/app_database.dart';
+import 'package:cestovni/db/repositories/settings_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -144,6 +145,200 @@ void main() {
         reason: 'deleting the active vehicle must clear ActiveVehicle');
 
     await _drainAndClose(tester, db);
+  });
+
+  group('CES-57 Preferences section', () {
+    testWidgets('distance unit tile opens a picker and persists the choice',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      await settings.getOrBootstrap();
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Kilometers (km)'), findsOneWidget);
+
+      await tester.tap(find.text('Kilometers (km)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Miles (mi)'));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      final row = await settings.getOrBootstrap();
+      expect(row.preferredDistanceUnit, 'mi');
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets('volume unit tile opens a picker and persists the choice',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      await settings.getOrBootstrap();
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Liters (L)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Gallons (gal)'));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      final row = await settings.getOrBootstrap();
+      expect(row.preferredVolumeUnit, 'gal');
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets('currency tile opens a dialog and persists a valid code',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      await settings.getOrBootstrap();
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('EUR'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField), 'czk');
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      final row = await settings.getOrBootstrap();
+      expect(row.currencyCode, 'CZK', reason: 'normalized to uppercase');
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets('currency dialog rejects an invalid code', (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      await settings.getOrBootstrap();
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('EUR'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField), 'X');
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a 3-letter ISO-4217 code (e.g. EUR).'),
+        findsOneWidget,
+      );
+      final row = await settings.getOrBootstrap();
+      expect(row.currencyCode, 'EUR', reason: 'invalid input rejected');
+
+      // Dismiss the still-open dialog before tearing down — leaving it
+      // mounted across the root-widget swap in `_drainAndClose` can
+      // bleed pending focus/scheduler callbacks into the next test.
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.pumpAndSettle();
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets('timezone tile opens a dialog and persists a new value',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      await settings.getOrBootstrap();
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('UTC'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField), 'Europe/Prague');
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      final row = await settings.getOrBootstrap();
+      expect(row.timezone, 'Europe/Prague');
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets(
+        'default vehicle tile picks a live vehicle and persists its id',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      await settings.getOrBootstrap();
+      final vehicleId = await VehiclesRepository(db).create(
+        const VehicleDraft(name: 'Octavia', fuelType: VehicleFuelType.gasoline),
+      );
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('None — first vehicle wins'), findsOneWidget);
+
+      await tester.tap(find.text('Default vehicle'));
+      await tester.pumpAndSettle();
+      // "Octavia" also appears in the Vehicles CRUD section above the
+      // Preferences section; the bottom-sheet copy is the last match.
+      await tester.tap(find.text('Octavia').last);
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      final row = await settings.getOrBootstrap();
+      expect(row.defaultVehicleId, vehicleId);
+      expect(find.text('Octavia'), findsWidgets);
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets('default vehicle tile clears back to None', (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      final settings = SettingsRepository(db);
+      final vehicleId = await VehiclesRepository(db).create(
+        const VehicleDraft(name: 'Octavia', fuelType: VehicleFuelType.gasoline),
+      );
+      await settings.update(defaultVehicleId: vehicleId);
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Octavia'), findsWidgets);
+
+      await tester.tap(find.text('Default vehicle'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('None — first vehicle wins'));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      final row = await settings.getOrBootstrap();
+      expect(row.defaultVehicleId, isNull);
+
+      await _drainAndClose(tester, db);
+    });
   });
 }
 

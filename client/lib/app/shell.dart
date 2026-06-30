@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../db/app_database.dart';
+import '../db/repositories/settings_repository.dart';
 import 'active_vehicle.dart';
 import 'pages/history_page.dart';
 import 'pages/log_page.dart';
@@ -36,6 +37,7 @@ class CestovniShell extends StatefulWidget {
 
 class _CestovniShellState extends State<CestovniShell> {
   late final VehicleRepository _vehicles;
+  late final SettingsRepository _settings;
   late final ActiveVehicle _activeVehicle;
   late final Stream<List<VehicleRow>> _liveVehicles;
   int _index = 0;
@@ -45,6 +47,7 @@ class _CestovniShellState extends State<CestovniShell> {
   void initState() {
     super.initState();
     _vehicles = VehicleRepository(widget.db);
+    _settings = SettingsRepository(widget.db);
     _activeVehicle = ActiveVehicle();
     // `watchLive()` returns a new stream on every call; memoize once
     // so the StreamBuilder below is not re-subscribed on every
@@ -53,10 +56,20 @@ class _CestovniShellState extends State<CestovniShell> {
     _seedActiveVehicle();
   }
 
+  /// CES-57: `settings.defaultVehicleId` wins over "first vehicle
+  /// alphabetically" on cold start, but only while it still resolves
+  /// to a **live** (non-deleted, non-archived) vehicle — a stale id
+  /// pointing at a deleted/archived vehicle falls back to the
+  /// ordering rule below rather than seeding a dead selection.
   Future<void> _seedActiveVehicle() async {
     final live = await _vehicles.liveOnce();
     if (!mounted || live.isEmpty) return;
-    _activeVehicle.setVehicleId(live.first.id);
+    final settings = await _settings.getOrBootstrap();
+    if (!mounted) return;
+    final defaultId = settings.defaultVehicleId;
+    final defaultIsLive =
+        defaultId != null && live.any((v) => v.id == defaultId);
+    _activeVehicle.setVehicleId(defaultIsLive ? defaultId : live.first.id);
   }
 
   @override

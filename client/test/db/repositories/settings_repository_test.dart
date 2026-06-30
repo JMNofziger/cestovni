@@ -19,6 +19,8 @@ void main() {
       expect(row.timezone, 'UTC');
       expect(row.id.length, 36, reason: 'UUIDv4 is 36 chars');
       expect(row.mutationId, isNotEmpty);
+      expect(row.defaultVehicleId, isNull,
+          reason: 'CES-57: no default vehicle until explicitly set');
     });
 
     test('getOrBootstrap() is idempotent', () async {
@@ -58,6 +60,47 @@ void main() {
       final row = await repo.update(timezone: 'America/Los_Angeles');
       expect(row.timezone, 'America/Los_Angeles');
       expect(row.currencyCode, 'EUR', reason: 'default kept on bootstrap path');
+    });
+
+    group('defaultVehicleId (CES-57)', () {
+      test('omitting the param leaves defaultVehicleId unchanged', () async {
+        final db = openInMemoryDb();
+        addTearDown(db.close);
+        final repo = SettingsRepository(db);
+        const vehicleId = '00000000-0000-4000-8000-000000000001';
+
+        await repo.update(defaultVehicleId: vehicleId);
+        final row = await repo.update(currencyCode: 'CZK');
+
+        expect(row.defaultVehicleId, vehicleId,
+            reason: 'omitted arg must not clobber a previously set value');
+        expect(row.currencyCode, 'CZK');
+      });
+
+      test('passing a vehicle id sets defaultVehicleId', () async {
+        final db = openInMemoryDb();
+        addTearDown(db.close);
+        final repo = SettingsRepository(db);
+        const vehicleId = '00000000-0000-4000-8000-000000000002';
+
+        final row = await repo.update(defaultVehicleId: vehicleId);
+
+        expect(row.defaultVehicleId, vehicleId);
+      });
+
+      test('passing explicit null clears a previously set defaultVehicleId',
+          () async {
+        final db = openInMemoryDb();
+        addTearDown(db.close);
+        final repo = SettingsRepository(db);
+        const vehicleId = '00000000-0000-4000-8000-000000000003';
+
+        await repo.update(defaultVehicleId: vehicleId);
+        final cleared = await repo.update(defaultVehicleId: null);
+
+        expect(cleared.defaultVehicleId, isNull,
+            reason: 'explicit null must distinguish "clear" from "omit"');
+      });
     });
   });
 }
