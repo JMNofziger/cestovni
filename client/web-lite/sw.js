@@ -1,6 +1,6 @@
 // Offline shell precache. Spec: docs/specs/pwa-lite-v1.md §6.
 // Cache-first for same-origin GET; navigation fallback to index.html.
-const CACHE = 'cestovni-lite-v2';
+const CACHE = 'cestovni-lite-v3';
 const SHELL = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const SHELL = [
   './app.js',
   './idb.js',
   './sync.js',
+  './config.js',
   './manifest.json',
   './icons/Icon-192.png',
   './icons/Icon-512.png',

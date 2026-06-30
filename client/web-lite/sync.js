@@ -15,34 +15,64 @@ import {
 } from './idb.js';
 
 // ---------------------------------------------------------------------------
-// Config — base URL + bearer token.
+// Config — base URL + bearer token. Runtime override via window.CESTOVNI_CONFIG
+// (client/web-lite/config.js), falling back to this constant if it's absent
+// so offline-first behavior survives a failed/missing config.js load.
 // ---------------------------------------------------------------------------
 export const CESTOVNI_API_BASE = 'http://127.0.0.1:8787';
 const TOKEN_KEY = 'cestovni_token';
+const API_BASE_KEY = 'cestovni_api_base';
 const DEV_TOKEN = 'dev-cestovni-token';
 
-// `?token=` bootstraps localStorage once (then the param can be dropped).
-(function bootstrapTokenFromUrl() {
+// `?token=` / `?api_base=` bootstrap localStorage once (then the param can
+// be dropped).
+(function bootstrapFromUrl() {
   try {
-    const t = new URLSearchParams(location.search).get('token');
+    const params = new URLSearchParams(location.search);
+    const t = params.get('token');
     if (t) localStorage.setItem(TOKEN_KEY, t);
+    const b = params.get('api_base');
+    if (b) localStorage.setItem(API_BASE_KEY, b);
   } catch (_) {
     /* non-browser / no location — ignore */
   }
 })();
 
 function apiBase() {
-  return CESTOVNI_API_BASE;
+  try {
+    const stored = localStorage.getItem(API_BASE_KEY);
+    if (stored) return stored;
+  } catch (_) {
+    /* ignore */
+  }
+  return (
+    (typeof window !== 'undefined' && window.CESTOVNI_CONFIG?.apiBase) ||
+    CESTOVNI_API_BASE
+  );
 }
 
-// Fall back to the dev bearer so a clean checkout flushes against the stub
-// without manual setup; real deployments set localStorage / ?token=.
+// Dev bearer fallback is gated by config.js so it can be disabled before any
+// public non-dev URL ships; real deployments set localStorage / ?token=.
 function getToken() {
+  let stored;
   try {
-    return localStorage.getItem(TOKEN_KEY) || DEV_TOKEN;
+    stored = localStorage.getItem(TOKEN_KEY);
   } catch (_) {
-    return DEV_TOKEN;
+    stored = null;
   }
+  if (stored) return stored;
+  const allowDevFallback =
+    typeof window === 'undefined' ||
+    window.CESTOVNI_CONFIG?.allowDevTokenFallback !== false;
+  return allowDevFallback ? DEV_TOKEN : null;
+}
+
+// Omits Authorization entirely when no token is available (dev fallback
+// gated off) so the request goes out unauthenticated; the existing 401
+// retry path handles the rejection.
+function authHeaders() {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 // ---------------------------------------------------------------------------
@@ -116,7 +146,7 @@ async function pushBatch() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        ...authHeaders(),
       },
       body: JSON.stringify(envelope),
     });
@@ -216,7 +246,7 @@ async function pullTable(table) {
     try {
       res = await fetch(
         `${apiBase()}/api/v1/changes?table=${table}&since=${since}&limit=200`,
-        { headers: { Authorization: `Bearer ${getToken()}` } },
+        { headers: authHeaders() },
       );
     } catch (_) {
       return; // transport error — try again on next trigger

@@ -13,7 +13,7 @@ Ship a **Cloudflare Pages preview** of `client/web-lite/` so iPhone users can Ad
 ## Scope (in)
 
 1. **Deploy** `client/web-lite/` to Cloudflare Pages (`wrangler pages deploy` or GitHub Action on `client/web-lite/**`).
-2. **`CESTOVNI_API_BASE` runtime config** — today hardcoded in `client/web-lite/sync.js`; expose via one of:
+2. **`CESTOVNI_API_BASE` runtime config** — today hardcoded in `client/web-lite/sync.js`; expose via one of: ✅ **Done** (`feat/pwa-lite-api-config`): added `config.js` + `?api_base=` bootstrap; gated dev-bearer fallback behind `allowDevTokenFallback`.
    - build-time injection (small `config.js` generated in CI), or
    - `?api_base=` query bootstrap (mirror `?token=`), documented for preview only.
 3. **Stub reachability** — document how preview origin calls the API (Cloudflare Tunnel to local stub, deployed stub Worker, or staging). CORS already on `server/dev-sync-stub/server.js`.
