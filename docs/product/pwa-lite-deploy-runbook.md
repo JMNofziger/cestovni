@@ -16,10 +16,13 @@
 Set the two secrets in **GitHub → Settings → Secrets and variables → Actions**
 for this repo so `pwa-lite-pages-deploy.yml` can run. Never commit them.
 
-> **If the Cloudflare account or `cestovni-pwa` project does not exist yet**,
-> create the project first (dashboard or `wrangler pages project create
-> cestovni-pwa`) — the GitHub Action will fail with a "project not found"
-> error otherwise. This is a one-time setup step, not part of this branch.
+> **Status (2026-06-30):** `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` are
+> configured as repo secrets and the `cestovni-pwa` Pages project already
+> exists. CI deploy verified green; preview reachable
+> (`https://feat-pwa-lite-pages-ci.cestovni-pwa.pages.dev` at merge time —
+> branch alias, will differ per branch). If either is ever missing/rotated,
+> recreate per the table above — the Action fails fast with a clear
+> "not logged in" or "project not found" error rather than hanging.
 
 ## 2. Manual deploy (local)
 

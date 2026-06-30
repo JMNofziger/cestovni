@@ -12,11 +12,11 @@ Ship a **Cloudflare Pages preview** of `client/web-lite/` so iPhone users can Ad
 
 ## Scope (in)
 
-1. **Deploy** `client/web-lite/` to Cloudflare Pages (`wrangler pages deploy` or GitHub Action on `client/web-lite/**`). **Done** — `.github/workflows/pwa-lite-pages-deploy.yml` (`feat/pwa-lite-pages-ci`); requires `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` repo secrets to actually deploy (see runbook).
+1. **Deploy** `client/web-lite/` to Cloudflare Pages (`wrangler pages deploy` or GitHub Action on `client/web-lite/**`). **Done** — `.github/workflows/pwa-lite-pages-deploy.yml` (`feat/pwa-lite-pages-ci`, merged `main` `3d17342`); `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` repo secrets configured and `cestovni-pwa` project confirmed — CI deploy run verified green, preview reachable (see runbook).
 2. **`CESTOVNI_API_BASE` runtime config** — today hardcoded in `client/web-lite/sync.js`; expose via one of: ✅ **Done** (`feat/pwa-lite-api-config`): added `config.js` + `?api_base=` bootstrap; gated dev-bearer fallback behind `allowDevTokenFallback`.
    - build-time injection (small `config.js` generated in CI), or
    - `?api_base=` query bootstrap (mirror `?token=`), documented for preview only.
-3. **Stub reachability** — document how preview origin calls the API (Cloudflare Tunnel to local stub, deployed stub Worker, or staging). CORS already on `server/dev-sync-stub/server.js`. **Done** — [`pwa-lite-deploy-runbook.md`](../pwa-lite-deploy-runbook.md) §3 (`feat/pwa-lite-pages-ci`).
+3. **Stub reachability** — document how preview origin calls the API (Cloudflare Tunnel to local stub, deployed stub Worker, or staging). CORS already on `server/dev-sync-stub/server.js`. **Done** — [`pwa-lite-deploy-runbook.md`](../pwa-lite-deploy-runbook.md) §3 (`feat/pwa-lite-pages-ci`); no preview has had `config.js#apiBase` pointed at a tunnel/staging yet, so the sync round-trip (acceptance criterion below) is still open.
 4. **Finalize [`install-ios.md`](../install-ios.md)** — real preview URL, Safari steps, token bootstrap (`?token=dev-cestovni-token` for dev).
 5. **Optional CI job** — deploy preview on PR touching `client/web-lite/**` (minute discipline: paths-filter only). **Done** — see task #1 (same workflow covers both `push` and `pull_request`).
 
