@@ -24,7 +24,7 @@ Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: `
 
 ## Delivery (Phase 3 / Stage 5)
 
-Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (RYG checklist is source of truth). Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**. **M0 closed** (**CES-36** / **CES-37**). **M1 active:** **CES-38 Done** on `main`; **CES-39 in progress** (repos + vehicle CRUD on `main`; Log + History UI on branch pending merge). Prerequisites **CES-53**–**CES-56** **Done in repo** — align Linear + drop stale **blocks CES-39** edges ([`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)).
+Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (RYG checklist is source of truth). Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**. **M0 closed** (**CES-36** / **CES-37**). **M1 active:** **CES-38** / **CES-39** / **CES-57** **Done on `main`**; remaining M1: **CES-40** photo, Metrics/Maint stubs, Log/History prefs display follow-on. Prerequisites **CES-53**–**CES-56** **Done in repo** — align Linear + drop stale **blocks CES-39** edges ([`ux/UX_IMPLEMENTATION_GAPS.md`](ux/UX_IMPLEMENTATION_GAPS.md)). Linear MCP/API: [`../linear/mcp-setup.md`](../linear/mcp-setup.md).
 
 ## Specs
 

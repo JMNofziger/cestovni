@@ -139,6 +139,7 @@ Exactly one row per user. The `id` column equals the `user_id` for simplicity; t
 | `preferred_volume_unit`  | `TEXT`         | NOT NULL, `CHECK (preferred_volume_unit IN ('L','gal'))`                 |                                           |
 | `currency_code`          | `CHAR(3)`      | NOT NULL, same check as above                                             | Default currency for new fill-ups/events. |
 | `timezone`               | `TEXT`         | NOT NULL, `length BETWEEN 1 AND 64`                                       | IANA name (e.g. `Europe/Prague`).         |
+| `default_vehicle_id`     | `UUID`         | NULL, references `vehicles.id` by convention (no SQLite FK in v1)         | Cold-start default for active vehicle selector; validated against live vehicles in app code (CES-57). |
 
 **Indexes:**
 
@@ -228,18 +229,20 @@ db/
   migrations/
     0001_init.sql
     0002_add_maintenance_events_category_shop.sql
+    0003_settings_default_vehicle_id.sql
     ...
 client/
   drift/
     migrations/
       0001_init.dart
       0002_add_maintenance_events_category_shop.dart
+      0003_settings_default_vehicle_id.dart
       ...
 ```
 
 Numbers are aligned: every server migration `NNNN_*.sql` has a matching client Drift migration `NNNN_*.dart` (or equivalent in whichever client stack ships).
 
-**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
+**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
 
 ### Rules
 

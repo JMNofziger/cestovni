@@ -77,7 +77,7 @@ Parent **CES-22**; children **CES-26–CES-32** (see [`README.md`](README.md)). 
 
 ## Implementation status (Stage 5)
 
-- **M0 (2026-04-18):** Mobile shell + local Drift database on `main` — repository root [`client/`](../../client/). Matches **ADR 003** (Flutter + Drift) and **`data-model.md`** client tables (`schema_version` **2** as of 2026-04-22: `0001_init` + `0002_add_maintenance_events_category_shop`; fresh `onCreate` uses `m.createAll()`). Not yet: consumption UI (M1), export (M2), server backup (M3), Sentry wiring (M4). CI: [`ci/client-build.yml`](../../ci/client-build.yml); telemetry allow-list gate includes a **Dart source scan** for literal `Telemetry.emit` event names ([`ci/telemetry-gate.py`](../../ci/telemetry-gate.py)).
+- **M0 (2026-04-18):** Mobile shell + local Drift database on `main` — repository root [`client/`](../../client/). Matches **ADR 003** (Flutter + Drift) and **`data-model.md`** client tables (`schema_version` **3** as of 2026-06-30: `0001_init` + `0002_add_maintenance_events_category_shop` + `0003_settings_default_vehicle_id`; fresh `onCreate` uses `m.createAll()`). Not yet: export (M2), production server backup (M3), Sentry wiring (M4). CI: [`ci/client-build.yml`](../../ci/client-build.yml); telemetry allow-list gate includes a **Dart source scan** for literal `Telemetry.emit` event names ([`ci/telemetry-gate.py`](../../ci/telemetry-gate.py)).
 
 ## Related compliance / ops
 

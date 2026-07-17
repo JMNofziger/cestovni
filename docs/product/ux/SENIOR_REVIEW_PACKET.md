@@ -44,12 +44,11 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 ## Residual risks (not doc conflicts)
 
 - **Metrics** and **Maint** tab UI still stubs; History is fuel-only until maintenance repository lands.
-- **CES-39 phase 3** (Log + History) on branch — merge to `main` before PWA-lite gate checklist.
-- Settings units/currency/default vehicle (**CES-57**) not wired; metric hardcoded km/L/EUR in Log for now.
+- **CES-57 shipped** (PR #9): Settings prefs + `default_vehicle_id` + cold-start seeding. **Follow-on:** Log/History still hardcode km/L/EUR for display — wire to `SettingsRepository` (Linear issue via `scripts/linear-ces57-closeout.mjs`).
 - Metrics low-data placeholder behavior still needs widget/repository coverage when Metrics tab ships.
 
 ## Recommended sign-off decision
 
-- **Approve with follow-up issues** for remaining M1 surfaces (Metrics, Maint, photo, settings prefs).
+- **Approve with follow-up issues** for remaining M1 surfaces (Metrics, Maint, photo, Log/History prefs display).
 - **CES-39** prerequisite gate is **closed in repo**; align Linear blocks-CES-39 edges.
 - Use `SENIOR_REVIEW_CHECKLIST.md` for CES-39 PR reviews; track rollup in `delivery-plan-v1.md` RYG.
