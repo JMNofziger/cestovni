@@ -64,6 +64,19 @@ Re-running is safe: the script skips creating a duplicate follow-up if one alrea
 node scripts/linear-workspace-bootstrap.mjs
 ```
 
+**General create/update/close (reusable, any issue):**
+
+```bash
+node scripts/linear.mjs get CES-57
+node scripts/linear.mjs create --title "..." --description "..." --state Todo --labels type:improvement,effort:medium
+node scripts/linear.mjs update CES-57 --state "In Progress" --priority 2
+node scripts/linear.mjs close CES-57 --comment "Shipped in PR #NN"
+node scripts/linear.mjs comment CES-57 --body-file notes.md
+```
+
+This is the reusable complement to the one-shot `linear-*.mjs` scripts — use it for
+autonomous create/update/close when MCP is `needsAuth`. Same `LINEAR_API_KEY` auth.
+
 Never commit `.secrets/linear.env` or paste keys into issues/PRs.
 
 ---
