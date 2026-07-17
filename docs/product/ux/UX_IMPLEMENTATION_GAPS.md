@@ -2,11 +2,9 @@
 
 **Purpose:** Track documentation and product gaps discovered before M1 UI execution so they do not leak into implementation as silent contradictions.
 
-**Gate (closed in repo):** Every row under [Critical gaps — Linear blockers](#critical-gaps--linear-blockers) is **Done**. **CES-39** implementation is **underway** (see [`delivery-plan-v1.md`](../delivery-plan-v1.md) M1 checklist). **Linear hygiene:** mark CES-53–CES-56 **Done** and remove stale **blocks CES-39** edges. Metrics/Maint tab UI and maintenance-backed History filter remain separate M1 work.
+**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **M1 follow-ons on board:** [CES-65](https://linear.app/personal-interests-llc/issue/CES-65) (Log/History prefs), [CES-66](https://linear.app/personal-interests-llc/issue/CES-66) (Metrics), [CES-67](https://linear.app/personal-interests-llc/issue/CES-67) (Maintenance).
 
-**Owner:** Product + CTO (engineering owns closure in code/specs).
-
-**Last reviewed:** 2026-06-30 (CES-57 settings prefs shipped PR #9; gate rows Done; CES-39 on `main`)
+**Last reviewed:** 2026-07-17 (Linear board sync; CES-65–68 created)
 
 ---
 
@@ -43,7 +41,7 @@ Not automatic blockers for CES-39 unless product promotes them.
 | Empty / loading / error | Copy and patterns (no skeleton shimmer per style spec) per screen                                                       | Product + UX    |
 | Vehicle CRUD UX         | Field-level spec beyond “must ship” list in `DELIVERY_ACCEPTANCE.md`                                                    | Product         |
 | Currency display        | ISO-4217 minor units (not always 2 decimals)                                                                            | Eng + product   |
-| Settings prefs display  | **CES-57 shipped** (Settings UI + `default_vehicle_id`); Log/History still assume km/L/EUR — follow-on M1 issue (`scripts/linear-ces57-closeout.mjs`) | Eng (M1)        |
+| Settings prefs display  | **CES-57 shipped** (Settings UI); Log/History still assume km/L/EUR — **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** | Eng (M1)        |
 | i18n / a11y             | Dynamic type, locale number/date formatting, semantics labels                                                           | Eng (Stage 5/6) |
 | Test matrix             | §4 of `SENIOR_REVIEW_CHECKLIST.md` — map each bullet to a PR or issue                                                   | Eng             |
 
