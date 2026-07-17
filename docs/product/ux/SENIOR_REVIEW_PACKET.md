@@ -36,15 +36,15 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 - Data semantics contract: `docs/product/ux/DATA_CONTRACTS.md`
 - Must-ship gates and tests: `docs/product/ux/DELIVERY_ACCEPTANCE.md`
 - Visual system reference: `docs/product/ux/cestovni-styling.md`
-- **Implementation gap tracker (gate closed; CES-39 underway):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
+- **Implementation gap tracker (gate closed; CES-39 Done):** `docs/product/ux/UX_IMPLEMENTATION_GAPS.md`
 - Senior checklist: `docs/product/ux/SENIOR_REVIEW_CHECKLIST.md`
 - Delivery plan linkage: `docs/product/delivery-plan-v1.md` (M1 prerequisite + CES-39 row)
 - Linear: **CES-39** gate is clear in repo — **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)**, **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)**, **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)**, and **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** are **Done in repo**. Set each Linear workflow to **Done** and remove stale **blocks** edges if present (see issue comments on CES-39).
 
 ## Residual risks (not doc conflicts)
 
-- **Metrics** and **Maint** tab UI still stubs; History is fuel-only until maintenance repository lands.
-- **CES-57 shipped** (PR #9): Settings prefs + `default_vehicle_id` + cold-start seeding. **Follow-on:** Log/History still hardcode km/L/EUR for display — wire to `SettingsRepository` (Linear issue via `scripts/linear-ces57-closeout.mjs`).
+- **Metrics** and **Maint** tab UI still stubs → **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66)** / **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)**; History is fuel-only until maintenance repo lands.
+- **CES-57 shipped** (PR #9). **Follow-on:** Log/History prefs display → **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)**.
 - Metrics low-data placeholder behavior still needs widget/repository coverage when Metrics tab ships.
 
 ## Recommended sign-off decision

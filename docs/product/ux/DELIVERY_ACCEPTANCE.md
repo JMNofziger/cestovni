@@ -2,7 +2,7 @@
 
 This document defines what must ship vs what can wait. Use it to prevent scope creep during implementation.
 
-**M1 / CES-39:** Prerequisite gate **closed in repo** (CES-53–CES-56). **CES-39 Done on `main`** — Log + History + vehicle CRUD shipped (phase 3). **CES-57 Done on `main`** (PR #9) — Settings prefs UI + `default_vehicle_id` + cold-start seeding. **Still open:** Metrics/Maint tabs, photo (**CES-40**), and Log/History *reading* stored prefs for unit display (CES-57 follow-on). See [`../delivery-plan-v1.md`](../delivery-plan-v1.md) and [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md).
+**M1 / CES-39:** Gate closed; **CES-39 Done** (repo + Linear). **CES-57 Done.** **Still open:** **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** (Log/History prefs display), **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66)** / **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** (Metrics/Maint tabs), photo (**CES-40**). See [`../delivery-plan-v1.md`](../delivery-plan-v1.md).
 
 ## Global acceptance gates
 
