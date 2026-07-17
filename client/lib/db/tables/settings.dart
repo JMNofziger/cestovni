@@ -29,6 +29,17 @@ class AppSettings extends Table with ProtocolColumns {
   TextColumn get timezone =>
       text().withLength(min: 1, max: 64)();
 
+  /// Optional FK-by-convention to `vehicles.id` (CES-57). No SQLite FK
+  /// constraint on purpose: a stale id (vehicle later soft-deleted or
+  /// archived) must remain a legal value here rather than blocking a
+  /// settings write. `shell.dart#_seedActiveVehicle` re-validates
+  /// against the live vehicle list before honoring it, falling back
+  /// to "first vehicle alphabetically" otherwise.
+  TextColumn get defaultVehicleId => text()
+      .named('default_vehicle_id')
+      .nullable()
+      .withLength(min: 36, max: 36)();
+
   @override
   String get tableName => 'settings';
 

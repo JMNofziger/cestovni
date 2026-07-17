@@ -8,8 +8,9 @@
 // - On launch the first live vehicle is selected; if none exist the
 //   selector renders a placeholder (the "Add vehicle" CTA lands with
 //   CES-39).
-// - When `settings.default_vehicle_id` (CES-57) exists it will win
-//   over the ordering rule; the column is not yet in the schema.
+// - `settings.default_vehicle_id` (CES-57) wins over the ordering
+//   rule when it still resolves to a live vehicle; see
+//   `shell.dart#_seedActiveVehicle`.
 //
 // The previous inline `VehicleRepository` here moved to
 // `client/lib/db/repositories/vehicles_repository.dart` during CES-39

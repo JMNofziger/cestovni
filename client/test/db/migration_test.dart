@@ -32,7 +32,20 @@ void main() {
         'settings',
         'vehicles',
       });
-      expect(db.schemaVersion, 2);
+      expect(db.schemaVersion, 3);
+    });
+
+    test('onCreate settings has the v3 default_vehicle_id column', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      await db.customSelect('SELECT 1').get();
+
+      final cols = await db.customSelect('PRAGMA table_info(settings)').get();
+      final byName = {for (final r in cols) r.read<String>('name'): r};
+
+      expect(byName.containsKey('default_vehicle_id'), isTrue);
+      expect(byName['default_vehicle_id']!.read<int>('notnull'), 0,
+          reason: 'default_vehicle_id is nullable (CES-57)');
     });
 
     test(
@@ -192,6 +205,91 @@ void main() {
         [eventId2, userId, '2026-04-22T13:00:00Z', mutationId2, vehicleId, '2026-04-22T13:00:00Z'],
       );
     });
+
+    test(
+      '0003 adds default_vehicle_id to a v2 settings row without data loss',
+      () async {
+        final db = openInMemoryDb();
+        addTearDown(db.close);
+        await db.customSelect('SELECT 1').get();
+
+        // Drop the v3 settings table and recreate the v2 shape (no
+        // default_vehicle_id) so the upgrade path exercises a real
+        // v2 -> v3 row, not Drift's onCreate output.
+        final userId = '00000000-0000-4000-8000-0000000000bb';
+        final mutationId = '00000000-0000-4000-8000-0000000000b3';
+        await db.customStatement('DROP TABLE settings');
+        await db.customStatement(
+          'CREATE TABLE settings ('
+          'id TEXT NOT NULL PRIMARY KEY CHECK (length(id) = 36), '
+          'user_id TEXT NULL CHECK (user_id IS NULL OR length(user_id) = 36), '
+          'row_version INTEGER NULL, '
+          'updated_at TEXT NOT NULL, '
+          'deleted_at TEXT NULL, '
+          'mutation_id TEXT NOT NULL CHECK (length(mutation_id) = 36), '
+          "preferred_distance_unit TEXT NOT NULL CHECK (preferred_distance_unit IN ('km','mi')), "
+          "preferred_volume_unit TEXT NOT NULL CHECK (preferred_volume_unit IN ('L','gal')), "
+          "currency_code TEXT NOT NULL CHECK (currency_code GLOB '[A-Z][A-Z][A-Z]'), "
+          'timezone TEXT NOT NULL'
+          ')',
+        );
+        const settingsId = '00000000-0000-4000-8000-000000000401';
+        await db.customStatement(
+          'INSERT INTO settings '
+          '(id, user_id, row_version, updated_at, mutation_id, '
+          ' preferred_distance_unit, preferred_volume_unit, currency_code, timezone) '
+          "VALUES (?, ?, 1, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+          [settingsId, userId, '2026-06-30T12:00:00Z', mutationId],
+        );
+
+        final step = db.migrationRunner.steps.firstWhere(
+          (s) => s.name == '0003_settings_default_vehicle_id',
+        );
+        await db.transaction(() async {
+          final migrator = Migrator(db);
+          await step.up(migrator);
+        });
+
+        final rows = await db
+            .customSelect(
+              'SELECT currency_code, default_vehicle_id FROM settings '
+              'WHERE id = ?',
+              variables: [Variable.withString(settingsId)],
+            )
+            .get();
+        expect(rows, hasLength(1));
+        expect(rows.single.read<String>('currency_code'), 'EUR',
+            reason: 'pre-existing row untouched by the ALTER');
+        expect(rows.single.readNullable<String>('default_vehicle_id'), isNull);
+
+        // New column actually accepts a value post-upgrade.
+        await db.customStatement(
+          "UPDATE settings SET default_vehicle_id = "
+          "'00000000-0000-4000-8000-000000000999' WHERE id = ?",
+          [settingsId],
+        );
+        final updated = await db
+            .customSelect(
+              'SELECT default_vehicle_id FROM settings WHERE id = ?',
+              variables: [Variable.withString(settingsId)],
+            )
+            .getSingle();
+        expect(updated.read<String>('default_vehicle_id'),
+            '00000000-0000-4000-8000-000000000999');
+
+        // Rollback hook (CES-47): down() drops the column again.
+        await db.transaction(() async {
+          final migrator = Migrator(db);
+          await step.down(migrator);
+        });
+        final colsAfterDown =
+            await db.customSelect('PRAGMA table_info(settings)').get();
+        expect(
+          colsAfterDown.any((r) => r.read<String>('name') == 'default_vehicle_id'),
+          isFalse,
+        );
+      },
+    );
 
     test('foreign keys are enforced (PRAGMA on)', () async {
       final db = openInMemoryDb();
