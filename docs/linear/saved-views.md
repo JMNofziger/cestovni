@@ -26,6 +26,14 @@ node scripts/linear-workspace-bootstrap.mjs
 
 That script also enables **2-week cycles** for team `Cestovni` (if they were off) and creates workspace **issue templates** (Bug, Feature, Improvement, Spike). Re-running is safe: existing views/templates are skipped when Linear reports a duplicate.
 
+**MCP in Cursor:** see [mcp-setup.md](./mcp-setup.md) for desktop OAuth vs cloud-agent `needsAuth` and API-key fallbacks.
+
+**Post-CES-57 closeout** (mark Done + create Log/History prefs follow-up):
+
+```bash
+node scripts/linear-ces57-closeout.mjs
+```
+
 ## Manual
 
 Create **saved views** in Linear (Issues → filters → **Save as view**). Every view must include **Project = Cestovni** so other products never leak in.

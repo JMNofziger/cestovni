@@ -51,4 +51,4 @@ git clone https://github.com/JMNofziger/cestovni.git
 cd cestovni
 ```
 
-Linear API scripts (optional): see [docs/linear/saved-views.md](https://github.com/JMNofziger/cestovni/blob/main/docs/linear/saved-views.md).
+Linear API scripts (optional): see [docs/linear/saved-views.md](https://github.com/JMNofziger/cestovni/blob/main/docs/linear/saved-views.md) and [docs/linear/mcp-setup.md](https://github.com/JMNofziger/cestovni/blob/main/docs/linear/mcp-setup.md) (MCP auth + cloud-agent workarounds).

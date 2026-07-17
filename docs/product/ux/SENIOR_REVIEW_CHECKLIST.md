@@ -51,5 +51,5 @@ Use this checklist before approving UX-driven implementation work.
 Reviewer notes:
 
 - Docs and Linear alignment complete for CES-39 prerequisites (CES-53–CES-56).
-- **CES-39 in progress** — Log/History + vehicle CRUD in repo; merge phase 3 to `main` before PWA-lite gate.
-- Remaining M1 gaps: Metrics/Maint tabs, photo (CES-40), settings prefs (CES-57); see [`delivery-plan-v1.md`](../delivery-plan-v1.md).
+- **CES-39 + CES-57 Done on `main`** — Log/History/vehicle CRUD + Settings prefs shipped (PR #9).
+- Remaining M1 gaps: Metrics/Maint tabs, photo (**CES-40**), Log/History prefs *display* follow-on (post-CES-57); see [`delivery-plan-v1.md`](../delivery-plan-v1.md).

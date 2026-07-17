@@ -4,6 +4,8 @@
 
 See [saved-views.md](./saved-views.md): `node scripts/linear-workspace-bootstrap.mjs` (with `LINEAR_API_KEY`) creates **Bug**, **Feature**, **Improvement**, and **Spike** templates with defaults for team/project **Cestovni**.
 
+**MCP + cloud agents:** [mcp-setup.md](./mcp-setup.md) — desktop OAuth, cloud `needsAuth` workaround, and `LINEAR_API_KEY` for `scripts/linear-*.mjs`.
+
 ## Manual
 
 Copy into **Workspace settings → Templates → Issue templates** (or start from these in the Linear project documents).
