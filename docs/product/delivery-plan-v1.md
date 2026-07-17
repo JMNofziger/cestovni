@@ -1,12 +1,27 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22** — Linear **CES-36** / **CES-37** in **Done**, CTO review passed, `verify-full` green on `main`. **M1 core done; PWA-lite Phase 1+2 merged to `main`** (PR #3 + #4, 2026-05-29). **CES-38 Done in repo** on `main` (consumption module + 20 golden fixtures + `client/test/consumption/` runner). **CES-39 Done in repo** on `main` (repositories, vehicle CRUD/settings, Log + History UI; 121+ widget/DB tests). **CES-57 Done in repo** on `main` (2026-06-30, PR #9): settings prefs UI + `default_vehicle_id` + cold-start seeding (schema v3). **Active (M-dist):** PWA-lite Pages deploy — [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md). **M3 gate slice done:** dev stub + Android/PWA-lite flush; full **CES-43** / **CES-44** / **CES-45** remain. **CES-39 gate prerequisites Done in repo** — [§ M1 prerequisite — UX gap closure](#m1-prerequisite--ux-gap-closure-blocks-ces-39) (**CES-53**–**CES-56**). **Linear hygiene (2026-07-17):** CES-39/57/53–56 **Done** on board; stale **blocks CES-39** edges removed. **M1 open:** **CES-40** photo; **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** Log/History prefs display; **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66)** Metrics tab; **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** Maintenance tab. **M-dist open:** **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** PWA deploy (In Progress); **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK release. Parent **CES-35** / **CES-61**. M0 follow-ups: **CES-48**, **CES-49** (blocks CES-42), **CES-50** (blocks CES-47). M1 follow-ups: **CES-51**, **CES-52**. Source: Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)**. **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); remaining M1 verticals **CES-65**–**CES-67** + **CES-40**. **PWA-lite Phase 1+2 on `main`** (PR #3 + #4); **deploy track** **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** In Progress. **M3 gate slice on `main`** (dev stub + outbox); full **CES-42**–**CES-45** remain. **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
 **Architecture:** `[../specs/ARCHITECTURE.md](../specs/ARCHITECTURE.md)`, [ADR 001](../specs/adr/001-backend-api-boundary.md) (backend boundary), [ADR 002](../specs/adr/002-backup-sync-layer.md) (backup/sync), [ADR 003](../specs/adr/003-mobile-stack.md) (mobile stack), [ADR 004](../specs/adr/004-telemetry-crash-sdk.md) (telemetry/crash SDK), [ADR 005](../specs/adr/005-distribution-channels.md) (Stage 1 distribution).
 
 Stage 5 exit (copied from workflow): **running build with test strategy tied to spec risks (math, backup, export).** Stage 5 is **not** launch — that's Stage 6.
+
+---
+
+## Current focus
+
+Two parallel tracks — pick based on whether product priority is **iPhone reach** or **Android M1 completeness**:
+
+| Track | Issue | Why now | Done when |
+| ----- | ----- | ------- | --------- |
+| **A — M-dist (recommended)** | **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** | Only Stage 1 iPhone gap left; CI deploy + `config.js` already on `main`; closes ADR 005 PWA-lite lane | Preview URL + tunnel/staging API reachable from phone → save → `SYNCED`; [`install-ios.md`](install-ios.md) finalized; iPhone T1 signed off on **CES-62** |
+| **B — M1 hygiene** | **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** | Small follow-on from shipped **CES-57**; Log/History still hardcode EUR/km/L | `log_page.dart` / `history_page.dart` read `SettingsRepository` prefs; widget test for non-default units |
+
+**After A or B:** **CES-66** (Metrics) → **CES-67** (Maintenance) complete the offline Android app per `DELIVERY_ACCEPTANCE.md`. **CES-68** (Android APK release) can run anytime after M1 core is demo-ready. **M2/M3** (export, production backup) stay on the milestone spine — not the immediate focus.
+
+**Prompt for track A:** [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md) · **Runbook:** [`pwa-lite-deploy-runbook.md`](pwa-lite-deploy-runbook.md)
 
 ---
 
@@ -108,9 +123,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M-dist — Distribution (parallel, non-blocking)
 
-Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **Sequencing (2026-05-21, Option B):** Android path first (CES-39 → minimal M3 client/server → E2E proof); iPhone PWA-lite **blocked** until [PWA-lite gate](../specs/pwa-lite-gate.md) passes.
-
-**M1 priority:** [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) is the active M1 execution focus; it **blocks** PWA-lite.
+Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **PWA-lite gate passed 2026-05-29** — Android E2E + Phase 1+2 on `main`. **Active:** **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** (deploy + install doc).
 
 #### PWA-lite gate
 
@@ -192,7 +205,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 Leading emoji tracks **exit** state (independent of per-vertical RYG above, but should converge at stage close).
 
 - 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47; M0 follow-ups CES-48/49/50 created 2026-04-22, linked to their downstream verticals via `blocks`.)*
-- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed 2026-04-22**. **M1 core done on `main`**: CES-38 + CES-39 + CES-57 (settings prefs) Done in repo; Metrics/Maint/photo + Log/History prefs display follow-on still open.)*
+- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed**. **M1 core closed** (CES-38/39/57 Done). **Open:** CES-65–67 + CES-40 — see [Current focus](#current-focus).)*
 - 🟥 M2 lands: ZIP export round-trips for a representative fixture.
 - 🟥 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green.
 - 🟥 M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.
