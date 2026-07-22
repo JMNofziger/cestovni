@@ -12,16 +12,17 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 ## Current focus
 
-Two parallel tracks — pick based on whether product priority is **iPhone reach** or **Android M1 completeness**:
+**Recommended next coding work (2026-07-22 architecture re-check):** **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66) Metrics tab** — completes offline local review of fuel usage on Android (primary product surface). PWA-lite iPhone capability gap is an accepted Stage 1 tradeoff; CES-63 remaining work is mostly install-doc + product T1 (ops), not the highest-value engineering step. Production backup (M3) stays on the spine.
 
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
-| **A — M-dist (recommended)** | **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** | Only Stage 1 iPhone gap left; CI deploy + `config.js` already on `main`; closes ADR 005 PWA-lite lane | Preview URL + tunnel/staging API reachable from phone → save → `SYNCED`; [`install-ios.md`](install-ios.md) finalized; iPhone T1 signed off on **CES-62** |
-| **B — M1 hygiene** | **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** | Small follow-on from shipped **CES-57**; Log/History still hardcode EUR/km/L | `log_page.dart` / `history_page.dart` read `SettingsRepository` prefs; widget test for non-default units |
+| **A — M1 Metrics (recommended)** | **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66)** | Stub tab; consumption math ready; matches "review metrics locally offline" principle | Range filter + lifetime card + cost-over-time + empty/low-data; tests green |
+| **B — M-dist (ops/product)** | **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** | CI deploy live; install doc + phone→stub `SYNCED` still open | [`install-ios.md`](install-ios.md) finalized; iPhone T1 signed off on **CES-62** |
+| **Note — CES-65** | **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** | Linear **Done**, but Log still hardcodes EUR in repo — fix as Phase 0 inside CES-66 prompt | Prefs wired in Log/History/Metrics |
 
-**After A or B:** **CES-66** (Metrics) → **CES-67** (Maintenance) complete the offline Android app per `DELIVERY_ACCEPTANCE.md`. **CES-68** (Android APK release) can run anytime after M1 core is demo-ready. **M2/M3** (export, production backup) stay on the milestone spine — not the immediate focus.
+**After CES-66:** **CES-67** (Maintenance) completes offline Android per `DELIVERY_ACCEPTANCE.md`. **CES-68** (APK release) anytime after M1 demo-ready. **M2/M3** (export, production backup) stay on the spine.
 
-**Prompt for track A:** [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md) · **Runbook:** [`pwa-lite-deploy-runbook.md`](pwa-lite-deploy-runbook.md)
+**Prompt for track A:** [`prompts/ces-66-metrics.md`](prompts/ces-66-metrics.md) · **Prompt for track B:** [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md) · **Runbook:** [`pwa-lite-deploy-runbook.md`](pwa-lite-deploy-runbook.md)
 
 ---
 
