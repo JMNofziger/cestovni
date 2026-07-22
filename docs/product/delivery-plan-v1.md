@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); remaining M1 verticals **CES-65**–**CES-67** + **CES-40**. **PWA-lite Phase 1+2 on `main`** (PR #3 + #4); **deploy track** **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** In Progress. **M3 gate slice on `main`** (dev stub + outbox); full **CES-42**–**CES-45** remain. **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); **CES-65/CES-66 Done in repo 2026-07-22**; remaining M1 verticals **CES-67** + **CES-40**. **PWA-lite Phase 1+2 on `main`** (PR #3 + #4); **deploy track** **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** In Progress. **M3 gate slice on `main`** (dev stub + outbox); full **CES-42**–**CES-45** remain. **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -17,9 +17,9 @@ Two parallel tracks — pick based on whether product priority is **iPhone reach
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
 | **A — M-dist (recommended)** | **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** | Only Stage 1 iPhone gap left; CI deploy + `config.js` already on `main`; closes ADR 005 PWA-lite lane | Preview URL + tunnel/staging API reachable from phone → save → `SYNCED`; [`install-ios.md`](install-ios.md) finalized; iPhone T1 signed off on **CES-62** |
-| **B — M1 hygiene** | **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** | Small follow-on from shipped **CES-57**; Log/History still hardcode EUR/km/L | `log_page.dart` / `history_page.dart` read `SettingsRepository` prefs; widget test for non-default units |
+| **B — M1 completeness** | **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** | Last offline-Android vertical: Maintenance entry/history + History `MAINT` filter; **CES-65** + **CES-66** shipped (Metrics tab + prefs display) | `maintenance_page.dart` replaces stub; entries land in shared history stream; reminder fields persisted per `DELIVERY_ACCEPTANCE.md` §Maintenance |
 
-**After A or B:** **CES-66** (Metrics) → **CES-67** (Maintenance) complete the offline Android app per `DELIVERY_ACCEPTANCE.md`. **CES-68** (Android APK release) can run anytime after M1 core is demo-ready. **M2/M3** (export, production backup) stay on the milestone spine — not the immediate focus.
+**After A or B:** **CES-67** (Maintenance) completes the offline Android app per `DELIVERY_ACCEPTANCE.md` (**CES-66** Metrics shipped). **CES-68** (Android APK release) can run anytime after M1 core is demo-ready. **M2/M3** (export, production backup) stay on the milestone spine — not the immediate focus.
 
 **Prompt for track A:** [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md) · **Runbook:** [`pwa-lite-deploy-runbook.md`](pwa-lite-deploy-runbook.md)
 
@@ -92,12 +92,12 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M1 — Local logging + math
 
-- 🟨 **M1 rollup** — offline logging usable end-to-end without a server. *(Core fill-up path done; Metrics/Maint/photo open; Log/History prefs display follow-on from CES-57.)*
+- 🟨 **M1 rollup** — offline logging usable end-to-end without a server. *(Core fill-up path + prefs display + Metrics done; Maint/photo open.)*
   - 🟩 **CES-38 — Consumption math + golden tests** — **Done in repo on `main`** (2026-05): `client/lib/consumption/`, auto-discovery runner over 20 `tests/math/fixtures/`, module-purity test, validation wired in Log/History save paths. Follow-ups: **CES-51** / **CES-52** (non-blocking).
   - 🟩 **CES-39 — Fill-up + vehicle UI (core)** — **Done** (repo 2026-05, Linear 2026-07-17): repos + vehicle CRUD + Log/History UI; 121+ tests. Out of scope → **CES-65** / **CES-66** / **CES-67** / **CES-40**.
   - 🟩 **CES-57 — Settings prefs + default vehicle** — **Done** (PR #9, Linear Done). Follow-on display wiring → **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)**.
-  - 🟥 **CES-65 — Log/History prefs display** — wire stored units/currency to Log + History ([`DATA_CONTRACTS.md`](ux/DATA_CONTRACTS.md)).
-  - 🟥 **CES-66 — Metrics tab UI** — range filter, lifetime card, cost-over-time (`metrics_page.dart` stub today).
+  - 🟩 **CES-65 — Log/History prefs display** — **Done in repo** (2026-07-22, shipped with CES-66): Log/History labels, display, and save-time conversion read `SettingsRepository` prefs via `client/lib/units/display_units.dart`; widget tests for non-default units.
+  - 🟩 **CES-66 — Metrics tab UI** — **Done in repo** (2026-07-22): range filter (30D/90D/YTD/ALL), summary card (cost/distance), stat tiles (volume/economy/fill-ups), cost-over-time chart (custom painter, no chart dependency), empty + low-data placeholders; aggregation in `client/lib/metrics/` reusing `client/lib/consumption/`. Known limits: mixed currencies render one series per currency (deep fix **CES-51**); non-UTC IANA timezones approximate window boundaries with the device offset (no tz db yet).
   - 🟥 **CES-67 — Maintenance tab UI + repo** — entry/history + History Maint filter (`maintenance_page.dart` stub today).
   - 🟥 **CES-40 — Photo pipeline** — per `[photo-pipeline.md](../specs/photo-pipeline.md)`; depends on CES-37.
   - 🟩 **M1 UX gap closure (blocks CES-39):** 🟩 **[CES-53](https://linear.app/personal-interests-llc/issue/CES-53)** maintenance contract — **repo Done** · 🟩 **[CES-54](https://linear.app/personal-interests-llc/issue/CES-54)** date-only vs `TIMESTAMPTZ` — **repo Done** (2026-04-24) · 🟩 **[CES-55](https://linear.app/personal-interests-llc/issue/CES-55)** visual bootstrap — **repo Done** (2026-04-25) · 🟩 **[CES-56](https://linear.app/personal-interests-llc/issue/CES-56)** shell + active vehicle — **repo Done** (2026-04-25) — parent epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**.
