@@ -104,20 +104,29 @@ class SettingsRepository {
     return updated;
   }
 
+  /// Runs in a transaction with a re-check so concurrent first-run
+  /// callers (Log / History / Metrics all bootstrap on mount) cannot
+  /// each insert their own row into the single-row table — Drift
+  /// serializes transactions on one database instance.
   Future<SettingsRow> _bootstrap() async {
-    final id = _newId();
-    await _db.into(_db.appSettings).insert(
-          AppSettingsCompanion(
-            id: Value(id),
-            preferredDistanceUnit: const Value(_defaultDistanceUnit),
-            preferredVolumeUnit: const Value(_defaultVolumeUnit),
-            currencyCode: const Value(_defaultCurrencyCode),
-            timezone: const Value(_defaultTimezone),
-            updatedAt: Value(_now()),
-            mutationId: Value(_newId()),
-          ),
-        );
-    return (_db.select(_db.appSettings)..where((s) => s.id.equals(id)))
-        .getSingle();
+    return _db.transaction(() async {
+      final existing =
+          await _db.select(_db.appSettings).getSingleOrNull();
+      if (existing != null) return existing;
+      final id = _newId();
+      await _db.into(_db.appSettings).insert(
+            AppSettingsCompanion(
+              id: Value(id),
+              preferredDistanceUnit: const Value(_defaultDistanceUnit),
+              preferredVolumeUnit: const Value(_defaultVolumeUnit),
+              currencyCode: const Value(_defaultCurrencyCode),
+              timezone: const Value(_defaultTimezone),
+              updatedAt: Value(_now()),
+              mutationId: Value(_newId()),
+            ),
+          );
+      return (_db.select(_db.appSettings)..where((s) => s.id.equals(id)))
+          .getSingle();
+    });
   }
 }
