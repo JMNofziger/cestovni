@@ -20,6 +20,16 @@ Provide a practical continuity path so technical users can run backend services 
 - A compatible OIDC/JWT auth provider that can issue tokens with the same claim model as managed mode (see ADR 001 identity model).
 - DNS or local network access for client devices to reach the self-hosted API.
 
+## 0. Where to run this (hosting recommendation)
+
+Per [ADR 001 addendum — self-host hosting recommendation](adr/001-addendum-self-host-hosting.md):
+
+- **Recommended: Oracle Cloud "Always Free" tier.** Provision either the AMD `VM.Standard.E2.1.Micro` shape (1 GB RAM — recommended default) or the `VM.Standard.A1.Flex` (Ampere) shape (2 OCPU / 12 GB always-free allocation). Both are standard Ubuntu/Oracle Linux VMs — install Docker, then follow this runbook unmodified. **$0/year.**
+- A user's full history (~1000 fill-ups/year) is a few hundred KB/year — every free tier considered has 100-1000x the storage this needs. Sizing is not the constraint; uptime predictability is.
+- **Risk:** Oracle is not contractually obligated to keep current Always Free limits (it cut the Ampere allocation in half in June 2026 with no notice). Treat it as best-effort $0, not a guaranteed SLA.
+- **Paid fallback (~$48-50/year):** a small Hetzner CX-series VPS if you want a predictable, paid always-on host instead. Because this stack is standard Postgres + `docker compose`, moving from Oracle to a paid VPS is a `pg_dump` / `pg_restore` (see §3-4 below), not a rewrite.
+- Full rationale and options considered: [ADR 001 addendum](adr/001-addendum-self-host-hosting.md).
+
 ## 1. Bootstrap
 
 ```bash
