@@ -1,14 +1,21 @@
 # Cursor execution prompt — CES-66 Metrics tab UI
 
-> **Recommended next development step** after the 2026-07-22 architecture re-check.
+> **Status: EXECUTED** (2026-07-22) — shipped on `main`.
+> Linear **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66)** + **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** are **Done**.
+> Manual checklist: [`../ces-66-manual-test.md`](../ces-66-manual-test.md).
+> Next coding focus: **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** Maintenance — see [`../delivery-plan-v1.md`](../delivery-plan-v1.md) §Current focus.
+>
+> Kept as an archive of the execution brief (do not re-run).
+
+> **Recommended next development step** after the 2026-07-22 architecture re-check *(historical)*.
 >
 > **Why this, not CES-63 / M3:** PWA-lite iPhone capability gap is an accepted Stage 1 tradeoff; CES-63 remaining work is mostly install-doc + product T1 against a tunnel (ops/product, thin coding value). Production backup (CES-42–45) stays on the spine but is not the immediate offline-app gap. Metrics is the missing piece of "**review fuel usage and vehicle history locally with zero network**" on the primary Android surface.
 
-**Branch:** cut `cursor/ces-66-metrics-<suffix>` from `main` (use cloud-agent branch naming if applicable)
-**Linear:** [CES-66](https://linear.app/personal-interests-llc/issue/CES-66) (High / `type:feature` / `effort:high`) — set In Progress when starting
+**Branch:** cut `cursor/ces-66-metrics-<suffix>` from `main` (use cloud-agent branch naming if applicable) — **done:** `cursor/ces-66-metrics-dc52`
+**Linear:** [CES-66](https://linear.app/personal-interests-llc/issue/CES-66) — **Done**
 **Spec:** `docs/specs/consumption-math.md` + `docs/product/ux/DATA_CONTRACTS.md` §Metrics + `docs/product/ux/cestovni-views.md` §Metrics
 **UX refs:** `docs/product/ux/DELIVERY_ACCEPTANCE.md` §Metrics · `docs/product/ux/cestovni-styling.md` · screenshots `docs/product/ux/screenshots/dark-midnight/metrics.png` + `light-parchment/full-scroll/metrics-*.png`
-**Delivery plan:** `docs/product/delivery-plan-v1.md` §Current focus → after A/B → **CES-66**
+**Delivery plan:** `docs/product/delivery-plan-v1.md` §Current focus → **CES-67** next
 
 ## Goal
 
@@ -29,6 +36,8 @@ Must work with **zero network**. Do not touch sync, PWA-lite, or server code.
 - Pattern already exists in Settings UI / CES-57 — reuse, do not invent a second prefs path.
 - Add/extend a widget test that asserts a non-default unit/currency appears in Log or History.
 - If you fix prefs as part of this PR, mention CES-65 in the PR body and leave a Linear comment on CES-65 noting the repo gap was closed here (do **not** reopen unless product asks).
+
+*(Prerequisite closed in the same PR as Metrics.)*
 
 ## Scope (in)
 

@@ -9,7 +9,7 @@ Use this together with:
 
 ## Current implementation map (source of truth)
 
-**Last synced:** 2026-05-21 (CES-39 phases 1–3; phase 3 on branch `docs/android-first-sequencing`, merge to `main` pending).
+**Last synced:** 2026-07-22 (CES-65 prefs display + CES-66 Metrics tab on main).
 
 - Shell and nav: `client/lib/app/shell.dart` (Log / History / Metrics / Maint + header)
 - Active vehicle: `client/lib/app/active_vehicle.dart`
@@ -18,7 +18,8 @@ Use this together with:
 - Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 phase 3)
 - Vehicle CRUD: `pages/vehicle_form_page.dart` + list in `pages/settings_page.dart` (phase 2)
 - Settings: vehicle list wired; units/currency/default vehicle wired (**CES-57**)
-- Metrics / Maint tabs: `pages/metrics_page.dart`, `pages/maintenance_page.dart` (stubs)
+- Metrics: `pages/metrics_page.dart` (**CES-66** — range filter + summary + cost chart; aggregation in `client/lib/metrics/`, display units in `client/lib/units/`)
+- Maint tab: `pages/maintenance_page.dart` (stub)
 - Debug: `pages/debug_page.dart`
 
 ## Delivery status by screen
@@ -28,7 +29,7 @@ Use this together with:
 | --------------------------- | ---------------- | --------------------- | --------------------------------------------------------- |
 | Log / fuel entry            | Defined          | **Shipped** (phase 3) | `pages/log_page.dart` — form, draft, `validateInsert`     |
 | History timeline            | Defined          | **Shipped** (fuel)    | `pages/history_page.dart` — list, detail, edit, delete; MAINT chip disabled; flip mode later |
-| Metrics                     | Defined          | Stub                  | `pages/metrics_page.dart`                                 |
+| Metrics                     | Defined          | **Shipped** (CES-66)  | `pages/metrics_page.dart` — range filter, summary card, cost-over-time chart, low-data placeholders |
 | Maintenance entry + history | Defined          | Stub                  | `pages/maintenance_page.dart`                             |
 | Settings                    | Defined          | **Shipped** (CES-57)  | `pages/settings_page.dart` — vehicle CRUD + units/currency/timezone/default vehicle |
 | Vehicle CRUD                | Defined          | **Shipped** (phase 2) | `pages/vehicle_form_page.dart`                            |
@@ -43,7 +44,7 @@ Use this together with:
 - Visual style and component rules are defined in `cestovni-styling.md`.
 - Screenshot references are under `screenshots/dark-midnight/`.
 
-**Implementation note:** Shell from CES-56; Log and History tabs are live (CES-39 phase 3). Metrics and Maint remain stub pages. Settings (gear) is a pushed route; Debug from Settings. Theme toggle is local; first-load default **dark** per `cestovni-styling.md` §5.
+**Implementation note:** Shell from CES-56; Log, History (CES-39 phase 3), and Metrics (CES-66) tabs are live. Maint remains a stub page. Settings (gear) is a pushed route; Debug from Settings. Theme toggle is local; first-load default **dark** per `cestovni-styling.md` §5.
 
 ### Active vehicle (session state)
 
@@ -110,7 +111,7 @@ Screenshot: `screenshots/dark-midnight/metrics.png`
 - Canonical first chart in MVP is **Cost over time**.
 - Maintenance totals include only entries with both date and cost.
 
-**Implementation note:** No metrics page exists yet. Define metrics contracts first (aggregation windows, rounding, partial-fill handling), then UI.
+**Implementation note:** Shipped (**CES-66**). Range windows / summary / cost series computed in `client/lib/metrics/metrics_aggregation.dart` (pure, reuses `client/lib/consumption/` segment math); UI in `pages/metrics_page.dart` with a minimal custom-painter polyline (no chart dependency). MVP ships the cost-over-time chart only; economy trend + category splits are Later. Mixed currencies render one series per currency (deep fix CES-51); non-UTC IANA timezones approximate window boundaries with the device offset until a tz database lands.
 
 **Scope gate**
 

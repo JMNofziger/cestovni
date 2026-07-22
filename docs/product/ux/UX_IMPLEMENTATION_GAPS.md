@@ -2,9 +2,9 @@
 
 **Purpose:** Track documentation and product gaps discovered before M1 UI execution so they do not leak into implementation as silent contradictions.
 
-**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **M1 follow-ons on board:** [CES-65](https://linear.app/personal-interests-llc/issue/CES-65) (Log/History prefs), [CES-66](https://linear.app/personal-interests-llc/issue/CES-66) (Metrics), [CES-67](https://linear.app/personal-interests-llc/issue/CES-67) (Maintenance).
+**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **Open M1 follow-on:** [CES-67](https://linear.app/personal-interests-llc/issue/CES-67) (Maintenance) + photo (**CES-40**).
 
-**Last reviewed:** 2026-07-17 (Linear board sync; CES-65–68 created)
+**Last reviewed:** 2026-07-22 (CES-65/66 shipped; board + docs sync)
 
 ---
 
@@ -35,13 +35,13 @@ Not automatic blockers for CES-39 unless product promotes them.
 | Area                    | Gap                                                                                                                     | Suggested owner |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------- |
 | Draft lifecycle         | Single vs multiple drafts per vehicle, discard/dirty navigation, “resume draft” entry points                            | Product + UX    |
-| Metrics                 | “Cost over time” bucketing (day/week/month by range), empty buckets; multi-currency until **CES-51**                    | Product + eng   |
+| Metrics                 | MVP shipped (**CES-66**): point series per fill-up. Open: day/week/month bucketing by range; multi-currency until **CES-51** | Product + eng   |
 | Soft delete             | Undo window vs confirm-only; whether deleted rows reappear anywhere                                                     | Product         |
 | Light theme             | Wired in: `light-parchment` set + `full-scroll/` subfolder referenced by `cestovni-full-views.md` and `cestovni-add-vehicle-cta.md`; `README` lists both variants. Dark remains first-load default per `cestovni-styling.md` §5. | Design          |
 | Empty / loading / error | Copy and patterns (no skeleton shimmer per style spec) per screen                                                       | Product + UX    |
 | Vehicle CRUD UX         | Field-level spec beyond “must ship” list in `DELIVERY_ACCEPTANCE.md`                                                    | Product         |
 | Currency display        | ISO-4217 minor units (not always 2 decimals)                                                                            | Eng + product   |
-| Settings prefs display  | **CES-57 shipped** (Settings UI); Log/History still assume km/L/EUR — **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** | Eng (M1)        |
+| Settings prefs display  | **CES-65 Done** (with CES-66 on main): Log/History/Metrics read prefs via `client/lib/units/display_units.dart` | Eng (M1) — closed |
 | i18n / a11y             | Dynamic type, locale number/date formatting, semantics labels                                                           | Eng (Stage 5/6) |
 | Test matrix             | §4 of `SENIOR_REVIEW_CHECKLIST.md` — map each bullet to a PR or issue                                                   | Eng             |
 
