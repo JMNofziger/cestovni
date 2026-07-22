@@ -9,7 +9,7 @@ Use this together with:
 
 ## Current implementation map (source of truth)
 
-**Last synced:** 2026-05-21 (CES-39 phases 1–3; phase 3 on branch `docs/android-first-sequencing`, merge to `main` pending).
+**Last synced:** 2026-07-22 (CES-65 prefs display + CES-66 Metrics tab; PR #16).
 
 - Shell and nav: `client/lib/app/shell.dart` (Log / History / Metrics / Maint + header)
 - Active vehicle: `client/lib/app/active_vehicle.dart`

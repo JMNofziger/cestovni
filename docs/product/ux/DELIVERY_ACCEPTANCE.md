@@ -2,7 +2,7 @@
 
 This document defines what must ship vs what can wait. Use it to prevent scope creep during implementation.
 
-**M1 / CES-39:** Gate closed; **CES-39 Done** (repo + Linear). **CES-57 Done.** **CES-65 Done in repo** (prefs display, shipped with CES-66). **CES-66 Done in repo** (Metrics tab). **Still open:** **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** (Maint tab), photo (**CES-40**). See [`../delivery-plan-v1.md`](../delivery-plan-v1.md).
+**M1 / CES-39:** Gate closed; **CES-39 Done** (repo + Linear). **CES-57 Done.** **CES-65 Done** (prefs display, shipped with CES-66, PR #16). **CES-66 Done** (Metrics tab, repo + Linear). **Still open:** **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** (Maint tab), photo (**CES-40**). See [`../delivery-plan-v1.md`](../delivery-plan-v1.md).
 
 ## Global acceptance gates
 
