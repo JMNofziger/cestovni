@@ -61,7 +61,7 @@ Engineering and in-app copy must reflect this table; do not silently degrade.
 | Google Play | **$0** (APK) or **$25 once** | Optional discoverability |
 | PWA static hosting | **$0** | Cloudflare Pages free tier for `client/web-lite/` |
 | Crash / telemetry backend | **$0** at low volume | [Glitchtip](https://glitchtip.com) self-host per [ADR 004 addendum](004-addendum-glitchtip-transport.md); SaaS free tier acceptable for earliest betas |
-| Backup API | Managed free tier or self-host | [ADR 001](001-backend-api-boundary.md) — separate from store fees |
+| Backup API | Managed free tier, or **$0-50/yr self-host** | [ADR 001](001-backend-api-boundary.md) — separate from store fees; self-host hosting target ($0/yr Oracle Cloud Always Free, ~$50/yr paid fallback) named in [ADR 001 addendum](001-addendum-self-host-hosting.md) |
 
 ## Technical note (post-spike)
 
