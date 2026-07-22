@@ -3,6 +3,7 @@ import 'package:cestovni/app/pages/history_page.dart';
 import 'package:cestovni/app/theme/cestovni_typography.dart';
 import 'package:cestovni/db/app_database.dart';
 import 'package:cestovni/db/repositories/fill_ups_repository.dart';
+import 'package:cestovni/db/repositories/settings_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,6 +115,47 @@ void main() {
 
     final all = await repo.listForVehicle(vehicleId);
     expect(all, isEmpty);
+
+    await _drain(tester, db);
+  });
+
+  testWidgets('display units and row currency follow prefs (CES-65)',
+      (tester) async {
+    final db = AppDatabase.withExecutor(NativeDatabase.memory());
+    final vehicleId = await _seedVehicle(db);
+    await SettingsRepository(db).update(
+      preferredDistanceUnit: 'mi',
+      preferredVolumeUnit: 'gal',
+      currencyCode: 'USD',
+    );
+    final repo = FillUpsRepository(db);
+    // 160 934 m ≈ 100 mi; 3 785 411 784 µL = 1.00 US gal. Row was
+    // logged in USD, so the money renders with `$` regardless of any
+    // later currency pref change.
+    await repo.create(FillUpDraft(
+      vehicleId: vehicleId,
+      filledAt: DateTime.utc(2026, 4, 18, 10),
+      odometerM: 160934,
+      volumeUL: 3785411784,
+      totalPriceCents: 4520,
+      currencyCode: 'USD',
+      isFull: true,
+    ));
+
+    await tester.pumpWidget(_host(db, vehicleId));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('\$45.20'), findsOneWidget);
+    expect(find.textContaining('100 mi'), findsOneWidget);
+    expect(find.textContaining('1.00 gal'), findsOneWidget);
+
+    await tester.tap(find.text('\$45.20'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('ODOMETER (MI)'), findsOneWidget);
+    expect(find.text('VOLUME (GAL)'), findsOneWidget);
 
     await _drain(tester, db);
   });

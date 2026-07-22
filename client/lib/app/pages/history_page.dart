@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../consumption/adapters.dart';
 import '../../consumption/models.dart';
 import '../../consumption/validation.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/fill_ups_repository.dart';
+import '../../db/repositories/settings_repository.dart';
+import '../../units/display_units.dart';
 import '../active_vehicle.dart';
 import '../theme/cestovni_primitives.dart';
 import '../theme/cestovni_tokens.dart';
@@ -31,13 +36,35 @@ enum _Filter { all, fuel }
 
 class _HistoryPageState extends State<HistoryPage> {
   late final FillUpsRepository _repo;
+  late final SettingsRepository _settingsRepo;
   _Filter _filter = _Filter.all;
+
+  /// Latest settings row (CES-65) — distance / volume display units
+  /// follow these prefs. Money renders in each row's own stored
+  /// currency, not the current pref. Defaults (km / L) apply until
+  /// the bootstrap read lands.
+  SettingsRow? _settings;
+  StreamSubscription<SettingsRow?>? _settingsSub;
 
   @override
   void initState() {
     super.initState();
     _repo = FillUpsRepository(widget.db);
+    _settingsRepo = SettingsRepository(widget.db);
+    _settingsRepo.getOrBootstrap();
+    _settingsSub = _settingsRepo.watchSingle().listen((row) {
+      if (mounted && row != null) setState(() => _settings = row);
+    });
   }
+
+  @override
+  void dispose() {
+    _settingsSub?.cancel();
+    super.dispose();
+  }
+
+  String get _distanceUnit => _settings?.preferredDistanceUnit ?? 'km';
+  String get _volumeUnit => _settings?.preferredVolumeUnit ?? 'L';
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +309,8 @@ class _HistoryPageState extends State<HistoryPage> {
         padding: const EdgeInsets.only(bottom: 10),
         child: _FillUpCard(
           row: row,
+          distanceUnit: _distanceUnit,
+          volumeUnit: _volumeUnit,
           onTap: () => _showDetail(row),
         ),
       ));
@@ -322,6 +351,8 @@ class _HistoryPageState extends State<HistoryPage> {
       builder: (_) => _DetailSheet(
         row: row,
         colors: colors,
+        distanceUnit: _distanceUnit,
+        volumeUnit: _volumeUnit,
         onDelete: () => _confirmDelete(row),
         onEdit: () => _openEdit(row),
       ),
@@ -367,7 +398,12 @@ class _HistoryPageState extends State<HistoryPage> {
           data: Theme.of(context),
           child: ActiveVehicleScope(
             notifier: ActiveVehicleScope.of(context),
-            child: _FillUpEditPage(db: widget.db, existing: row),
+            child: _FillUpEditPage(
+              db: widget.db,
+              existing: row,
+              distanceUnit: _distanceUnit,
+              volumeUnit: _volumeUnit,
+            ),
           ),
         ),
       ),
@@ -398,18 +434,22 @@ class _HistoryPageState extends State<HistoryPage> {
 // ══════════════════════════════════════════════════════════════════════
 
 class _FillUpCard extends StatelessWidget {
-  const _FillUpCard({required this.row, required this.onTap});
+  const _FillUpCard({
+    required this.row,
+    required this.distanceUnit,
+    required this.volumeUnit,
+    required this.onTap,
+  });
 
   final FillUpRow row;
+  final String distanceUnit;
+  final String volumeUnit;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.cestovniColors;
     final dt = DateTime.parse(row.filledAt).toLocal();
-    final odoKm = row.odometerM ~/ 1000;
-    final volL = row.volumeUL / 1000000;
-    final total = row.totalPriceCents / 100;
 
     return LedgerCard(
       onTap: onTap,
@@ -444,14 +484,15 @@ class _FillUpCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '€${total.toStringAsFixed(2)}',
+                      formatMoney(row.totalPriceCents, row.currencyCode),
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_fmtInt(odoKm)} km     ${volL.toStringAsFixed(2)} L',
+                  '${formatDistance(row.odometerM, distanceUnit)}     '
+                  '${volumeToDisplay(row.volumeUL, volumeUnit)} $volumeUnit',
                   style: TextStyle(
                       color: colors.mutedForeground, fontSize: 13),
                 ),
@@ -493,15 +534,6 @@ class _FillUpCard extends StatelessWidget {
     return '${months[dt.month]} ${dt.day}';
   }
 
-  static String _fmtInt(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
-      buf.write(s[i]);
-    }
-    return buf.toString();
-  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -512,21 +544,22 @@ class _DetailSheet extends StatelessWidget {
   const _DetailSheet({
     required this.row,
     required this.colors,
+    required this.distanceUnit,
+    required this.volumeUnit,
     required this.onDelete,
     required this.onEdit,
   });
 
   final FillUpRow row;
   final CestovniColors colors;
+  final String distanceUnit;
+  final String volumeUnit;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     final dt = DateTime.parse(row.filledAt).toLocal();
-    final odoKm = row.odometerM ~/ 1000;
-    final volL = row.volumeUL / 1000000;
-    final total = row.totalPriceCents / 100;
 
     return SafeArea(
       child: Padding(
@@ -549,9 +582,13 @@ class _DetailSheet extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _detailRow('DATE', _fmtFull(dt)),
-            _detailRow('ODOMETER (KM)', _FillUpCard._fmtInt(odoKm)),
-            _detailRow('VOLUME (L)', volL.toStringAsFixed(3)),
-            _detailRow('TOTAL', '€${total.toStringAsFixed(2)}'),
+            _detailRow('ODOMETER (${distanceUnitLabel(distanceUnit)})',
+                formatThousands(metersToDisplayWhole(
+                    row.odometerM, distanceUnit))),
+            _detailRow('VOLUME (${volumeUnitLabel(volumeUnit)})',
+                volumeToDisplay(row.volumeUL, volumeUnit, decimals: 3)),
+            _detailRow(
+                'TOTAL', formatMoney(row.totalPriceCents, row.currencyCode)),
             _detailRow('PARTIAL', row.isFull ? 'No' : 'Yes'),
             if (row.notes != null && row.notes!.isNotEmpty)
               _detailRow('NOTES', row.notes!),
@@ -636,10 +673,17 @@ class _DetailSheet extends StatelessWidget {
 // ══════════════════════════════════════════════════════════════════════
 
 class _FillUpEditPage extends StatefulWidget {
-  const _FillUpEditPage({required this.db, required this.existing});
+  const _FillUpEditPage({
+    required this.db,
+    required this.existing,
+    required this.distanceUnit,
+    required this.volumeUnit,
+  });
 
   final AppDatabase db;
   final FillUpRow existing;
+  final String distanceUnit;
+  final String volumeUnit;
 
   @override
   State<_FillUpEditPage> createState() => _FillUpEditPageState();
@@ -664,10 +708,12 @@ class _FillUpEditPageState extends State<_FillUpEditPage> {
     _repo = FillUpsRepository(widget.db);
     final r = widget.existing;
     _filledAt = DateTime.parse(r.filledAt).toLocal();
-    _odometerCtrl =
-        TextEditingController(text: (r.odometerM ~/ 1000).toString());
+    _odometerCtrl = TextEditingController(
+        text: metersToDisplayWhole(r.odometerM, widget.distanceUnit)
+            .toString());
     _volumeCtrl = TextEditingController(
-        text: (r.volumeUL / 1000000).toStringAsFixed(3));
+        text: microlitersToDouble(r.volumeUL, widget.volumeUnit)
+            .toStringAsFixed(3));
     _totalCtrl = TextEditingController(
         text: (r.totalPriceCents / 100).toStringAsFixed(2));
     _notesCtrl = TextEditingController(text: r.notes ?? '');
@@ -691,13 +737,13 @@ class _FillUpEditPageState extends State<_FillUpEditPage> {
       _saving = true;
     });
 
-    final odometerKm = int.tryParse(_odometerCtrl.text.trim());
-    final volumeL = double.tryParse(_volumeCtrl.text.trim());
+    final odometerVal = int.tryParse(_odometerCtrl.text.trim());
+    final volumeVal = double.tryParse(_volumeCtrl.text.trim());
     final totalMajor = double.tryParse(_totalCtrl.text.trim());
 
     final errors = <String, String>{};
-    if (odometerKm == null) errors['odometer'] = 'Required';
-    if (volumeL == null || volumeL <= 0) errors['volume'] = 'Required';
+    if (odometerVal == null) errors['odometer'] = 'Required';
+    if (volumeVal == null || volumeVal <= 0) errors['volume'] = 'Required';
     if (totalMajor == null || totalMajor <= 0) errors['total'] = 'Required';
 
     if (errors.isNotEmpty) {
@@ -708,9 +754,12 @@ class _FillUpEditPageState extends State<_FillUpEditPage> {
       return;
     }
 
-    final odometerM = odometerKm! * 1000;
-    final volumeUL = (volumeL! * 1000000).round();
-    final totalCents = (totalMajor! * 100).round();
+    // Amend keeps the row's stored currency (a row logged in EUR stays
+    // EUR even if prefs changed since); units follow current prefs.
+    final odometerM =
+        distanceToMeters(odometerVal!.toDouble(), widget.distanceUnit);
+    final volumeUL = volumeToMicroliters(volumeVal!, widget.volumeUnit);
+    final totalCents = majorToCents(totalMajor!);
     final notes = _notesCtrl.text.trim();
 
     final candidate = FillUp(
@@ -821,19 +870,29 @@ class _FillUpEditPageState extends State<_FillUpEditPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                              child: _txt('ODOMETER (KM)', _odometerCtrl,
-                                  'odometer', colors,
+                              child: _txt(
+                                  'ODOMETER (${distanceUnitLabel(widget.distanceUnit)})',
+                                  _odometerCtrl,
+                                  'odometer',
+                                  colors,
                                   kb: TextInputType.number)),
                           const SizedBox(width: 12),
                           Expanded(
-                              child: _txt('VOLUME (L)', _volumeCtrl,
-                                  'volume', colors,
+                              child: _txt(
+                                  'VOLUME (${volumeUnitLabel(widget.volumeUnit)})',
+                                  _volumeCtrl,
+                                  'volume',
+                                  colors,
                                   kb: const TextInputType.numberWithOptions(
                                       decimal: true))),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      _txt('TOTAL (€)', _totalCtrl, 'total', colors,
+                      _txt(
+                          'TOTAL (${currencySymbol(widget.existing.currencyCode).trim()})',
+                          _totalCtrl,
+                          'total',
+                          colors,
                           kb: const TextInputType.numberWithOptions(
                               decimal: true)),
                       const SizedBox(height: 16),

@@ -47,8 +47,8 @@ The user may enter values in any of these units. The app converts to canonical a
 Convert the user's entry to canonical with **banker's rounding** (round-half-to-even) at the nearest canonical unit. Examples:
 
 - `42.183 L` → `42 183 000` µL (no rounding; exact)
-- `13.157 gal` → `13.157 × 3 785 411 784 = 49 807 362 871.288` → rounds to **`49 807 362 871`** µL
-- `123.456 mi` → `123.456 × 1 609.344 = 198 689.195...` → rounds to **`198 689`** m
+- `13.157 gal` → `13.157 × 3 785 411 784 = 49 804 662 842.088` → rounds to **`49 804 662 842`** µL
+- `123.456 mi` → `123.456 × 1 609.344 = 198 683.173...` → rounds to **`198 683`** m
 - `45.678 km` → `45 678` m
 - `€ 67.89` → `6 789` cents
 

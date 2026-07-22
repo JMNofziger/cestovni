@@ -130,7 +130,11 @@ class _CestovniShellState extends State<CestovniShell> {
                             onOpenSettings: () =>
                                 _openSettings(innerContext),
                           ),
-                          const MetricsPage(),
+                          MetricsPage(
+                            db: widget.db,
+                            onOpenSettings: () =>
+                                _openSettings(innerContext),
+                          ),
                           const MaintenancePage(),
                         ],
                       ),

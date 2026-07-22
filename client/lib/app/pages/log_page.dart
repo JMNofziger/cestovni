@@ -9,6 +9,8 @@ import '../../consumption/validation.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/drafts_repository.dart';
 import '../../db/repositories/fill_ups_repository.dart';
+import '../../db/repositories/settings_repository.dart';
+import '../../units/display_units.dart';
 import '../active_vehicle.dart';
 import '../theme/cestovni_primitives.dart';
 import '../theme/cestovni_tokens.dart';
@@ -34,6 +36,13 @@ class LogPage extends StatefulWidget {
 class _LogPageState extends State<LogPage> {
   late final FillUpsRepository _fillUps;
   late final DraftsRepository _drafts;
+  late final SettingsRepository _settingsRepo;
+
+  /// Latest settings row (CES-65) — entry labels and save-time unit /
+  /// currency conversion follow these prefs. Defaults (km / L / EUR)
+  /// apply until the bootstrap read lands.
+  SettingsRow? _settings;
+  StreamSubscription<SettingsRow?>? _settingsSub;
 
   final _odometerCtrl = TextEditingController();
   final _volumeCtrl = TextEditingController();
@@ -58,10 +67,18 @@ class _LogPageState extends State<LogPage> {
     super.initState();
     _fillUps = FillUpsRepository(widget.db);
     _drafts = DraftsRepository(widget.db);
+    _settingsRepo = SettingsRepository(widget.db);
+    _settingsSub = _settingsRepo.watchSingle().listen((row) {
+      if (mounted && row != null) setState(() => _settings = row);
+    });
     for (final c in [_odometerCtrl, _volumeCtrl, _totalCtrl, _notesCtrl]) {
       c.addListener(_scheduleAutoSave);
     }
   }
+
+  String get _distanceUnit => _settings?.preferredDistanceUnit ?? 'km';
+  String get _volumeUnit => _settings?.preferredVolumeUnit ?? 'L';
+  String get _currencyCode => _settings?.currencyCode ?? 'EUR';
 
   @override
   void didChangeDependencies() {
@@ -77,6 +94,7 @@ class _LogPageState extends State<LogPage> {
 
   @override
   void dispose() {
+    _settingsSub?.cancel();
     _autoSaveTimer?.cancel();
     _odometerCtrl.dispose();
     _volumeCtrl.dispose();
@@ -92,6 +110,9 @@ class _LogPageState extends State<LogPage> {
       _resetForm();
       return;
     }
+    // Prefs must be known before canonical draft values are rendered
+    // back into entry units (CES-65).
+    _settings ??= await _settingsRepo.getOrBootstrap();
     final draft = await _drafts.openDraftForVehicle(vehicleId);
     if (!mounted || loadToken != _draftLoadToken) return;
     if (draft == null) {
@@ -104,13 +125,14 @@ class _LogPageState extends State<LogPage> {
         _filledAt = DateTime.parse(draft.filledAt!).toLocal();
       }
       if (draft.odometerM != null) {
-        _odometerCtrl.text = (draft.odometerM! ~/ 1000).toString();
+        _odometerCtrl.text =
+            metersToDisplayWhole(draft.odometerM!, _distanceUnit).toString();
       }
       if (draft.volumeUL != null) {
-        final litres = draft.volumeUL! / 1000000;
-        _volumeCtrl.text = litres == litres.roundToDouble()
-            ? litres.toStringAsFixed(0)
-            : litres.toStringAsFixed(3);
+        final vol = microlitersToDouble(draft.volumeUL!, _volumeUnit);
+        _volumeCtrl.text = vol == vol.roundToDouble()
+            ? vol.toStringAsFixed(0)
+            : vol.toStringAsFixed(3);
       }
       if (draft.totalPriceCents != null) {
         _totalCtrl.text = (draft.totalPriceCents! / 100).toStringAsFixed(2);
@@ -145,18 +167,22 @@ class _LogPageState extends State<LogPage> {
     final vehicleId = _trackedVehicleId;
     if (vehicleId == null) return;
 
-    final odometerKm = int.tryParse(_odometerCtrl.text.trim());
-    final volumeL = double.tryParse(_volumeCtrl.text.trim());
+    final odometerVal = int.tryParse(_odometerCtrl.text.trim());
+    final volumeVal = double.tryParse(_volumeCtrl.text.trim());
     final totalMajor = double.tryParse(_totalCtrl.text.trim());
     final notes = _notesCtrl.text.trim();
 
     final savedDraftId = await _drafts.save(DraftSnapshot(
       vehicleId: vehicleId,
       filledAt: _filledAt.toUtc(),
-      odometerM: odometerKm != null ? odometerKm * 1000 : null,
-      volumeUL: volumeL != null ? (volumeL * 1000000).round() : null,
-      totalPriceCents: totalMajor != null ? (totalMajor * 100).round() : null,
-      currencyCode: 'EUR',
+      odometerM: odometerVal != null
+          ? distanceToMeters(odometerVal.toDouble(), _distanceUnit)
+          : null,
+      volumeUL: volumeVal != null
+          ? volumeToMicroliters(volumeVal, _volumeUnit)
+          : null,
+      totalPriceCents: totalMajor != null ? majorToCents(totalMajor) : null,
+      currencyCode: _currencyCode,
       isFull: !_partialFill,
       missedBefore: _missedBefore,
       odometerReset: _odometerReset,
@@ -178,13 +204,13 @@ class _LogPageState extends State<LogPage> {
       _saving = true;
     });
 
-    final odometerKm = int.tryParse(_odometerCtrl.text.trim());
-    final volumeL = double.tryParse(_volumeCtrl.text.trim());
+    final odometerVal = int.tryParse(_odometerCtrl.text.trim());
+    final volumeVal = double.tryParse(_volumeCtrl.text.trim());
     final totalMajor = double.tryParse(_totalCtrl.text.trim());
 
     final errors = <String, String>{};
-    if (odometerKm == null) errors['odometer'] = 'Required';
-    if (volumeL == null || volumeL <= 0) errors['volume'] = 'Required';
+    if (odometerVal == null) errors['odometer'] = 'Required';
+    if (volumeVal == null || volumeVal <= 0) errors['volume'] = 'Required';
     if (totalMajor == null || totalMajor <= 0) errors['total'] = 'Required';
 
     if (errors.isNotEmpty) {
@@ -195,9 +221,10 @@ class _LogPageState extends State<LogPage> {
       return;
     }
 
-    final odometerM = odometerKm! * 1000;
-    final volumeUL = (volumeL! * 1000000).round();
-    final totalCents = (totalMajor! * 100).round();
+    final odometerM =
+        distanceToMeters(odometerVal!.toDouble(), _distanceUnit);
+    final volumeUL = volumeToMicroliters(volumeVal!, _volumeUnit);
+    final totalCents = majorToCents(totalMajor!);
     final notes = _notesCtrl.text.trim();
 
     final candidate = FillUp(
@@ -207,7 +234,7 @@ class _LogPageState extends State<LogPage> {
       odometerM: odometerM,
       volumeUL: volumeUL,
       totalPriceCents: totalCents,
-      currencyCode: 'EUR',
+      currencyCode: _currencyCode,
       isFull: !_partialFill,
       missedBefore: _missedBefore,
       odometerReset: _odometerReset,
@@ -232,7 +259,7 @@ class _LogPageState extends State<LogPage> {
       odometerM: odometerM,
       volumeUL: volumeUL,
       totalPriceCents: totalCents,
-      currencyCode: 'EUR',
+      currencyCode: _currencyCode,
       isFull: !_partialFill,
       missedBefore: _missedBefore,
       odometerReset: _odometerReset,
@@ -335,19 +362,27 @@ class _LogPageState extends State<LogPage> {
             children: [
               Expanded(
                 child: _field(
-                    'ODOMETER (KM)', _odometerCtrl, 'odometer', colors,
+                    'ODOMETER (${distanceUnitLabel(_distanceUnit)})',
+                    _odometerCtrl,
+                    'odometer',
+                    colors,
                     keyboard: TextInputType.number),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _field('VOLUME (L)', _volumeCtrl, 'volume', colors,
+                child: _field(
+                    'VOLUME (${volumeUnitLabel(_volumeUnit)})',
+                    _volumeCtrl,
+                    'volume',
+                    colors,
                     keyboard:
                         const TextInputType.numberWithOptions(decimal: true)),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          _field('TOTAL (€)', _totalCtrl, 'total', colors,
+          _field('TOTAL (${currencySymbol(_currencyCode).trim()})',
+              _totalCtrl, 'total', colors,
               keyboard:
                   const TextInputType.numberWithOptions(decimal: true)),
           const SizedBox(height: 16),
