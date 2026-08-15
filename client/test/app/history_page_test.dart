@@ -3,6 +3,7 @@ import 'package:cestovni/app/pages/history_page.dart';
 import 'package:cestovni/app/theme/cestovni_typography.dart';
 import 'package:cestovni/db/app_database.dart';
 import 'package:cestovni/db/repositories/fill_ups_repository.dart';
+import 'package:cestovni/db/repositories/maintenance_events_repository.dart';
 import 'package:cestovni/db/repositories/settings_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ void main() {
     await _drain(tester, db);
   });
 
-  testWidgets('shows empty fill-ups hint when vehicle has none',
+  testWidgets('shows empty entries hint when vehicle has none',
       (tester) async {
     final db = AppDatabase.withExecutor(NativeDatabase.memory());
     final vehicleId = await _seedVehicle(db);
@@ -33,7 +34,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('No fill-ups yet'), findsOneWidget);
+    expect(find.text('No entries yet'), findsOneWidget);
 
     await _drain(tester, db);
   });
@@ -69,6 +70,93 @@ void main() {
     expect(find.text('€45.20'), findsOneWidget);
     expect(find.text('€47.22'), findsOneWidget);
     expect(find.textContaining('FUEL'), findsWidgets);
+
+    await _drain(tester, db);
+  });
+
+  testWidgets('Maint filter shows maintenance rows (CES-67)', (tester) async {
+    final db = AppDatabase.withExecutor(NativeDatabase.memory());
+    final vehicleId = await _seedVehicle(db);
+    await FillUpsRepository(db).create(FillUpDraft(
+      vehicleId: vehicleId,
+      filledAt: DateTime.utc(2026, 4, 18, 10),
+      odometerM: 51460000,
+      volumeUL: 13100000,
+      totalPriceCents: 4520,
+      currencyCode: 'EUR',
+      isFull: true,
+    ));
+    await MaintenanceEventsRepository(db).create(MaintenanceEventDraft(
+      vehicleId: vehicleId,
+      performedAt: DateTime.utc(2026, 4, 10, 12),
+      category: 'oil',
+      costCents: 8900,
+      currencyCode: 'EUR',
+    ));
+
+    await tester.pumpWidget(_host(db, vehicleId));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.textContaining('FUEL'), findsWidgets);
+    expect(find.textContaining('MAINT'), findsWidgets);
+    expect(find.text('€89.00'), findsOneWidget);
+
+    await tester.tap(find.text('MAINT').first);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('€89.00'), findsOneWidget);
+    expect(find.text('€45.20'), findsNothing);
+
+    await tester.tap(find.text('€89.00'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Maintenance details'), findsOneWidget);
+    expect(find.text('Oil'), findsWidgets);
+
+    await _drain(tester, db);
+  });
+
+  testWidgets('soft-delete removes maintenance row (CES-67)', (tester) async {
+    final db = AppDatabase.withExecutor(NativeDatabase.memory());
+    final vehicleId = await _seedVehicle(db);
+    final repo = MaintenanceEventsRepository(db);
+    await repo.create(MaintenanceEventDraft(
+      vehicleId: vehicleId,
+      performedAt: DateTime.utc(2026, 4, 10, 12),
+      category: 'oil',
+      costCents: 8900,
+      currencyCode: 'EUR',
+    ));
+
+    await tester.pumpWidget(_host(db, vehicleId));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('€89.00'), findsOneWidget);
+
+    await tester.tap(find.text('€89.00'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Maintenance details'), findsOneWidget);
+
+    await tester.tap(find.text('Delete entry'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Delete entry?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('€89.00'), findsNothing);
+    expect(find.text('No entries yet'), findsOneWidget);
+
+    final all = await repo.listForVehicle(vehicleId);
+    expect(all, isEmpty);
 
     await _drain(tester, db);
   });
@@ -111,7 +199,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('€45.20'), findsNothing);
-    expect(find.text('No fill-ups yet'), findsOneWidget);
+    expect(find.text('No entries yet'), findsOneWidget);
 
     final all = await repo.listForVehicle(vehicleId);
     expect(all, isEmpty);
