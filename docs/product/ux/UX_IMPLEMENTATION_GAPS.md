@@ -2,9 +2,9 @@
 
 **Purpose:** Track documentation and product gaps discovered before M1 UI execution so they do not leak into implementation as silent contradictions.
 
-**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **Open M1 follow-on:** [CES-67](https://linear.app/personal-interests-llc/issue/CES-67) (Maintenance) + photo (**CES-40**).
+**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **CES-67 Done** (2026-08-15). **Open M1 follow-on:** photo (**CES-40**).
 
-**Last reviewed:** 2026-07-22 (CES-65/66 shipped; board + docs sync)
+**Last reviewed:** 2026-08-15 (CES-67 shipped; next coding = CES-40)
 
 ---
 

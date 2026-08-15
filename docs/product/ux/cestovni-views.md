@@ -9,17 +9,17 @@ Use this together with:
 
 ## Current implementation map (source of truth)
 
-**Last synced:** 2026-07-22 (CES-65 prefs display + CES-66 Metrics tab on main).
+**Last synced:** 2026-08-15 (CES-67 Maintenance tab + History Maint chip).
 
 - Shell and nav: `client/lib/app/shell.dart` (Log / History / Metrics / Maint + header)
 - Active vehicle: `client/lib/app/active_vehicle.dart`
-- Repositories: `client/lib/db/repositories/` (vehicles, fill-ups, drafts, settings)
+- Repositories: `client/lib/db/repositories/` (vehicles, fill-ups, drafts, settings, maintenance events)
 - Consumption validation: `client/lib/consumption/` (wired on Log save + History amend)
-- Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 phase 3)
+- Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 fuel + **CES-67** maint)
 - Vehicle CRUD: `pages/vehicle_form_page.dart` + list in `pages/settings_page.dart` (phase 2)
 - Settings: vehicle list wired; units/currency/default vehicle wired (**CES-57**)
 - Metrics: `pages/metrics_page.dart` (**CES-66** — range filter + summary + cost chart; aggregation in `client/lib/metrics/`, display units in `client/lib/units/`)
-- Maint tab: `pages/maintenance_page.dart` (stub)
+- Maint tab: `pages/maintenance_page.dart` (**CES-67** — form + recent list; date-only helpers in `client/lib/maintenance/`)
 - Debug: `pages/debug_page.dart`
 
 ## Delivery status by screen
@@ -28,9 +28,9 @@ Use this together with:
 | Screen                      | UX target status | Implementation status | Primary file(s)                                           |
 | --------------------------- | ---------------- | --------------------- | --------------------------------------------------------- |
 | Log / fuel entry            | Defined          | **Shipped** (phase 3) | `pages/log_page.dart` — form, draft, `validateInsert`     |
-| History timeline            | Defined          | **Shipped** (fuel)    | `pages/history_page.dart` — list, detail, edit, delete; MAINT chip disabled; flip mode later |
+| History timeline            | Defined          | **Shipped** (fuel + maint) | `pages/history_page.dart` — list, detail, edit/delete fuel, detail/delete maint; All/Fuel/Maint chips; flip mode later |
 | Metrics                     | Defined          | **Shipped** (CES-66)  | `pages/metrics_page.dart` — range filter, summary card, cost-over-time chart, low-data placeholders |
-| Maintenance entry + history | Defined          | Stub                  | `pages/maintenance_page.dart`                             |
+| Maintenance entry + history | Defined          | **Shipped** (CES-67)  | `pages/maintenance_page.dart` — date-only form, category, reminder fields, recent list |
 | Settings                    | Defined          | **Shipped** (CES-57)  | `pages/settings_page.dart` — vehicle CRUD + units/currency/timezone/default vehicle |
 | Vehicle CRUD                | Defined          | **Shipped** (phase 2) | `pages/vehicle_form_page.dart`                            |
 
@@ -91,7 +91,7 @@ Screenshots: `screenshots/dark-midnight/history.png`, `screenshots/dark-midnight
 - Empty states are explicit and non-blocking.
 - Ordering is deterministic: event datetime DESC, then `created_at` DESC, then `id` DESC.
 
-**Implementation note:** No dedicated history page exists yet. Add page + state model + grouping/query layer before visual polish.
+**Implementation note:** Shipped — fuel (CES-39) + maintenance (CES-67). Unified stream in `pages/history_page.dart` via `client/lib/maintenance/history_ledger.dart` (event datetime DESC, then `id` DESC). Maint chip is live. Flip-card mode remains Later.
 
 **Scope gate**
 
@@ -129,7 +129,7 @@ Screenshot: `screenshots/dark-midnight/maint.png`
 - Optional reminders by distance and/or months — persisted on `maintenance_rules` (not as columns on `maintenance_events`).
 - Save writes maintenance entry to shared ledger; reminder cadence follows the rule row contract in `data-model.md`.
 
-**Implementation note:** No maintenance form/history page exists yet. Data model + repository support should land before page build.
+**Implementation note:** Shipped (**CES-67**). Form + recent list in `pages/maintenance_page.dart`; `MaintenanceEventsRepository` create/list/soft-delete (no outbox — CES-44). Date-only `performed_at` via `client/lib/maintenance/performed_at.dart` (local noon, same tz approximation as CES-66). Reminder fields upsert `maintenance_rules` by vehicle+category name; scheduling UX is Later.
 
 **Scope gate**
 
