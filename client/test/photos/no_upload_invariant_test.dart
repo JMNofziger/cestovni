@@ -38,6 +38,7 @@ void main() {
     final photos = PhotoService(
       refs: PhotoRefsRepository(db),
       store: PhotoStore.inDirectory(Directory(p.join(sandbox.path, 'photos'))),
+      processor: processPhotoInProcess,
     );
 
     final first = await photos.attachFromBytes(

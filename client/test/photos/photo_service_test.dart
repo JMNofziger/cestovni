@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:cestovni/db/app_database.dart';
 import 'package:cestovni/db/repositories/drafts_repository.dart';
 import 'package:cestovni/db/repositories/photo_refs_repository.dart';
+import 'package:cestovni/photos/photo_processing.dart';
 import 'package:cestovni/photos/photo_service.dart';
 import 'package:cestovni/photos/photo_store.dart';
 import 'package:cestovni/photos/photo_ttl.dart';
@@ -35,12 +36,40 @@ void main() {
   PhotoStore storeFor() =>
       PhotoStore.inDirectory(Directory(p.join(sandbox.path, 'photos')));
 
+  // The isolate hop is production-only: tests process in-process so they stay
+  // deterministic and off real isolates.
   PhotoService serviceFor(AppDatabase db, {DateTime Function()? clock}) =>
       PhotoService(
         refs: PhotoRefsRepository(db),
         store: storeFor(),
         clock: clock,
+        processor: processPhotoInProcess,
       );
+
+  group('isolate offload', () {
+    // Production runs the decode on a background isolate so a 12 MP photo
+    // cannot drop frames. These two cover that hop, since every other test
+    // here injects the in-process processor.
+    test('produces the same result as processing in-process', () async {
+      final input = jpegWithSensitiveExif(width: 800, height: 600);
+      final now = DateTime.utc(2026, 8, 15, 12);
+
+      final direct = await processPhotoInProcess(input, now);
+      final offloaded = await processPhotoInIsolate(input, now);
+
+      expect(offloaded.sha256Hex, direct.sha256Hex);
+      expect(offloaded.byteSize, direct.byteSize);
+      expect(offloaded.capturedAt, direct.capturedAt);
+      expect(readTag(offloaded.bytes, 'gps', 'GPSLatitude'), isNull);
+    });
+
+    test('propagates a decode failure as PhotoProcessingException', () async {
+      await expectLater(
+        processPhotoInIsolate(notAnImage(), DateTime.utc(2026, 8, 15)),
+        throwsA(isA<PhotoProcessingException>()),
+      );
+    });
+  });
 
   group('attach', () {
     test('writes a stripped file plus a row whose hash matches the file',
@@ -321,6 +350,7 @@ void main() {
             'sandbox unavailable',
           ),
         ),
+        processor: processPhotoInProcess,
       );
 
       final result = await photos.sweepThrottled(

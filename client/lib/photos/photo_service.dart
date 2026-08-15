@@ -19,6 +19,31 @@ import 'photo_processing.dart';
 import 'photo_store.dart';
 import 'photo_ttl.dart';
 
+/// Signature of the byte pipeline, so the isolate hop can be swapped for a
+/// direct call in tests.
+typedef PhotoProcessor = Future<ProcessedPhoto> Function(
+  Uint8List bytes,
+  DateTime now,
+);
+
+/// Runs the pipeline on a background isolate.
+///
+/// `package:image` decodes and re-encodes in pure Dart, and a 12 MP camera
+/// photo is a few hundred milliseconds of work — enough to drop frames if it
+/// ran on the UI isolate while the user is standing at a pump.
+Future<ProcessedPhoto> processPhotoInIsolate(Uint8List bytes, DateTime now) =>
+    compute(_processInIsolate, (bytes: bytes, now: now));
+
+ProcessedPhoto _processInIsolate(({Uint8List bytes, DateTime now}) request) =>
+    processPhotoBytes(request.bytes, now: request.now);
+
+/// Runs the pipeline in-process. Tests use this to stay off real isolates.
+Future<ProcessedPhoto> processPhotoInProcess(
+  Uint8List bytes,
+  DateTime now,
+) async =>
+    processPhotoBytes(bytes, now: now);
+
 /// A stored photo plus its file, ready for the UI to render.
 class PhotoAttachment {
   const PhotoAttachment({required this.row, required this.file});
@@ -62,10 +87,12 @@ class PhotoService {
     required PhotoStore store,
     String Function()? newId,
     DateTime Function()? clock,
+    PhotoProcessor? processor,
   })  : _refs = refs,
         _store = store,
         _newId = newId ?? newUuid,
-        _clock = clock ?? DateTime.now;
+        _clock = clock ?? DateTime.now,
+        _process = processor ?? processPhotoInIsolate;
 
   /// Production wiring — `photo_refs` plus the app sandbox.
   factory PhotoService.forDatabase(AppDatabase db) => PhotoService(
@@ -77,6 +104,7 @@ class PhotoService {
   final PhotoStore _store;
   final String Function() _newId;
   final DateTime Function() _clock;
+  final PhotoProcessor _process;
 
   /// Cleanup is throttled per process rather than per widget, because the
   /// Log page is rebuilt every time the user switches tabs.
@@ -110,7 +138,7 @@ class PhotoService {
       throw PhotoLimitExceededException(draftId, maxPhotosPerDraft);
     }
 
-    final processed = processPhotoBytes(bytes, now: _clock());
+    final processed = await _process(bytes, _clock());
     final id = _newId();
     await _store.write(id, processed.bytes);
 

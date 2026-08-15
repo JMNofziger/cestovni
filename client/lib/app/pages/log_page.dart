@@ -266,6 +266,12 @@ class _LogPageState extends State<LogPage> {
       if (mounted) {
         setState(() => _photoError = "That image couldn't be read.");
       }
+    } catch (_) {
+      // Anything else — a full sandbox, a picker the OS could not open — is
+      // still just a failed photo. The entry itself must stay saveable.
+      if (mounted) {
+        setState(() => _photoError = "That photo couldn't be attached.");
+      }
     } finally {
       if (mounted) setState(() => _attachingPhoto = false);
     }

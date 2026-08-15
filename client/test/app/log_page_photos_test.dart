@@ -44,6 +44,9 @@ void main() {
         refs: PhotoRefsRepository(db),
         store:
             PhotoStore.inDirectory(Directory(p.join(sandbox.path, 'photos'))),
+        // Production offloads the decode to an isolate; a test isolate would
+        // add spawn latency to every attach for no extra coverage.
+        processor: processPhotoInProcess,
       );
 
   testWidgets('attach card starts empty and offers both sources',
