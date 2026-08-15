@@ -1,7 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Receipt photos live in the app sandbox and MUST NOT be captured by
+         Android auto-backup or device transfer (docs/specs/photo-pipeline.md
+         §"Security & privacy"). Auto-backup cannot be scoped reliably to the
+         photos/ subdirectory, because path_provider places it under the data
+         dir rather than files/, so backup is disabled for the whole app.
+         Nothing is lost: user data is restored by the M3 sync protocol, and
+         photos are local-only by design. -->
     <application
         android:label="cestovni"
         android:name="${applicationName}"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

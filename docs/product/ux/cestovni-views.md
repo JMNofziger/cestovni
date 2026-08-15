@@ -73,6 +73,13 @@ Screenshot: `screenshots/dark-midnight/log.png`
 - Data-quality flags stay visible in MVP: `isFull`, `missedBefore`, `odometerReset`.
 - Each flag must include helper text explaining consumption impact.
 
+**Implementation note (receipt photos):** Shipped — CES-40. An optional
+`RECEIPT PHOTO` card sits between the form card and `ADVANCED`: camera /
+library attach, up to five thumbnails, tap for a full preview with delete, and
+a permanent local-only disclosure line. A refused permission hides attach and
+never blocks the save. Pipeline lives in `client/lib/photos/` per
+[`../../specs/photo-pipeline.md`](../../specs/photo-pipeline.md).
+
 **Scope gate**
 
 - Must ship: required fields + validation + save flow + draft save/resume.

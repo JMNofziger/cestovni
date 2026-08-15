@@ -1,8 +1,17 @@
 # Cursor execution prompt — CES-40 Photo pipeline
 
-> **Status: READY** (2026-08-15). Handoff after **CES-67** Maint shipped.
-> Linear **[CES-40](https://linear.app/personal-interests-llc/issue/CES-40)** — Backlog → set **In Progress** when you start.
-> Product direction: **do CES-40 next.** Do **not** pick up iPhone / CES-63 / PWA-lite unless the user explicitly redirects.
+> **Status: EXECUTED** (2026-08-15) — shipped on `cursor/ces-40-photos-9a29`, based on the CES-67 tip because PR #17 was still open.
+> Linear **[CES-40](https://linear.app/personal-interests-llc/issue/CES-40)** is **Done**.
+> Manual checklist: [`../ces-40-manual-test.md`](../ces-40-manual-test.md) — needs a physical Android device with a camera.
+> Next coding focus: **[CES-41](https://linear.app/personal-interests-llc/issue/CES-41)** Export ZIP — see [`../delivery-plan-v1.md`](../delivery-plan-v1.md) §Current focus.
+>
+> Deviations from the brief below, all recorded in the PR:
+> - **Full EXIF strip, not a blocklist.** The output JPEG carries an empty EXIF container, so no sensitive tag can survive by being missing from a hard-list. Capture time is kept only in `photo_refs.captured_at`.
+> - **Always-on disclosure instead of a one-shot first-run hint.** A dismissible hint would need a schema migration for a UX flag; the copy is a permanent muted line on the photo card.
+> - **`android:allowBackup="false"` app-wide** rather than a `photos/`-scoped backup rule — `path_provider` puts the sandbox outside the `file` backup domain, so a scoped exclusion would be coupled to plugin internals.
+> - **iOS backup exclusion not implemented** (documented gap; iPhone runs PWA-lite per ADR 005).
+>
+> Kept as an archive of the execution brief (do not re-run).
 
 **Branch:** cut `cursor/ces-40-photos-<suffix>` from **CES-67 tip**, not stale `main`
 **Linear:** [CES-40](https://linear.app/personal-interests-llc/issue/CES-40)
