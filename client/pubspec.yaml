@@ -32,6 +32,9 @@ dependencies:
   # Targets the dev sync stub at `server/dev-sync-stub/`; replaced by
   # the real M3 client once CES-43 lands.
   http: ^1.2.0
+  image: ^4.9.1
+  crypto: ^3.0.7
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:

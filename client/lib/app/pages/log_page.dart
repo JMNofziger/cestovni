@@ -9,7 +9,11 @@ import '../../consumption/validation.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/drafts_repository.dart';
 import '../../db/repositories/fill_ups_repository.dart';
+import '../../db/repositories/photo_refs_repository.dart';
 import '../../db/repositories/settings_repository.dart';
+import '../../photos/photo_picker.dart';
+import '../../photos/photo_processing.dart';
+import '../../photos/photo_service.dart';
 import '../../units/display_units.dart';
 import '../active_vehicle.dart';
 import '../theme/cestovni_primitives.dart';
@@ -19,15 +23,26 @@ import '../theme/cestovni_typography.dart';
 /// **Log** tab — fast-entry fill-up form per `cestovni-views.md`.
 ///
 /// CES-39: replaces M1 stub with working form + draft lifecycle.
+/// CES-40: optional ephemeral receipt photos on the open draft.
 class LogPage extends StatefulWidget {
   const LogPage({
     super.key,
     required this.db,
     required this.onOpenSettings,
+    this.photoService,
+    this.photoPicker,
   });
 
   final AppDatabase db;
   final VoidCallback onOpenSettings;
+
+  /// Receipt-photo backend. Tests inject a temp-directory store; production
+  /// falls back to the app sandbox.
+  final PhotoService? photoService;
+
+  /// Camera / photo-library source. Tests inject bytes directly — the CI VM
+  /// has neither.
+  final PhotoPicker? photoPicker;
 
   @override
   State<LogPage> createState() => _LogPageState();
@@ -37,6 +52,8 @@ class _LogPageState extends State<LogPage> {
   late final FillUpsRepository _fillUps;
   late final DraftsRepository _drafts;
   late final SettingsRepository _settingsRepo;
+  late final PhotoService _photos;
+  late final PhotoPicker _photoPicker;
 
   /// Latest settings row (CES-65) — entry labels and save-time unit /
   /// currency conversion follow these prefs. Defaults (km / L / EUR)
@@ -62,18 +79,29 @@ class _LogPageState extends State<LogPage> {
   bool _showAdvanced = false;
   Map<String, String> _errors = {};
 
+  List<PhotoAttachment> _photoAttachments = const [];
+  bool _attachingPhoto = false;
+  bool _photoAccessDenied = false;
+  String? _photoError;
+
   @override
   void initState() {
     super.initState();
     _fillUps = FillUpsRepository(widget.db);
     _drafts = DraftsRepository(widget.db);
     _settingsRepo = SettingsRepository(widget.db);
+    _photos = widget.photoService ?? PhotoService.forDatabase(widget.db);
+    _photoPicker = widget.photoPicker ?? ImagePickerPhotoPicker();
     _settingsSub = _settingsRepo.watchSingle().listen((row) {
       if (mounted && row != null) setState(() => _settings = row);
     });
     for (final c in [_odometerCtrl, _volumeCtrl, _totalCtrl, _notesCtrl]) {
       c.addListener(_scheduleAutoSave);
     }
+    // Foreground cleanup hook (`photo-pipeline.md` §"Cleanup triggers"),
+    // throttled per process. Failures are recorded, not thrown — a broken
+    // photo sandbox must never stop the user logging a fill-up.
+    _photos.sweepThrottled();
   }
 
   String get _distanceUnit => _settings?.preferredDistanceUnit ?? 'km';
@@ -142,6 +170,7 @@ class _LogPageState extends State<LogPage> {
       _missedBefore = draft.missedBefore == 1;
       _odometerReset = draft.odometerReset == 1;
     });
+    await _reloadPhotos();
   }
 
   void _resetForm() {
@@ -155,6 +184,8 @@ class _LogPageState extends State<LogPage> {
     _missedBefore = false;
     _odometerReset = false;
     _errors = {};
+    _photoAttachments = const [];
+    _photoError = null;
     if (mounted) setState(() {});
   }
 
@@ -191,6 +222,58 @@ class _LogPageState extends State<LogPage> {
     if (_trackedVehicleId == vehicleId) {
       _draftId = savedDraftId;
     }
+  }
+
+  // ────────────────────────────── Receipt photos (CES-40)
+
+  Future<void> _reloadPhotos() async {
+    final draftId = _draftId;
+    final attachments = draftId == null
+        ? const <PhotoAttachment>[]
+        : await _photos.listForDraft(draftId);
+    if (!mounted) return;
+    setState(() => _photoAttachments = attachments);
+  }
+
+  Future<void> _attachPhoto(PhotoSource source) async {
+    if (_attachingPhoto || _trackedVehicleId == null) return;
+
+    setState(() {
+      _attachingPhoto = true;
+      _photoError = null;
+    });
+    try {
+      final bytes = await _photoPicker.pick(source);
+      if (bytes == null) return;
+
+      // `photo_refs.draft_id` is a foreign key, so the draft row has to
+      // exist before the photo can point at it.
+      _autoSaveTimer?.cancel();
+      await _saveDraftNow();
+      final draftId = _draftId;
+      if (draftId == null) return;
+
+      await _photos.attachFromBytes(draftId: draftId, bytes: bytes);
+      await _reloadPhotos();
+    } on PhotoPermissionDeniedException {
+      if (mounted) setState(() => _photoAccessDenied = true);
+    } on PhotoLimitExceededException {
+      if (mounted) {
+        setState(() => _photoError =
+            'Limit of $maxPhotosPerDraft photos reached.');
+      }
+    } on PhotoProcessingException {
+      if (mounted) {
+        setState(() => _photoError = "That image couldn't be read.");
+      }
+    } finally {
+      if (mounted) setState(() => _attachingPhoto = false);
+    }
+  }
+
+  Future<void> _deletePhoto(PhotoAttachment photo) async {
+    await _photos.delete(photo.id);
+    await _reloadPhotos();
   }
 
   // ────────────────────────────── Save entry
@@ -266,7 +349,13 @@ class _LogPageState extends State<LogPage> {
       notes: notes.isEmpty ? null : notes,
     ));
 
-    if (_draftId != null) await _drafts.markCompleted(_draftId!);
+    final completedDraftId = _draftId;
+    if (completedDraftId != null) {
+      await _drafts.markCompleted(completedDraftId);
+      // The photo has done its job now the entry exists, so the 30-day
+      // capture TTL collapses to 7 days from completion.
+      await _photos.onDraftCompleted(completedDraftId);
+    }
 
     if (!mounted) return;
     _resetForm();
@@ -332,6 +421,8 @@ class _LogPageState extends State<LogPage> {
                 _NoVehicleCard(onTap: widget.onOpenSettings)
               else ...[
                 _buildFormCard(context, colors),
+                const SizedBox(height: 12),
+                _buildPhotosCard(colors),
                 const SizedBox(height: 12),
                 _buildAdvancedSection(colors),
                 const SizedBox(height: CestovniMetrics.sectionGap),
@@ -406,6 +497,205 @@ class _LogPageState extends State<LogPage> {
             decoration: _inputDeco(colors),
           ),
         ],
+      ),
+    );
+  }
+
+  // ────────────────────────────── Receipt photo card
+
+  Widget _buildPhotosCard(CestovniColors colors) {
+    final atCap = _photoAttachments.length >= maxPhotosPerDraft;
+    final canAttach = !atCap && !_attachingPhoto;
+
+    return LedgerCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _label('RECEIPT PHOTO (OPT.)', colors)),
+              Text(
+                '${_photoAttachments.length} / $maxPhotosPerDraft',
+                style: CestovniTypography.mono(
+                    fontSize: 11, color: colors.mutedForeground),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (_photoAttachments.isEmpty)
+            Text('No photo attached.',
+                style: TextStyle(color: colors.mutedForeground, fontSize: 12))
+          else
+            _buildThumbnailStrip(colors),
+          const SizedBox(height: 12),
+          if (_photoAccessDenied)
+            Text(
+              'Camera and photo access are off. You can still save the '
+              'fill-up.',
+              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: _photoSourceButton('CAMERA',
+                      Icons.photo_camera_outlined, PhotoSource.camera, colors,
+                      enabled: canAttach),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _photoSourceButton('LIBRARY',
+                      Icons.photo_library_outlined, PhotoSource.gallery, colors,
+                      enabled: canAttach),
+                ),
+              ],
+            ),
+          if (atCap)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                'Limit of $maxPhotosPerDraft photos reached. Delete one to '
+                'add another.',
+                style:
+                    TextStyle(color: colors.mutedForeground, fontSize: 12),
+              ),
+            ),
+          if (_photoError != null) _errorText(_photoError!, colors),
+          const SizedBox(height: 10),
+          const HairlineDivider(),
+          const SizedBox(height: 10),
+          // Local-only disclosure per `platform-compliance-v1.md` §3. Kept
+          // permanently visible rather than a one-shot first-run hint: a
+          // dismissible flag would need a schema migration for a UX toggle,
+          // and this line is the user's only signal that the photo will
+          // disappear.
+          Text(
+            'Stays on this device — never backed up, never exported. '
+            'Auto-deletes 30 days after capture, or 7 days after you save '
+            'the entry.',
+            style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThumbnailStrip(CestovniColors colors) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final photo in _photoAttachments)
+          GestureDetector(
+            key: ValueKey('photo-thumb-${photo.id}'),
+            onTap: () => _openPhotoPreview(photo),
+            child: Container(
+              width: 64,
+              height: 64,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(CestovniMetrics.radiusSm),
+                border: Border.all(
+                    color: colors.rule, width: CestovniMetrics.hairline),
+              ),
+              child: Image.file(
+                photo.file,
+                fit: BoxFit.cover,
+                // A file lost between the row and the sweep must render as a
+                // placeholder, not as a red error box.
+                errorBuilder: (_, _, _) => Icon(
+                  Icons.receipt_long_outlined,
+                  size: 20,
+                  color: colors.mutedForeground,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _photoSourceButton(
+    String label,
+    IconData icon,
+    PhotoSource source,
+    CestovniColors colors, {
+    required bool enabled,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: enabled ? () => _attachPhoto(source) : null,
+      icon: Icon(icon, size: 16),
+      label: Text(
+        label,
+        style: CestovniTypography.mono(
+          fontSize: 11,
+          color: enabled ? colors.ink : colors.mutedForeground,
+          weight: FontWeight.w600,
+          letterSpacing: 0.12 * 11,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors.ink,
+        disabledForegroundColor: colors.mutedForeground,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        side: BorderSide(
+            color: enabled ? colors.ink : colors.rule,
+            width: CestovniMetrics.hairline),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CestovniMetrics.radiusBase),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openPhotoPreview(PhotoAttachment photo) {
+    final colors = context.cestovniColors;
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: colors.card,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 420),
+              child: Image.file(
+                photo.file,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text('This photo is no longer on the device.',
+                      style: TextStyle(color: colors.mutedForeground)),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: Text('CLOSE',
+                        style: CestovniTypography.labelMono(color: colors.ink)),
+                  ),
+                  TextButton(
+                    // Dismiss first, delete second: the user asked for the
+                    // photo to be gone, so there is nothing left to preview.
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await _deletePhoto(photo);
+                    },
+                    child: Text('DELETE PHOTO',
+                        style: CestovniTypography.labelMono(
+                            color: colors.destructive)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
