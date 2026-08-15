@@ -21,7 +21,7 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 **Shipped this cycle:** **CES-67** (Maintenance tab + History Maint chip). **M2/M3** stay on the spine.
 
-**Prompt (CES-67):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md)
+**Prompt (CES-67, executed):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md) · **Prompt (CES-40, next):** [`prompts/ces-40-photo-pipeline.md`](prompts/ces-40-photo-pipeline.md)
 
 ---
 
