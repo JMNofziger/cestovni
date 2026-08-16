@@ -1,7 +1,7 @@
 # Cursor execution prompt — CES-70 ZIP import
 
-> **Status: READY** (2026-08-16). All product locks resolved — **mode is `replace`**.
-> Prerequisite: **CES-41 must be merged to `main`** first; import shares `client/lib/export/headers.dart`.
+> **Status: READY** (2026-08-16). All product locks resolved — **mode is `replace`**. No prerequisites outstanding.
+> **CES-41 is merged** to `main` ([PR #21](https://github.com/JMNofziger/cestovni/pull/21)), so `client/lib/export/` is available to share from.
 > Linear **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** — **Todo** → set **In Progress** when you start.
 > Do **not** pick up M3 (CES-42–45), CES-51, CES-71, or PWA-lite unless the user explicitly redirects.
 
@@ -15,10 +15,10 @@
 
 | Item | State |
 |------|-------|
-| Last coding | **CES-41** export — `client/lib/export/`, [PR #21](https://github.com/JMNofziger/cestovni/pull/21) |
+| Last coding | **CES-41** export — merged to `main` ([PR #21](https://github.com/JMNofziger/cestovni/pull/21)); code in `client/lib/export/` |
 | M1 | **Closed.** Log / History / Metrics / Maint / photos ship on Android |
 | M2 | **CES-41 done.** This ticket is the import half |
-| Prerequisite | **CES-41 on `main`** — import imports `client/lib/export/headers.dart`, never copies it |
+| Prerequisite | None outstanding — import imports `client/lib/export/headers.dart`, never copies it |
 | Parallel (do not do here) | CES-63 iPhone install-doc · CES-68 APK · M3 CES-42–45 · CES-71 cadence rename |
 
 **Git start:** `git fetch origin && git checkout -b cursor/ces-70-import-<suffix> origin/main`
