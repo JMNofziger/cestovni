@@ -1,7 +1,7 @@
 # Cestovni — mobile client
 
 **Stack:** Flutter + Drift (ADR 003).  
-**Milestones:** M0 closed (CES-36, CES-37). M1 in progress — CES-38 consumption math **done**; CES-39 Log/History/vehicle UI **done on `main`**; CES-57 settings prefs + `default_vehicle_id` **done** (PR #9, schema v3). See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
+**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. Next coding: **CES-41** export. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
 
 ## Quick start
 
@@ -25,8 +25,8 @@ client/
       shell.dart                  # 4 tabs: Log / History / Metrics / Maint
       active_vehicle.dart         # session-scoped vehicle id
       pages/
-        log_page.dart             # fill-up form + drafts (CES-39)
-        history_page.dart         # fill-up timeline (CES-39)
+        log_page.dart             # fill-up form + drafts (CES-39) + photos (CES-40)
+        history_page.dart         # fuel + maint timeline (CES-39 / CES-67)
         vehicle_form_page.dart    # add/edit vehicle (CES-39)
         settings_page.dart        # vehicle CRUD + prefs (CES-57)
         metrics_page.dart         # aggregates + cost chart (CES-66)
@@ -35,6 +35,8 @@ client/
       theme/                      # CES-55 visual system
     consumption/                  # CES-38 math + validation
     photos/                       # CES-40 receipt photo pipeline
+    metrics/                      # CES-66 aggregation
+    maintenance/                  # CES-67 date-only + history ledger
     db/
       app_database.dart           # schema_version = 3
       repositories/               # vehicles, fill-ups, drafts, settings, photo refs

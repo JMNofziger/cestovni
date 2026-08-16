@@ -9,17 +9,18 @@ Use this together with:
 
 ## Current implementation map (source of truth)
 
-**Last synced:** 2026-08-15 (CES-67 Maintenance tab + History Maint chip).
+**Last synced:** 2026-08-16 — Android M1 closed on `main` (`bb1d5d5`): Maint (CES-67) + photos (CES-40). Next coding: CES-41 export.
 
 - Shell and nav: `client/lib/app/shell.dart` (Log / History / Metrics / Maint + header)
 - Active vehicle: `client/lib/app/active_vehicle.dart`
-- Repositories: `client/lib/db/repositories/` (vehicles, fill-ups, drafts, settings, maintenance events)
+- Repositories: `client/lib/db/repositories/` (vehicles, fill-ups, drafts, settings, maintenance events, photo refs)
 - Consumption validation: `client/lib/consumption/` (wired on Log save + History amend)
-- Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 fuel + **CES-67** maint)
+- Log / History: `pages/log_page.dart`, `pages/history_page.dart` (CES-39 fuel + **CES-67** maint + **CES-40** Log photo attach)
 - Vehicle CRUD: `pages/vehicle_form_page.dart` + list in `pages/settings_page.dart` (phase 2)
 - Settings: vehicle list wired; units/currency/default vehicle wired (**CES-57**)
 - Metrics: `pages/metrics_page.dart` (**CES-66** — range filter + summary + cost chart; aggregation in `client/lib/metrics/`, display units in `client/lib/units/`)
 - Maint tab: `pages/maintenance_page.dart` (**CES-67** — form + recent list; date-only helpers in `client/lib/maintenance/`)
+- Photos: `client/lib/photos/` + `photo_refs_repository.dart` (**CES-40** — EXIF strip / TTL / Log attach)
 - Debug: `pages/debug_page.dart`
 
 ## Delivery status by screen
@@ -27,7 +28,7 @@ Use this together with:
 
 | Screen                      | UX target status | Implementation status | Primary file(s)                                           |
 | --------------------------- | ---------------- | --------------------- | --------------------------------------------------------- |
-| Log / fuel entry            | Defined          | **Shipped** (phase 3) | `pages/log_page.dart` — form, draft, `validateInsert`     |
+| Log / fuel entry            | Defined          | **Shipped** (phase 3 + CES-40 photos) | `pages/log_page.dart` — form, draft, `validateInsert`, receipt attach |
 | History timeline            | Defined          | **Shipped** (fuel + maint) | `pages/history_page.dart` — list, detail, edit/delete fuel, detail/delete maint; All/Fuel/Maint chips; flip mode later |
 | Metrics                     | Defined          | **Shipped** (CES-66)  | `pages/metrics_page.dart` — range filter, summary card, cost-over-time chart, low-data placeholders |
 | Maintenance entry + history | Defined          | **Shipped** (CES-67)  | `pages/maintenance_page.dart` — date-only form, category, reminder fields, recent list |
@@ -44,7 +45,7 @@ Use this together with:
 - Visual style and component rules are defined in `cestovni-styling.md`.
 - Screenshot references are under `screenshots/dark-midnight/`.
 
-**Implementation note:** Shell from CES-56; Log, History (CES-39 phase 3), and Metrics (CES-66) tabs are live. Maint remains a stub page. Settings (gear) is a pushed route; Debug from Settings. Theme toggle is local; first-load default **dark** per `cestovni-styling.md` §5.
+**Implementation note:** Shell from CES-56; Log, History (CES-39 phase 3), Metrics (CES-66), and Maint (CES-67) tabs are live. Receipt photos shipped (CES-40). Settings (gear) is a pushed route; Debug from Settings. Theme toggle is local; first-load default **dark** per `cestovni-styling.md` §5.
 
 ### Active vehicle (session state)
 
@@ -69,7 +70,7 @@ Screenshot: `screenshots/dark-midnight/log.png`
 
 **Current implementation anchors**
 
-- Form fields and validation live in `fill_up_form_page.dart`.
+- Form fields and validation live in `pages/log_page.dart`.
 - Data-quality flags stay visible in MVP: `isFull`, `missedBefore`, `odometerReset`.
 - Each flag must include helper text explaining consumption impact.
 
@@ -157,7 +158,7 @@ Screenshot: `screenshots/dark-midnight/settings.png`
 
 - Preferences currently implemented in `settings_page.dart` (distance/volume/currency/timezone).
 - Vehicle CRUD is implemented across `vehicle_list_page.dart`, `vehicle_detail_page.dart`, and `vehicle_form_page.dart`.
-- Export/reset are not yet implemented in current settings UI.
+- Export is **not** in Settings yet — next coding **CES-41** (`prompts/ces-41-export.md`). Destructive reset remains Later.
 
 **Scope gate**
 

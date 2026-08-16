@@ -43,12 +43,12 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 
 ## Residual risks (not doc conflicts)
 
-- **CES-67 Done** (Maint tab + History Maint chip, 2026-08-15). Photo pipeline → **CES-40**.
+- **CES-67 Done** (Maint tab + History Maint chip, 2026-08-15). **CES-40 Done** (receipt photos, 2026-08-16, PR #18). Android M1 closed.
 - **CES-57 + CES-65 Done** (prefs UI + Log/History/Metrics display). **CES-66 Done** (Metrics tab on main).
-- Metrics multi-currency / chart bucketing remain Later (**CES-51** + DELIVERY_ACCEPTANCE).
+- Metrics multi-currency / chart bucketing remain Later (**CES-51** + DELIVERY_ACCEPTANCE). Next coding: **CES-41** export.
 
 ## Recommended sign-off decision
 
-- **Approve with follow-up issues** for remaining M1 surface (photo).
+- **Approve with follow-up issues** for M2 export (**CES-41**) and M-dist ops (**CES-63** install-doc / iPhone T1). Android M1 surface is closed.
 - **CES-39** prerequisite gate is **closed in repo**; align Linear blocks-CES-39 edges.
 - Use `SENIOR_REVIEW_CHECKLIST.md` for CES-39 PR reviews; track rollup in `delivery-plan-v1.md` RYG.

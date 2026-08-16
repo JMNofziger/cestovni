@@ -1,8 +1,8 @@
 # Cursor execution prompt — CES-67 Maintenance tab UI + repository
 
-> **Status: EXECUTED** (2026-08-15) on `cursor/ces-67-maintenance-2aaa`.
-> Linear **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** — close to **Done** after green tests.
-> Next coding: **CES-40** (photos). Parallel ops: **CES-68** (APK) / **CES-63** (iPhone).
+> **Status: EXECUTED** (2026-08-15) — shipped on `main` (PR #17).
+> Linear **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** is **Done**.
+> Next coding: **CES-41** (export). Parallel ops: **CES-68** (APK) / **CES-63** (iPhone install-doc).
 
 **Branch:** `cursor/ces-67-maintenance-2aaa` from `main`
 **Linear:** [CES-67](https://linear.app/personal-interests-llc/issue/CES-67)
