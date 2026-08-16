@@ -340,6 +340,58 @@ void main() {
       await _drainAndClose(tester, db);
     });
   });
+
+  group('CES-41 Export data', () {
+    testWidgets('Export data row is visible and photos disclaimer shows',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+
+      await tester.pumpWidget(_host(SettingsPage(db: db)));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.scrollUntilVisible(
+        find.text('Export data'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Export data'), findsOneWidget);
+      expect(find.text('Photos are not included.'), findsOneWidget);
+
+      await _drainAndClose(tester, db);
+    });
+
+    testWidgets('tapping Export data calls the injected exporter',
+        (tester) async {
+      final db = AppDatabase.withExecutor(NativeDatabase.memory());
+      var calls = 0;
+
+      await tester.pumpWidget(_host(
+        SettingsPage(
+          db: db,
+          onExport: () async {
+            calls++;
+          },
+        ),
+      ));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.scrollUntilVisible(
+        find.text('Export data'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Export data'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(calls, 1);
+
+      await _drainAndClose(tester, db);
+    });
+  });
 }
 
 Widget _host(Widget child, {ActiveVehicle? active}) {

@@ -1,8 +1,10 @@
 # Cursor execution prompt — CES-41 Export ZIP
 
-> **Status: READY** (2026-08-16). Handoff after **CES-40** photos merged to `main` (PR #18).
-> Linear **[CES-41](https://linear.app/personal-interests-llc/issue/CES-41)** — **Todo** → set **In Progress** when you start.
-> Product direction: **do CES-41 next.** Do **not** pick up M3 (CES-42–45), CES-51, or PWA-lite unless the user explicitly redirects.
+> **Status: EXECUTED** (2026-08-16) — shipped on `cursor/ces-41-export-9a29` ([PR #21](https://github.com/JMNofziger/cestovni/pull/21)).
+> Linear **[CES-41](https://linear.app/personal-interests-llc/issue/CES-41)**.
+> Next coding focus: **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** ZIP import — see [`../delivery-plan-v1.md`](../delivery-plan-v1.md) §Current focus.
+>
+> Kept as an archive of the execution brief (do not re-run).
 
 **Branch:** cut `cursor/ces-41-export-<suffix>` from **`main`**
 **Linear:** [CES-41](https://linear.app/personal-interests-llc/issue/CES-41)

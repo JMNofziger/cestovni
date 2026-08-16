@@ -5,9 +5,8 @@
 /// `manifest.json` carries `photos_in_export: false` as a hard-coded
 /// assertion.
 ///
-/// The ZIP export itself is CES-41 and is deliberately not implemented here.
-/// This file exists so that when it lands there is exactly one place to call
-/// rather than a fresh judgement call about which paths are safe to bundle.
+/// CES-41 (`client/lib/export/`) calls [excludePhotoPaths] / [photosInExport]
+/// rather than re-deciding which paths are safe to bundle.
 ///
 /// Pure module: no Flutter, no Drift, no file IO.
 library;

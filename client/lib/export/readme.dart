@@ -1,0 +1,80 @@
+/// `README_export.txt` template (CES-41).
+///
+/// ASCII + CRLF. Amendments A2/A3/locked decision 6 are spelled out
+/// so a spreadsheet user is not surprised by both unit columns, the
+/// `cadence_km` name, or the `user_key_hash` stand-in.
+library;
+
+import 'csv.dart';
+
+String buildReadmeExport({
+  required String exportedAtUtc,
+  required String preferredDistanceUnit,
+  required String preferredVolumeUnit,
+  required String currencyCode,
+  required String timezone,
+  required int outboxPendingCount,
+}) {
+  final lines = <String>[
+    'Cestovni export — created $exportedAtUtc',
+    '',
+    'This archive contains a full copy of the structured data you have',
+    'recorded in Cestovni for the account you exported from.',
+    '',
+    'UNIT CONVENTIONS',
+    '  Distance canonical: meters (odometer_m)',
+    '  Distance display:   $preferredDistanceUnit',
+    '                      Derived columns odometer_km AND odometer_mi',
+    '                      always ship (header does not depend on prefs).',
+    '  Volume canonical:   microliters (volume_uL)',
+    '  Volume display:     $preferredVolumeUnit',
+    '                      Derived columns volume_L AND volume_gal always ship.',
+    '  Money canonical:    integer cents (total_price_cents)',
+    '  Money display:      $currencyCode (total_price_major)',
+    '',
+    'DISPLAY ROUNDING',
+    '  Volume:      2 decimals',
+    '  Distance:    0 decimals',
+    '  L/100km:     1 decimal (not exported as a column; derived in-app)',
+    '  Prices:      2 decimals',
+    '',
+    'CADENCE',
+    '  maintenance_rules.cadence_km stores canonical METERS despite the',
+    '  column name. Do not treat the value as kilometres. (CES-71 will',
+    '  rename the column; until then the header is cadence_km.)',
+    '',
+    'RECEIPT PHOTOS',
+    '  Photos are stored only on your device with a 30-day time-to-live.',
+    '  They are NOT included in this export. This is by design.',
+    '',
+    'TIMESTAMPS',
+    '  All *_utc columns are ISO-8601 UTC.',
+    '  All *_local columns use your preferred timezone ($timezone).',
+    '  IANA zones other than UTC currently use the device offset',
+    '  (no timezone database on the client yet).',
+    '',
+    'USER KEY HASH',
+    '  user_key_hash is the first 8 hex characters of SHA-256 over the',
+    '  local settings.id. Telemetry (CES-46) is not wired; this is a',
+    '  stable stand-in, not the eventual telemetry user key.',
+    '',
+    'RE-IMPORT',
+    '  The CANONICAL columns (odometer_m, volume_uL, total_price_cents)',
+    '  are the source of truth. Derived columns (odometer_km, odometer_mi,',
+    '  volume_L, volume_gal, total_price_major) are provided for convenience',
+    '  only and may lose precision after multiple open/save cycles in a',
+    '  spreadsheet. In-app re-import is CES-70 and is not in this ZIP.',
+    '',
+    'OUTBOX STATUS',
+    '  outbox_pending_count = $outboxPendingCount',
+    '  If > 0, some mutations had not yet been saved to the server at',
+    '  the time of export. The data in the CSVs still reflects your',
+    '  local state at export time.',
+    '',
+    'ROW VERSION',
+    '  row_version cells are empty and manifest max_row_version_seen is',
+    '  null until the backup server assigns versions (M3). Do not invent',
+    '  a number.',
+  ];
+  return lines.join(crlf) + crlf;
+}

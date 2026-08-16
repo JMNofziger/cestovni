@@ -1,7 +1,7 @@
 # Cestovni — mobile client
 
 **Stack:** Flutter + Drift (ADR 003).  
-**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. Next coding: **CES-41** export. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
+**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** on this branch. Next coding: **CES-70** import. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
 
 ## Quick start
 
@@ -35,6 +35,7 @@ client/
       theme/                      # CES-55 visual system
     consumption/                  # CES-38 math + validation
     photos/                       # CES-40 receipt photo pipeline
+    export/                       # CES-41 ZIP export (CSV + STORE zip + share)
     metrics/                      # CES-66 aggregation
     maintenance/                  # CES-67 date-only + history ledger
     db/
@@ -46,6 +47,7 @@ client/
     app/                          # log, history, settings, vehicle form widgets
     consumption/                  # golden fixtures + module purity
     photos/                       # EXIF strip, TTL, cleanup, no-upload invariant
+    export/                       # ZIP golden, streaming, photos excluded
     db/
     shell_smoke_test.dart
 ```

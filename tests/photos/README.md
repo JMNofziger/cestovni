@@ -9,7 +9,7 @@ tests in `tests/photos/`. They live in the Flutter client instead, so
 | 1. EXIF strip | [`client/test/photos/photo_processing_test.dart`](../../client/test/photos/photo_processing_test.dart) |
 | 2. TTL purge | [`client/test/photos/photo_ttl_test.dart`](../../client/test/photos/photo_ttl_test.dart) + [`photo_service_test.dart`](../../client/test/photos/photo_service_test.dart) §"cleanup sweep" |
 | 3. Orphan handling | [`client/test/photos/photo_service_test.dart`](../../client/test/photos/photo_service_test.dart) §"cleanup sweep" |
-| 4. Export exclusion | [`client/test/photos/no_upload_invariant_test.dart`](../../client/test/photos/no_upload_invariant_test.dart) — guard + test only; the ZIP itself is CES-41 |
+| 4. Export exclusion | [`client/test/photos/no_upload_invariant_test.dart`](../../client/test/photos/no_upload_invariant_test.dart) — guard; ZIP assertions in [`client/test/export/`](../../client/test/export/) (CES-41) |
 | 5. Sandbox backup disabled | `android:allowBackup="false"` in [`client/android/app/src/main/AndroidManifest.xml`](../../client/android/app/src/main/AndroidManifest.xml); **not** covered by an automated test (needs a device — see the manual checklist) |
 
 Also here, beyond the spec list:

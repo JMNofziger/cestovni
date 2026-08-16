@@ -175,6 +175,12 @@ class OutboxRepository {
     return query.watchSingle().map((row) => row.read(count) ?? 0);
   }
 
+  /// Every pending `mutation_id`, unsorted. Export hashes the sorted set.
+  Future<List<String>> pendingMutationIds() async {
+    final rows = await _db.select(_db.outbox).get();
+    return [for (final r in rows) r.mutationId];
+  }
+
   // ---------------------------------------------------------------- mutate
 
   /// Drop a row after the server returns `applied` or `duplicate`.

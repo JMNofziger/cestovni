@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../db/app_database.dart';
 import '../../db/repositories/settings_repository.dart';
+import '../../export/export_service.dart';
 import '../active_vehicle.dart';
 import '../theme/cestovni_primitives.dart';
 import '../theme/cestovni_tokens.dart';
@@ -16,9 +17,12 @@ import 'vehicle_form_page.dart';
 /// default vehicle) to [SettingsRepository]. Debug stays reachable
 /// from inside Settings until the rollback tooling lands (CES-50).
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key, required this.db});
+  const SettingsPage({super.key, required this.db, this.onExport});
 
   final AppDatabase db;
+
+  /// Test hook. Production leaves this null and uses [ExportService].
+  final Future<void> Function()? onExport;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +47,7 @@ class SettingsPage extends StatelessWidget {
             title: Text('Backup'),
             subtitle: Text('Offline — sign in lands in M3.'),
           ),
+          _ExportDataSection(db: db, onExport: onExport),
           const HairlineDivider(),
           const _SectionLabel(text: 'Developer'),
           ListTile(
@@ -509,6 +514,97 @@ class _DefaultVehicleTile extends StatelessWidget {
     if (picked == null) return; // dismissed without choosing
     final newId = identical(picked, _noneOption) ? null : picked as String;
     if (newId != currentId) onChanged(newId);
+  }
+}
+
+/// CES-41 — Settings → Export data. Isolated [StatefulWidget] so
+/// progress / error do not rebuild the rest of Settings.
+class _ExportDataSection extends StatefulWidget {
+  const _ExportDataSection({required this.db, this.onExport});
+
+  final AppDatabase db;
+  final Future<void> Function()? onExport;
+
+  @override
+  State<_ExportDataSection> createState() => _ExportDataSectionState();
+}
+
+class _ExportDataSectionState extends State<_ExportDataSection> {
+  bool _busy = false;
+  String? _error;
+
+  Future<void> _run() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final hook = widget.onExport;
+      if (hook != null) {
+        await hook();
+      } else {
+        await ExportService(db: widget.db).exportAndShare();
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'Export failed. Try again.');
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.cestovniColors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CestovniMetrics.pagePadding,
+        CestovniMetrics.tilePadding,
+        CestovniMetrics.pagePadding,
+        CestovniMetrics.tilePadding,
+      ),
+      child: LedgerTile(
+        onTap: _busy ? null : _run,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'EXPORT',
+              style: CestovniTypography.labelMono(
+                color: colors.mutedForeground,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Export data',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Photos are not included.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.mutedForeground,
+                  ),
+            ),
+            if (_busy) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(minHeight: 2),
+            ],
+            if (_error != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.destructive,
+                    ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
