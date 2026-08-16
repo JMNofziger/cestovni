@@ -54,7 +54,7 @@ class ExportService {
     if (!cfg.isConfigured) return null;
     return OutboxFlushWorker(
       outbox: OutboxRepository(db),
-      client: SyncClient(config: cfg),
+      client: SyncClient(baseUrl: cfg.baseUrl, bearerToken: cfg.bearerToken),
     );
   }
 

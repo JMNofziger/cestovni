@@ -11,7 +11,6 @@ import 'dart:typed_data';
 
 import '../photos/photo_export_guard.dart';
 import 'csv.dart';
-import 'headers.dart';
 import 'zip_sink.dart';
 
 class ExportCsvTable {

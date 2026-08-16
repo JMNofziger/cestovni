@@ -9,7 +9,7 @@ library;
 /// Format a stored ISO timestamp as `YYYY-MM-DDTHH:MM:SSZ`.
 String formatUtcIso(String stored) {
   final DateTime dt = DateTime.parse(stored).toUtc();
-  return _civil(dt) + 'Z';
+  return '${_civil(dt)}Z';
 }
 
 /// Civil local time `YYYY-MM-DDTHH:MM:SS` (no offset) for [stored]

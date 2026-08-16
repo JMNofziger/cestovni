@@ -109,27 +109,4 @@ void main() {
     expect(joined, isNot(contains(sha)));
     expect(joined, isNot(contains(draftId)));
   });
-
-    final dir = Directory.systemTemp.createTempSync('cestovni-export-photos-');
-    addTearDown(() {
-      if (dir.existsSync()) dir.deleteSync(recursive: true);
-    });
-    final file = await ExportService(
-      db: db,
-      sandboxDir: () => dir,
-      share: (_) async {},
-      clock: () => DateTime.utc(2026, 8, 16, 12, 0, 0),
-    ).exportToFile();
-
-    final entries = readStoreZip(file.readAsBytesSync());
-    expect(entries.keys.toList(), exportZipEntryNames);
-    expect(entries.keys.where((n) => n.contains('photos')), isEmpty);
-    for (final bytes in entries.values) {
-      expect(looksLikeJpeg(bytes), isFalse);
-      expect(looksLikePng(bytes), isFalse);
-    }
-    final joined = entries.values.map((b) => String.fromCharCodes(b)).join();
-    expect(joined, isNot(contains('photos/deadbeef.jpg')));
-    expect(joined, isNot(contains(draftId)));
-  });
 }

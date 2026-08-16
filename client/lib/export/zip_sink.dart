@@ -69,6 +69,9 @@ class CountingZipSink implements ZipSink {
   }
 
   @override
+  void abandon() {}
+
+  @override
   List<String> get fileNames => List<String>.unmodifiable(_names);
 }
 
@@ -103,6 +106,9 @@ class MemoryZipSink implements ZipSink {
   void close() {
     if (_current != null) throw StateError('close with a file still open');
   }
+
+  @override
+  void abandon() {}
 
   @override
   List<String> get fileNames => List<String>.unmodifiable(_order);

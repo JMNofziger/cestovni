@@ -54,4 +54,4 @@ Map<String, Object?> exportManifest({
 }
 
 String encodeManifest(Map<String, Object?> manifest) =>
-    const JsonEncoder.withIndent('  ').convert(manifest) + '\n';
+    '${const JsonEncoder.withIndent('  ').convert(manifest)}\n';
