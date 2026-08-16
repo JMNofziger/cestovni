@@ -135,7 +135,11 @@ class _CestovniShellState extends State<CestovniShell> {
                             onOpenSettings: () =>
                                 _openSettings(innerContext),
                           ),
-                          const MaintenancePage(),
+                          MaintenancePage(
+                            db: widget.db,
+                            onOpenSettings: () =>
+                                _openSettings(innerContext),
+                          ),
                         ],
                       ),
                     ),

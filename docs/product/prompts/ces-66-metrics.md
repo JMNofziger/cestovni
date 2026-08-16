@@ -3,7 +3,7 @@
 > **Status: EXECUTED** (2026-07-22) — shipped on `main`.
 > Linear **[CES-66](https://linear.app/personal-interests-llc/issue/CES-66)** + **[CES-65](https://linear.app/personal-interests-llc/issue/CES-65)** are **Done**.
 > Manual checklist: [`../ces-66-manual-test.md`](../ces-66-manual-test.md).
-> Next coding focus: **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)** Maintenance — see [`../delivery-plan-v1.md`](../delivery-plan-v1.md) §Current focus.
+> Next coding focus: **[CES-40](https://linear.app/personal-interests-llc/issue/CES-40)** photos — see [`../delivery-plan-v1.md`](../delivery-plan-v1.md) §Current focus. *(CES-67 Maint shipped 2026-08-15.)*
 >
 > Kept as an archive of the execution brief (do not re-run).
 

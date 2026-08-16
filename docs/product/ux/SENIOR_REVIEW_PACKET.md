@@ -43,12 +43,12 @@ This packet summarizes the current UX documentation posture for Stage 5 executio
 
 ## Residual risks (not doc conflicts)
 
-- **Maint** tab UI still a stub → **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)**; History is fuel-only until maintenance repo lands. Photo pipeline → **CES-40**.
+- **CES-67 Done** (Maint tab + History Maint chip, 2026-08-15). Photo pipeline → **CES-40**.
 - **CES-57 + CES-65 Done** (prefs UI + Log/History/Metrics display). **CES-66 Done** (Metrics tab on main).
 - Metrics multi-currency / chart bucketing remain Later (**CES-51** + DELIVERY_ACCEPTANCE).
 
 ## Recommended sign-off decision
 
-- **Approve with follow-up issues** for remaining M1 surfaces (Maint, photo).
+- **Approve with follow-up issues** for remaining M1 surface (photo).
 - **CES-39** prerequisite gate is **closed in repo**; align Linear blocks-CES-39 edges.
 - Use `SENIOR_REVIEW_CHECKLIST.md` for CES-39 PR reviews; track rollup in `delivery-plan-v1.md` RYG.

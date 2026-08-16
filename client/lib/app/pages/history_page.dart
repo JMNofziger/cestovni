@@ -7,17 +7,19 @@ import '../../consumption/models.dart';
 import '../../consumption/validation.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/fill_ups_repository.dart';
+import '../../db/repositories/maintenance_events_repository.dart';
 import '../../db/repositories/settings_repository.dart';
+import '../../maintenance/history_ledger.dart';
+import '../../maintenance/performed_at.dart';
 import '../../units/display_units.dart';
 import '../active_vehicle.dart';
 import '../theme/cestovni_primitives.dart';
 import '../theme/cestovni_tokens.dart';
 import '../theme/cestovni_typography.dart';
 
-/// **History** tab — fuel-up timeline per `cestovni-views.md`.
-///
-/// CES-39: replaces M1 stub with a working fill-up list, month
-/// grouping, detail sheet, amend, and soft-delete.
+/// **History** tab — unified fuel + maintenance timeline per
+/// `cestovni-views.md`. CES-39 shipped fill-ups; CES-67 adds
+/// maintenance rows and the Maint filter chip.
 class HistoryPage extends StatefulWidget {
   const HistoryPage({
     super.key,
@@ -32,10 +34,11 @@ class HistoryPage extends StatefulWidget {
   State<HistoryPage> createState() => _HistoryPageState();
 }
 
-enum _Filter { all, fuel }
+enum _Filter { all, fuel, maint }
 
 class _HistoryPageState extends State<HistoryPage> {
   late final FillUpsRepository _repo;
+  late final MaintenanceEventsRepository _maintRepo;
   late final SettingsRepository _settingsRepo;
   _Filter _filter = _Filter.all;
 
@@ -50,6 +53,7 @@ class _HistoryPageState extends State<HistoryPage> {
   void initState() {
     super.initState();
     _repo = FillUpsRepository(widget.db);
+    _maintRepo = MaintenanceEventsRepository(widget.db);
     _settingsRepo = SettingsRepository(widget.db);
     _settingsRepo.getOrBootstrap();
     _settingsSub = _settingsRepo.watchSingle().listen((row) {
@@ -153,7 +157,8 @@ class _HistoryPageState extends State<HistoryPage> {
         _chip('FUEL', _filter == _Filter.fuel, colors,
             () => setState(() => _filter = _Filter.fuel)),
         const SizedBox(width: 8),
-        _chip('MAINT', false, colors, null, disabled: true),
+        _chip('MAINT', _filter == _Filter.maint, colors,
+            () => setState(() => _filter = _Filter.maint)),
       ],
     );
   }
@@ -243,25 +248,75 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget _body(String vehicleId, CestovniColors colors) {
     return StreamBuilder<List<FillUpRow>>(
       stream: _repo.watchForVehicle(vehicleId),
-      builder: (context, snap) {
-        final rows = snap.data ?? const <FillUpRow>[];
+      builder: (context, fuelSnap) {
+        return StreamBuilder<List<MaintenanceEventRow>>(
+          stream: _maintRepo.watchForVehicle(vehicleId),
+          builder: (context, maintSnap) {
+            final fuels = fuelSnap.data ?? const <FillUpRow>[];
+            final maints = maintSnap.data ?? const <MaintenanceEventRow>[];
+            final fuelEntries = [
+              for (final r in fuels)
+                LedgerEntry(
+                  kind: LedgerKind.fuel,
+                  id: r.id,
+                  eventAt: DateTime.parse(r.filledAt).toUtc(),
+                  vehicleId: r.vehicleId,
+                  fillUp: r,
+                ),
+            ];
+            final maintEntries = [
+              for (final r in maints)
+                LedgerEntry(
+                  kind: LedgerKind.maint,
+                  id: r.id,
+                  eventAt: DateTime.parse(r.performedAt).toUtc(),
+                  vehicleId: r.vehicleId,
+                  maintenance: r,
+                ),
+            ];
+            var entries = mergeLedgerEntries(
+              fuel: fuelEntries,
+              maint: maintEntries,
+            );
+            if (_filter == _Filter.fuel) {
+              entries = entries.where((e) => e.kind == LedgerKind.fuel).toList();
+            } else if (_filter == _Filter.maint) {
+              entries =
+                  entries.where((e) => e.kind == LedgerKind.maint).toList();
+            }
 
-        if (rows.isEmpty) {
-          return _emptyFillUps(context, colors);
-        }
+            if (entries.isEmpty) {
+              return _emptyLedger(context, colors);
+            }
 
-        final grouped = _groupByMonth(rows);
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(
-              horizontal: CestovniMetrics.pagePadding),
-          itemCount: grouped.length,
-          itemBuilder: (context, i) => grouped[i],
+            final grouped = _groupByMonth(entries);
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: CestovniMetrics.pagePadding),
+              itemCount: grouped.length,
+              itemBuilder: (context, i) => grouped[i],
+            );
+          },
         );
       },
     );
   }
 
-  Widget _emptyFillUps(BuildContext context, CestovniColors colors) {
+  Widget _emptyLedger(BuildContext context, CestovniColors colors) {
+    final (title, hint) = switch (_filter) {
+      _Filter.fuel => (
+          'No fill-ups yet',
+          'Go to the Log tab to record your first fuel-up.',
+        ),
+      _Filter.maint => (
+          'No maintenance yet',
+          'Go to the Maint tab to record service.',
+        ),
+      _Filter.all => (
+          'No entries yet',
+          'Go to Log or Maint to add your first entry.',
+        ),
+    };
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(CestovniMetrics.pagePadding),
@@ -269,14 +324,18 @@ class _HistoryPageState extends State<HistoryPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.local_gas_station_outlined,
-                  size: 32, color: colors.ink),
+              Icon(
+                _filter == _Filter.maint
+                    ? Icons.build_outlined
+                    : Icons.local_gas_station_outlined,
+                size: 32,
+                color: colors.ink,
+              ),
               const SizedBox(height: 12),
-              Text('No fill-ups yet',
-                  style: Theme.of(context).textTheme.headlineSmall),
+              Text(title, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
-                'Go to the Log tab to record your first fuel-up.',
+                hint,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -289,30 +348,38 @@ class _HistoryPageState extends State<HistoryPage> {
 
   // ────────────────────────────── Month grouping
 
-  List<Widget> _groupByMonth(List<FillUpRow> rows) {
+  List<Widget> _groupByMonth(List<LedgerEntry> rows) {
     final widgets = <Widget>[];
     String? currentGroup;
+    final offset = tzOffsetForSettings(_settings?.timezone ?? 'UTC');
 
-    for (final row in rows) {
-      final dt = DateTime.parse(row.filledAt).toLocal();
+    for (final entry in rows) {
+      final dt = entry.eventAt.toUtc().add(offset);
       final groupKey = '${dt.year}-${dt.month}';
       if (groupKey != currentGroup) {
-        final count =
-            rows.where((r) {
-              final rd = DateTime.parse(r.filledAt).toLocal();
-              return rd.year == dt.year && rd.month == dt.month;
-            }).length;
+        final count = rows.where((r) {
+          final rd = r.eventAt.toUtc().add(offset);
+          return rd.year == dt.year && rd.month == dt.month;
+        }).length;
         widgets.add(_monthHeader(dt, count));
         currentGroup = groupKey;
       }
       widgets.add(Padding(
         padding: const EdgeInsets.only(bottom: 10),
-        child: _FillUpCard(
-          row: row,
-          distanceUnit: _distanceUnit,
-          volumeUnit: _volumeUnit,
-          onTap: () => _showDetail(row),
-        ),
+        child: entry.kind == LedgerKind.fuel
+            ? _FillUpCard(
+                row: entry.fillUp! as FillUpRow,
+                distanceUnit: _distanceUnit,
+                volumeUnit: _volumeUnit,
+                onTap: () => _showDetail(entry.fillUp! as FillUpRow),
+              )
+            : _MaintCard(
+                row: entry.maintenance! as MaintenanceEventRow,
+                distanceUnit: _distanceUnit,
+                tzOffset: offset,
+                onTap: () => _showMaintDetail(
+                    entry.maintenance! as MaintenanceEventRow),
+              ),
       ));
     }
     return widgets;
@@ -359,6 +426,23 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
+  void _showMaintDetail(MaintenanceEventRow row) {
+    final colors = context.cestovniColors;
+    final offset = tzOffsetForSettings(_settings?.timezone ?? 'UTC');
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: colors.paper,
+      isScrollControlled: true,
+      builder: (_) => _MaintDetailSheet(
+        row: row,
+        colors: colors,
+        distanceUnit: _distanceUnit,
+        tzOffset: offset,
+        onDelete: () => _confirmMaintDelete(row),
+      ),
+    );
+  }
+
   Future<void> _confirmDelete(FillUpRow row) async {
     Navigator.of(context).pop(); // close sheet
     final colors = context.cestovniColors;
@@ -387,6 +471,37 @@ class _HistoryPageState extends State<HistoryPage> {
     );
     if (confirmed == true) {
       await _repo.softDelete(row.id);
+    }
+  }
+
+  Future<void> _confirmMaintDelete(MaintenanceEventRow row) async {
+    Navigator.of(context).pop();
+    final colors = context.cestovniColors;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.paper,
+        title: Text('Delete entry?',
+            style: TextStyle(color: colors.ink)),
+        content: Text(
+          'This maintenance entry will be removed from your history.',
+          style: TextStyle(color: colors.mutedForeground),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel', style: TextStyle(color: colors.ink)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child:
+                Text('Delete', style: TextStyle(color: colors.destructive)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _maintRepo.softDelete(row.id);
     }
   }
 
@@ -537,6 +652,110 @@ class _FillUpCard extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════
+// Maintenance row card (CES-67).
+// ══════════════════════════════════════════════════════════════════════
+
+class _MaintCard extends StatelessWidget {
+  const _MaintCard({
+    required this.row,
+    required this.distanceUnit,
+    required this.tzOffset,
+    required this.onTap,
+  });
+
+  final MaintenanceEventRow row;
+  final String distanceUnit;
+  final Duration tzOffset;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.cestovniColors;
+    final civil = performedAtUtcToCivilDate(
+      DateTime.parse(row.performedAt).toUtc(),
+      tzOffset: tzOffset,
+    );
+    final cost = row.costCents == 0
+        ? '—'
+        : formatMoney(row.costCents, row.currencyCode);
+    final odo = row.odometerM == null
+        ? maintenanceCategoryLabel(row.category)
+        : '${maintenanceCategoryLabel(row.category)}     '
+            '${formatDistance(row.odometerM!, distanceUnit)}';
+
+    return LedgerCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(CestovniMetrics.tilePadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 6, right: 10),
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.ink,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _FillUpCard._fmtShortDate(
+                          DateTime(civil.year, civil.month, civil.day),
+                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Text(cost, style: Theme.of(context).textTheme.titleSmall),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  odo,
+                  style: TextStyle(
+                      color: colors.mutedForeground, fontSize: 13),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: colors.ink, width: CestovniMetrics.hairline),
+                    borderRadius:
+                        BorderRadius.circular(CestovniMetrics.radiusXs),
+                  ),
+                  child: Text(
+                    'MAINT',
+                    style: CestovniTypography.mono(
+                      fontSize: 10,
+                      color: colors.ink,
+                      weight: FontWeight.w600,
+                      letterSpacing: 0.08 * 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // Detail bottom sheet (matches history-detail.png screenshot).
 // ══════════════════════════════════════════════════════════════════════
 
@@ -665,6 +884,113 @@ class _DetailSheet extends StatelessWidget {
     final sec = dt.second.toString().padLeft(2, '0');
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     return '$m/$d/${dt.year}, ${h.toString().padLeft(2, '0')}:$min:$sec $ampm';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Maintenance detail sheet (CES-67) — date-only, no clock.
+// ══════════════════════════════════════════════════════════════════════
+
+class _MaintDetailSheet extends StatelessWidget {
+  const _MaintDetailSheet({
+    required this.row,
+    required this.colors,
+    required this.distanceUnit,
+    required this.tzOffset,
+    required this.onDelete,
+  });
+
+  final MaintenanceEventRow row;
+  final CestovniColors colors;
+  final String distanceUnit;
+  final Duration tzOffset;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final civil = performedAtUtcToCivilDate(
+      DateTime.parse(row.performedAt).toUtc(),
+      tzOffset: tzOffset,
+    );
+    final dateLabel =
+        '${civil.month.toString().padLeft(2, '0')}/${civil.day.toString().padLeft(2, '0')}/${civil.year}';
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(CestovniMetrics.pagePadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text('Maintenance details',
+                      style: Theme.of(context).textTheme.headlineSmall),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(Icons.close, color: colors.ink),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _detailRow('DATE', dateLabel),
+            _detailRow('CATEGORY', maintenanceCategoryLabel(row.category)),
+            if (row.odometerM != null)
+              _detailRow(
+                'ODOMETER (${distanceUnitLabel(distanceUnit)})',
+                formatThousands(
+                    metersToDisplayWhole(row.odometerM!, distanceUnit)),
+              ),
+            _detailRow(
+              'COST',
+              row.costCents == 0
+                  ? '—'
+                  : formatMoney(row.costCents, row.currencyCode),
+            ),
+            if (row.shop != null && row.shop!.isNotEmpty)
+              _detailRow('SHOP', row.shop!),
+            if (row.notes != null && row.notes!.isNotEmpty)
+              _detailRow('NOTES', row.notes!),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onDelete,
+                icon: Icon(Icons.delete_outline, color: colors.paper),
+                label: Text('Delete entry',
+                    style: TextStyle(color: colors.paper)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.destructive,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(CestovniMetrics.radiusBase),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label,
+                style: CestovniTypography.labelMono(
+                    color: colors.mutedForeground)),
+          ),
+          Text(value, style: TextStyle(color: colors.ink, fontSize: 14)),
+        ],
+      ),
+    );
   }
 }
 

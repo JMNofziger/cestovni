@@ -111,7 +111,17 @@ class DraftsRepository {
 
   /// Discard a draft entirely — row is removed; v1 does not surface a
   /// "trash" view for drafts.
-  Future<bool> discard(String draftId) async {
+  ///
+  /// `photo_refs.draft_id` references `drafts.id` with no ON DELETE
+  /// CASCADE, so any attached receipt photos must be purged first or the
+  /// delete fails on the foreign key. Pass [purgePhotos]
+  /// (`PhotoService.purgeDraft`) whenever the draft may hold photos;
+  /// discarding immediately is the spec behaviour, not a TTL wait.
+  Future<bool> discard(
+    String draftId, {
+    Future<void> Function(String draftId)? purgePhotos,
+  }) async {
+    if (purgePhotos != null) await purgePhotos(draftId);
     final removed = await (_db.delete(_db.drafts)
           ..where((d) => d.id.equals(draftId)))
         .go();

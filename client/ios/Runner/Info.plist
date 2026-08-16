@@ -26,6 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Receipt photos (docs/specs/photo-pipeline.md). Declared so the
+	     prompts are honest about what the photo is for; the iOS build is not
+	     a Stage 1 distribution channel (ADR 005 — iPhone is served by the
+	     PWA-lite), so these strings are not yet exercised on a device. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo of a fuel receipt so you can finish entering the fill-up later. Receipt photos stay on this device and are deleted automatically.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Attach a photo of a fuel receipt to a fill-up you are still entering. Receipt photos stay on this device and are deleted automatically.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

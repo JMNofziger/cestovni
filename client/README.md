@@ -29,19 +29,21 @@ client/
         history_page.dart         # fill-up timeline (CES-39)
         vehicle_form_page.dart    # add/edit vehicle (CES-39)
         settings_page.dart        # vehicle CRUD + prefs (CES-57)
-        metrics_page.dart         # stub
-        maintenance_page.dart     # stub
+        metrics_page.dart         # aggregates + cost chart (CES-66)
+        maintenance_page.dart     # maint entry + history (CES-67)
         debug_page.dart
       theme/                      # CES-55 visual system
     consumption/                  # CES-38 math + validation
+    photos/                       # CES-40 receipt photo pipeline
     db/
       app_database.dart           # schema_version = 3
-      repositories/               # vehicles, fill-ups, drafts, settings
+      repositories/               # vehicles, fill-ups, drafts, settings, photo refs
       migrations/
       tables/
   test/
     app/                          # log, history, settings, vehicle form widgets
     consumption/                  # golden fixtures + module purity
+    photos/                       # EXIF strip, TTL, cleanup, no-upload invariant
     db/
     shell_smoke_test.dart
 ```
@@ -52,6 +54,11 @@ client/
 - Protocol columns on backed-up tables (ADR 002).
 - Fill-up save paths call `validateInsert` before `FillUpsRepository.create` / `amend`.
 - Golden math fixtures: [`tests/math/`](../tests/math/) (20 JSON files, runner in `test/consumption/`).
+- Receipt photos are on-device only per [`docs/specs/photo-pipeline.md`](../docs/specs/photo-pipeline.md):
+  `client/lib/photos/` strips EXIF and enforces the TTL, `photo_refs` is absent
+  from the outbox `table` CHECK, and `android:allowBackup="false"` keeps the
+  sandbox out of OS backups. Manual device pass:
+  [`docs/product/ces-40-manual-test.md`](../docs/product/ces-40-manual-test.md).
 
 ## CI
 

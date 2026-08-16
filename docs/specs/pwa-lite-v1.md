@@ -155,7 +155,7 @@ On Save (after client-side validation mirroring `client/lib/consumption/validati
 
 ## 3. History screen — list contract
 
-**Implementation status:** Flutter `client/lib/app/pages/history_page.dart` is **implemented on `main`** (CES-39 phase 3). **PWA-lite** `client/web-lite/` History is a **subset** (read-only rows, no edit/delete/flip-card). Full Flutter target (`cestovni-views.md` §History) still lacks Maint filter chip until **[CES-67](https://linear.app/personal-interests-llc/issue/CES-67)**.
+**Implementation status:** Flutter `client/lib/app/pages/history_page.dart` is **implemented on `main`** (CES-39 fuel + **CES-67** maint / All-Fuel-Maint chips). **PWA-lite** `client/web-lite/` History is a **subset** (fill-ups only, read-only rows, no edit/delete/flip-card / no Maint).
 
 ### PWA-lite History (Phase 1+2)
 
