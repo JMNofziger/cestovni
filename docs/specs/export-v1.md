@@ -126,6 +126,8 @@ OUTBOX STATUS
 
 Every CSV uses the two-column pattern from [`si-units.md`](si-units.md) (canonical + derived). Common columns first, domain columns next, audit columns last.
 
+> **Headers below were written 2026-04-17 and predate schema v2/v3.** `maintenance_events` gained `category` + `shop` (CES-53) and `settings` gained `default_vehicle_id` (CES-57); `maintenance_rules.notes` was never listed. See [§ v1 amendments](#v1-amendments-2026-08-16) for the authoritative header list.
+
 ### `vehicles.csv`
 
 ```csv
@@ -234,6 +236,55 @@ Tests landing in `tests/export/`:
 4. **Outbox flush recorded** — run export with 3 pending mutations; assert `outbox_pending_count == 3` and `outbox_pending_hash` is stable for a stable set.
 5. **Large dataset** — 10 000 fill-ups; assert performance targets above.
 6. **Re-import round-trip** — a separate canonical-columns-only round-trip test (parse CSVs back to a minimal model; assert stored rows match) validates the "canonical is source of truth" promise.
+
+## v1 amendments (2026-08-16)
+
+Decisions taken when CES-41 moved to next-coding, resolving drift between this spec (authored 2026-04-17) and the shipped client schema. These **override** the corresponding text above.
+
+### A1 — Authoritative CSV headers
+
+The **live Drift schema decides which columns exist**; the header order above decides where they sit. A column present in `client/lib/db/tables/` but missing from the 2026-04 header list appends to the domain block, immediately before `notes` (or before the audit columns when the table has no `notes`).
+
+```csv
+vehicles.csv
+id,user_key_hash,name,make,model,year,vin,fuel_type,tank_capacity_uL,tank_capacity_L,archived_at_utc,row_version,updated_at_utc
+
+fill_ups.csv
+id,user_key_hash,vehicle_id,filled_at_utc,filled_at_local,odometer_m,odometer_km,odometer_mi,volume_uL,volume_L,volume_gal,total_price_cents,total_price_major,currency_code,is_full,missed_before,odometer_reset,notes,row_version,updated_at_utc
+
+maintenance_rules.csv
+id,user_key_hash,vehicle_id,name,cadence_km,cadence_days,enabled,notes,row_version,updated_at_utc
+
+maintenance_events.csv
+id,user_key_hash,vehicle_id,rule_id,performed_at_utc,performed_at_local,odometer_m,odometer_km,odometer_mi,cost_cents,cost_major,currency_code,category,shop,notes,row_version,updated_at_utc
+
+settings.csv
+user_key_hash,preferred_distance_unit,preferred_volume_unit,currency_code,timezone,default_vehicle_id,row_version,updated_at_utc
+```
+
+`user_id`, `deleted_at`, and `mutation_id` stay **out** of every CSV: `user_key_hash` stands in for the first, soft-deleted rows are filtered so the second is always null, and the third is sync bookkeeping with no portable meaning. `settings.id` also stays out — it equals the user id.
+
+### A2 — Derived unit columns are unconditional
+
+Every derived column ships on every export regardless of `settings` preferences: `odometer_km` **and** `odometer_mi`, `volume_L` **and** `volume_gal`. This overrides the implication in [`si-units.md`](si-units.md) §Rules 2 that preferences select the derived column, and the `{km|mi}` templating in the `README_export.txt` block above.
+
+Reason: a fixed header makes the golden-ZIP test independent of user settings, and gives CES-70 import exactly one header contract to parse. `unit_preferences` in `manifest.json` still records what the user was looking at.
+
+### A3 — `cadence_km` carries meters
+
+`maintenance_rules.cadence_km` is **canonical meters** despite its name (see [`data-model.md`](data-model.md) § `maintenance_rules`). Export it verbatim under its schema name, and say so in `README_export.txt`. Do **not** rename or add a converted column in v1 — a rename is a migration, and CES-70 must round-trip against the same header. Renaming to `cadence_m` is a follow-up ticket.
+
+### A4 — Performance targets are device-validated, not CI gates
+
+The 10 000-fill-up / 30 s / 10 MB targets above are **not** a CI gate and are not required to close CES-41. Neither GitHub Actions nor the Cloud VM can measure them meaningfully (no device, no Android SDK).
+
+Required instead: a test proving the assembler **streams** — that it never materializes all rows or all CSV bytes at once (e.g. a counting/chunk-observing sink over a ~1 000-row fixture). Device timing moves to the manual pass alongside [CES-68](https://linear.app/personal-interests-llc/issue/CES-68).
+
+### A5 — No background export task
+
+Export is **foreground-only** on Stage 1 Android. Drop the "app backgrounded → platform background task → completion notification" row from § Error handling. If the OS suspends or kills the app mid-export the existing atomicity contract already covers it: the `.tmp` never gets renamed, so no partial ZIP is ever visible, and the user retries.
+
+Reason: a background service plus `POST_NOTIFICATIONS` (Android 13+) is real platform plumbing and a new runtime permission for a path that finishes in seconds at realistic data sizes — CES-40 deliberately avoided extra permissions. Show progress and keep the user on the screen. An export slow enough to need backgrounding is evidence for the perf ticket, not for background infrastructure.
 
 ## References
 
