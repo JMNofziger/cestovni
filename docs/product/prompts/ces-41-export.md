@@ -1,6 +1,6 @@
 # Cursor execution prompt — CES-41 Export ZIP
 
-> **Status: EXECUTED** (2026-08-16) — shipped on `cursor/ces-41-export-9a29`.
+> **Status: EXECUTED** (2026-08-16) — shipped on `cursor/ces-41-export-9a29` ([PR #21](https://github.com/JMNofziger/cestovni/pull/21)).
 > Linear **[CES-41](https://linear.app/personal-interests-llc/issue/CES-41)**.
 > Next coding focus: **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** ZIP import — see [`../delivery-plan-v1.md`](../delivery-plan-v1.md) §Current focus.
 >
