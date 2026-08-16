@@ -158,7 +158,7 @@ Screenshot: `screenshots/dark-midnight/settings.png`
 
 - Preferences currently implemented in `settings_page.dart` (distance/volume/currency/timezone).
 - Vehicle CRUD is implemented across `vehicle_list_page.dart`, `vehicle_detail_page.dart`, and `vehicle_form_page.dart`.
-- Export is **not** in Settings yet — next coding **CES-41** (`prompts/ces-41-export.md`). Destructive reset remains Later.
+- Export is **shipped (CES-41)** — Settings → Backup → **Export data** (`client/lib/export/`, photos excluded). Destructive reset remains Later.
 
 **Scope gate**
 
