@@ -23,6 +23,8 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 **Prompts (executed):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md) · [`prompts/ces-40-photo-pipeline.md`](prompts/ces-40-photo-pipeline.md)
 
+**Prompt (next coding):** [`prompts/ces-41-export.md`](prompts/ces-41-export.md) — READY. Do **not** start M3 (CES-42–45) until export ships.
+
 **Manual checklist (CES-40):** [`ces-40-manual-test.md`](ces-40-manual-test.md) — needs a physical Android device with a camera; not runnable in CI or on the Cloud VM.
 
 ---
@@ -94,7 +96,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M1 — Local logging + math
 
-- 🟨 **M1 rollup** — offline logging usable end-to-end without a server. *(Core fill-up path + prefs + Metrics + Maint done; photo open.)*
+- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). Next coding is **CES-41** (M2), not another M1 vertical.
   - 🟩 **CES-38 — Consumption math + golden tests** — **Done in repo on `main`** (2026-05): `client/lib/consumption/`, auto-discovery runner over 20 `tests/math/fixtures/`, module-purity test, validation wired in Log/History save paths. Follow-ups: **CES-51** / **CES-52** (non-blocking).
   - 🟩 **CES-39 — Fill-up + vehicle UI (core)** — **Done** (repo 2026-05, Linear 2026-07-17): repos + vehicle CRUD + Log/History UI; 121+ tests. Out of scope → **CES-65** / **CES-66** / **CES-67** / **CES-40**.
   - 🟩 **CES-57 — Settings prefs + default vehicle** — **Done** (PR #9, Linear Done). Display wiring closed as **CES-65**.
@@ -107,14 +109,14 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 ### M2 — Export
 
 - 🟥 **M2 rollup** — export before backup exists.
-  - 🟥 **CES-41 — Export ZIP** — streaming assembly + manifest; fixture-driven tests in `tests/export/` (planned).
+  - 🟥 **CES-41 — Export ZIP** — **Todo / next coding.** Prompt [`prompts/ces-41-export.md`](prompts/ces-41-export.md). Reuse `PhotoExportGuard`. Fixture-driven tests in `tests/export/` (planned).
 
 ### M3 — Backup + restore
 
-- 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests.
+- 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests. *(Fill-up outbox gate slice + `server/dev-sync-stub/` already on `main`. Remaining: real Postgres/RLS, production API, vehicles/settings/maint enqueue, restore UX. **Do not start until CES-41 ships.**)*
   - 🟥 **CES-42 — Server Postgres + RLS migrations** — `[tests/rls/](../../tests/rls/)`, `[ci/rls-regression.yml](../../ci/rls-regression.yml)`.
-  - 🟥 **CES-43 — Server API + auth** — contract tests `[tests/contract/](../../tests/contract/)` (managed + self-host).
-  - 🟥 **CES-44 — Backup / outbox (client)** — depends on CES-37 + CES-43.
+  - 🟥 **CES-43 — Server API + auth** — contract tests `[tests/contract/](../../tests/contract/)` (managed + self-host). Dev stub on `main` is **not** this ticket.
+  - 🟥 **CES-44 — Backup / outbox (client)** — fill-up enqueue/flush **gate slice on `main`**; vehicles/settings/maint still do not enqueue. Depends on CES-37 + real CES-43.
   - 🟥 **CES-45 — Restore + dead-letter UX** — depends on CES-44; integration `tests/backup/` (planned).
 
 ### M4 — Telemetry + CI gate
@@ -169,11 +171,11 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 | 2   | [CES-37](https://linear.app/personal-interests-llc/issue/CES-37) | Client DB schema + migrations            | M0        | `docs/specs/data-model.md` + `docs/specs/si-units.md`                                                                                                                               | CES-36         | medium | **In repo** — `client/lib/db/`, `client/test/db/`, `tests/client-db/fixtures/`                           |
 | 3   | [CES-38](https://linear.app/personal-interests-llc/issue/CES-38) | Consumption math module + golden tests   | M1        | `docs/specs/consumption-math.md`                                                                                                                                                    | CES-37         | low    | **Done in repo on `main`** — `client/lib/consumption/`, `client/test/consumption/` (20 fixtures), phase 2 purity + CI coverage (2026-05) |
 | 4   | [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) | Fill-up + vehicle UI (core logging)      | M1        | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md` + `docs/product/ux/cestovni-views.md` + `docs/product/ux/DATA_CONTRACTS.md` + `docs/product/ux/DELIVERY_ACCEPTANCE.md` + `docs/product/ux/UX_IMPLEMENTATION_GAPS.md` | CES-37, CES-38 (CES-53–CES-56 **Done** in repo) | high   | **Done in repo on `main`** (2026-05) — repos + vehicle CRUD (phases 1–2) + Log/History UI (phase 3); 121+ widget/DB tests. Out of CES-39 scope: Metrics/Maint tabs, photo (**CES-40**), Log/History prefs *display* follow-on (post-CES-57) |
-| 5   | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation            | M1        | `docs/specs/photo-pipeline.md`                                                                                                                                                      | CES-37         | medium | **Done** (2026-08-15) — `client/lib/photos/` + Log attach UI; 46 tests                                   |
-| 6   | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP                               | M2        | `docs/specs/export-v1.md`                                                                                                                                                           | CES-37         | medium | —                                                                                                        |
+| 5   | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation            | M1        | `docs/specs/photo-pipeline.md`                                                                                                                                                      | CES-37         | medium | **Done** (2026-08-16, PR #18) — `client/lib/photos/` + Log attach UI; isolate decode; 47 tests in `client/test/photos/` + `log_page_photos_test.dart`. Manual device checklist: [`ces-40-manual-test.md`](ces-40-manual-test.md) (not yet run). |
+| 6   | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP                               | M2        | `docs/specs/export-v1.md`                                                                                                                                                           | CES-37         | medium | **Todo / next coding** — prompt [`prompts/ces-41-export.md`](prompts/ces-41-export.md). Photo exclusion guard already on `main`. |
 | 7   | [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) | Server Postgres + RLS migrations         | M3        | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md`                                                                                                           | —              | medium | —                                                                                                        |
-| 8   | [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) | Server API + auth                        | M3        | `docs/specs/adr/001-backend-api-boundary.md` + `docs/specs/sync-protocol.md`                                                                                                        | CES-42         | high   | —                                                                                                        |
-| 9   | [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) | Backup / outbox (client)                 | M3        | `docs/specs/adr/002-backup-sync-layer.md` + `docs/specs/sync-protocol.md`                                                                                                           | CES-37, CES-43 | high   | —                                                                                                        |
+| 8   | [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) | Server API + auth                        | M3        | `docs/specs/adr/001-backend-api-boundary.md` + `docs/specs/sync-protocol.md`                                                                                                        | CES-42         | high   | **Backlog** — `server/dev-sync-stub/` (fill-ups only) is **not** CES-43. |
+| 9   | [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) | Backup / outbox (client)                 | M3        | `docs/specs/adr/002-backup-sync-layer.md` + `docs/specs/sync-protocol.md`                                                                                                           | CES-37, CES-43 | high   | **Gate slice on `main`** (fill-up enqueue/flush). Remaining: vehicles/settings/maint + real API. |
 | 10  | [CES-45](https://linear.app/personal-interests-llc/issue/CES-45) | Restore + dead-letter UX                 | M3        | `docs/specs/sync-protocol.md`                                                                                                                                                       | CES-44         | medium | —                                                                                                        |
 | 11  | [CES-46](https://linear.app/personal-interests-llc/issue/CES-46) | Telemetry client wiring                  | M4        | `docs/specs/telemetry-allowlist.md` + `docs/specs/adr/004-telemetry-crash-sdk.md`                                                                                                   | CES-36         | medium | —                                                                                                        |
 | 12  | [CES-47](https://linear.app/personal-interests-llc/issue/CES-47) | Client schema migration rollback tooling | M5        | `docs/specs/TBD-migration-rollback.md`                                                                                                                                              | CES-37         | medium | —                                                                                                        |
@@ -230,4 +232,6 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` — locked scope.
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
+
+*Last updated: 2026-08-16 — hygiene after `main` `bb1d5d5` (CES-40 merge). Android M1 closed. Next coding: CES-41.*
 

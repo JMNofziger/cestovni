@@ -12,7 +12,7 @@ Canonical UX reference artifacts for product and engineering live in this folder
 - UX data contracts: [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md)
 - Senior review checklist: [`SENIOR_REVIEW_CHECKLIST.md`](SENIOR_REVIEW_CHECKLIST.md)
 - Senior review packet: [`SENIOR_REVIEW_PACKET.md`](SENIOR_REVIEW_PACKET.md)
-- UX gap closure tracker (gate closed; CES-39 in progress): [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md)
+- UX gap closure tracker (gate closed; CES-39 **Done**; Android M1 closed): [`UX_IMPLEMENTATION_GAPS.md`](UX_IMPLEMENTATION_GAPS.md)
 - Screenshot update process: [`SCREENSHOT_UPDATE.md`](SCREENSHOT_UPDATE.md)
 - Screenshot sets: [`screenshots/`](screenshots/)
 

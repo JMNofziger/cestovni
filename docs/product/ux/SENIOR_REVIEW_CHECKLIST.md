@@ -53,4 +53,4 @@ Reviewer notes:
 - Docs and Linear alignment complete for CES-39 prerequisites (CES-53–CES-56).
 - **CES-39 + CES-57 Done on `main`** — Log/History/vehicle CRUD + Settings prefs shipped (PR #9).
 - **CES-65 + CES-66 Done** (repo + Linear 2026-07-22) — prefs display + Metrics tab.
-- Remaining M1 gap: photo (**CES-40**); **CES-67** Maint shipped 2026-08-15. See [`delivery-plan-v1.md`](../delivery-plan-v1.md).
+- **CES-67 + CES-40 Done** (2026-08-15/16) — Maint tab + receipt photos. Android M1 closed. Next coding: **CES-41** export. See [`delivery-plan-v1.md`](../delivery-plan-v1.md).
