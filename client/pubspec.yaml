@@ -19,6 +19,8 @@ dependencies:
   path_provider: ^2.1.4
   path: ^1.9.0
   uuid: ^4.4.0
+  # Share sheet for CES-41 ZIP export (sandbox file → user-chosen dest).
+  share_plus: ^11.0.0
 
   # Visual system fonts (CES-55) — Fraunces (serif), Inter (sans),
   # JetBrains Mono (mono). Per cestovni-styling.md §2 / §14 with
