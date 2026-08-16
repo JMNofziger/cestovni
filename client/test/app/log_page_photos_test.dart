@@ -116,7 +116,14 @@ void main() {
       db: db,
       vehicleId: vehicleId,
       photos: photos,
-      picker: _FakePicker(bytes: _smallJpeg()),
+      // Stall past the old fixed 300ms `runAsync` wait so this test
+      // fails closed if a later change reintroduces that race: CAMERA
+      // is disabled while `_attachingPhoto` is true, and a tap then
+      // no-ops. That flake failed verify-full on CES-41 (PR #21).
+      picker: _FakePicker(
+        bytes: _smallJpeg(),
+        stall: const Duration(milliseconds: 400),
+      ),
     ));
     await _settle(tester);
 
@@ -272,16 +279,19 @@ void main() {
 // ══════════════════════════════════════════════════════════════════════
 
 class _FakePicker implements PhotoPicker {
-  _FakePicker({this.bytes, this.denied = false});
+  _FakePicker({this.bytes, this.denied = false, this.stall});
 
   final Uint8List? bytes;
   final bool denied;
+  final Duration? stall;
   int calls = 0;
 
   @override
   Future<Uint8List?> pick(PhotoSource source) async {
     calls++;
     if (denied) throw PhotoPermissionDeniedException(source);
+    final wait = stall;
+    if (wait != null) await Future<void>.delayed(wait);
     return bytes;
   }
 }
@@ -317,13 +327,59 @@ Future<void> _settle(WidgetTester tester) async {
 /// complete, no matter how much time is pumped afterwards, so the tap itself
 /// has to be dispatched inside [WidgetTester.runAsync] — that is the only way
 /// the attach / delete chain reaches the file system.
+///
+/// A fixed 300ms wait was not enough on a loaded CI runner: attach still
+/// held `_attachingPhoto`, the next CAMERA tap hit a disabled button, and
+/// `the fifth photo disables both sources` never reached `5 / 5`.
 Future<void> _tapWithIo(WidgetTester tester, String label) async {
   final finder = await _reveal(tester, label);
+  final thumbsBefore = _thumbnails().evaluate().length;
   await tester.runAsync(() async {
     await tester.tap(finder);
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    final deadline = DateTime.now().add(const Duration(seconds: 8));
+    while (DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await tester.pump();
+      if (_ioTapSettled(tester, label: label, thumbsBefore: thumbsBefore)) {
+        return;
+      }
+    }
   });
   await _settle(tester);
+}
+
+/// Whether the attach / delete started by [_tapWithIo] has landed in the tree.
+///
+/// Attach must also wait until CAMERA is tappable again (or at cap / denied).
+/// Returning at the first thumbnail increment is not enough: `_attachPhoto`
+/// reloads photos, then clears `_attachingPhoto` in `finally` — a tap in
+/// between is a no-op.
+bool _ioTapSettled(
+  WidgetTester tester, {
+  required String label,
+  required int thumbsBefore,
+}) {
+  final thumbs = _thumbnails().evaluate().length;
+  if (label == 'DELETE PHOTO') return thumbs < thumbsBefore;
+
+  if (find
+      .textContaining('You can still save the fill-up')
+      .evaluate()
+      .isNotEmpty) {
+    return true;
+  }
+  if (find.textContaining("couldn't").evaluate().isNotEmpty) {
+    return true;
+  }
+  if (thumbs <= thumbsBefore) return false;
+  if (thumbs >= maxPhotosPerDraft) return true;
+
+  final camera = find.ancestor(
+    of: find.text('CAMERA'),
+    matching: find.byType(OutlinedButton),
+  );
+  if (camera.evaluate().isEmpty) return true;
+  return tester.widget<OutlinedButton>(camera).onPressed != null;
 }
 
 /// Taps [label] for an action that only touches the database.
