@@ -1,7 +1,7 @@
 # Cestovni — mobile client
 
 **Stack:** Flutter + Drift (ADR 003).  
-**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** on `main`. **CES-70 import** implemented (Settings → Import data, `client/lib/import/`); spec tests green on PR #25, not on `main`. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
+**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** and **CES-70 import** on `main` (Settings → Import data, `client/lib/import/`). See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
 
 ## Quick start
 
