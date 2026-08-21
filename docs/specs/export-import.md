@@ -1,6 +1,6 @@
 # Spec: Export ZIP import (device-to-device, zero-server)
 
-**Status:** **Complete (v1) — ready for implementation.** All product locks resolved 2026-08-16 (see [§ Product decisions](#product-decisions-locked-2026-08-16)). Mode is **replace**.
+**Status:** **Complete (v1) — implemented, automated tests outstanding.** All product locks resolved 2026-08-16 (see [§ Product decisions](#product-decisions-locked-2026-08-16)). Mode is **replace**. Code lives in `client/lib/import/` + Settings → **Import data**; the 17 cases in [§ Test expectations](#test-expectations) are **not written**. CES-71 stays blocked until this is on `main` with a working round-trip.
 **Linear:** [CES-70](https://linear.app/personal-interests-llc/issue/CES-70)
 **Depends on:** [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) export ([PR #21](https://github.com/JMNofziger/cestovni/pull/21), `client/lib/export/`)
 **Blocks:** [CES-71](https://linear.app/personal-interests-llc/issue/CES-71) (`cadence_km` → `cadence_m` rename)
@@ -19,11 +19,11 @@ Let a user move their structured history between two devices with **zero server*
 
 ## Current state vs expected outcome
 
-| | Current | Expected after CES-70 |
+| | Current | Done when CES-70 is 🟩 |
 |---|---|---|
 | Export | Settings → **Export data** writes a STORE ZIP: `manifest.json`, `README_export.txt`, five CSVs | unchanged |
-| Import | none — a ZIP is a dead end inside the app | Settings → **Import data** replaces local history from a ZIP the app produced |
-| Mode | undecided | **Replace** — destructive restore, typed confirmation when there is data to lose |
+| Import | Settings → **Import data** (`client/lib/import/` + `import_data_section.dart`) replaces local history from a ZIP the app produced. **Not on `main` yet.** Automated tests in `client/test/import/` do not exist. | Same code on `main`; [§ Test expectations](#test-expectations) green |
+| Mode | **Replace** — destructive restore, typed `REPLACE` when there is data to lose. Merge is not built. | unchanged |
 | Photos | never exported (`photos_in_export: false`) | never imported; a photo-shaped ZIP **fails closed** |
 | `row_version` | client never writes it; CSV cells empty, manifest `null` | imported rows keep `row_version = NULL` (never synced) |
 | Identity | `user_key_hash` = SHA-256(`settings.id`)[:8]; `settings.id` is **not** in the ZIP | local `settings.id` never overwritten; source hash advisory only |

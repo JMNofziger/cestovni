@@ -16,7 +16,7 @@ them up without a second runner:
 
 **Not in CI (per `export-v1.md` § A4):** 10 000-row / 30 s / 10 MB device timing. That pass moves to [CES-68](https://linear.app/personal-interests-llc/issue/CES-68).
 
-**Not in this folder:** ZIP import ([CES-70](https://linear.app/personal-interests-llc/issue/CES-70)).
+**Import (CES-70):** code is in `client/lib/import/`; tests are **not written**. Pointer: [`../import/README.md`](../import/README.md).
 
 Run them with:
 

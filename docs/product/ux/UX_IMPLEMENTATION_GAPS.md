@@ -2,9 +2,9 @@
 
 **Purpose:** Track documentation and product gaps discovered before M1 UI execution so they do not leak into implementation as silent contradictions.
 
-**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **CES-67 Done** (2026-08-15). **CES-40 Done** (receipt photos, 2026-08-15) — **M1 verticals all closed.** Next spine item: export (**CES-41**, M2).
+**Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **CES-67 Done** (2026-08-15). **CES-40 Done** (receipt photos, 2026-08-15) — **M1 verticals all closed.** **CES-41** export shipped. Next spine item: import (**CES-70**, M2) — implemented, tests outstanding.
 
-**Last reviewed:** 2026-08-16 (hygiene after `main` `bb1d5d5`; next coding = CES-41 export)
+**Last reviewed:** 2026-08-21 (hygiene: CES-70 import implemented, tests outstanding)
 
 ---
 

@@ -152,13 +152,14 @@ Screenshot: `screenshots/dark-midnight/settings.png`
 
 - Preferences: theme, units, currency, default vehicle.
 - Vehicle management list with add/edit/delete.
-- Data actions (export, destructive reset) are visible and explicit.
+- Data actions (export, import, destructive reset) are visible and explicit.
 
 **Current implementation anchors**
 
 - Preferences currently implemented in `settings_page.dart` (distance/volume/currency/timezone).
 - Vehicle CRUD is implemented across `vehicle_list_page.dart`, `vehicle_detail_page.dart`, and `vehicle_form_page.dart`.
-- Export is **shipped (CES-41)** — Settings → Backup → **Export data** (`client/lib/export/`, photos excluded). Destructive reset remains Later.
+- Export is **shipped (CES-41)** — Settings → Backup → **Export data** (`client/lib/export/`, photos excluded).
+- Import is **implemented (CES-70)** — Settings → Backup → **Import data** (`client/lib/import/` + `import_data_section.dart`), replace mode, typed `REPLACE` when local history is non-empty. Automated tests outstanding; not on `main` yet. Destructive reset remains Later.
 
 **Scope gate**
 

@@ -19,7 +19,7 @@ Each Linear issue should include a **`Spec:`** line pointing to the relevant fil
 | [`consumption-math.md`](consumption-math.md)         | Math, segments, fill-up flags              | CES-26         | Complete (v1)                          |
 | [`si-units.md`](si-units.md)                         | Canonical INT storage + conversions        | CES-27         | Complete (v1)                          |
 | [`export-v1.md`](export-v1.md)                       | ZIP / CSV export contract                  | CES-28         | Complete (v1)                          |
-| [`export-import.md`](export-import.md)               | Device-to-device ZIP import (zero-server)  | CES-70         | Complete (v1) — replace mode locked    |
+| [`export-import.md`](export-import.md)               | Device-to-device ZIP import (zero-server)  | CES-70         | Complete (v1) — implemented; tests outstanding |
 | [`telemetry-allowlist.md`](telemetry-allowlist.md)   | Crash + product event allow-list           | CES-29         | Complete (v1)                          |
 | [`telemetry-events.v1.yaml`](telemetry-events.v1.yaml) | Machine-readable event catalogue         | CES-29         | Complete (v1)                          |
 | [`photo-pipeline.md`](photo-pipeline.md)             | Ephemeral photos / deferred entry          | CES-30         | Complete (v1)                          |

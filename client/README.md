@@ -1,7 +1,7 @@
 # Cestovni — mobile client
 
 **Stack:** Flutter + Drift (ADR 003).  
-**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** on this branch. Next coding: **CES-70** import. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
+**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** on `main`. **CES-70 import** implemented (Settings → Import data, `client/lib/import/`); automated tests still outstanding. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
 
 ## Quick start
 
@@ -28,7 +28,8 @@ client/
         log_page.dart             # fill-up form + drafts (CES-39) + photos (CES-40)
         history_page.dart         # fuel + maint timeline (CES-39 / CES-67)
         vehicle_form_page.dart    # add/edit vehicle (CES-39)
-        settings_page.dart        # vehicle CRUD + prefs (CES-57)
+        settings_page.dart        # vehicle CRUD + prefs (CES-57) + export/import
+        import_data_section.dart  # CES-70 ZIP import (replace)
         metrics_page.dart         # aggregates + cost chart (CES-66)
         maintenance_page.dart     # maint entry + history (CES-67)
         debug_page.dart
@@ -36,6 +37,7 @@ client/
     consumption/                  # CES-38 math + validation
     photos/                       # CES-40 receipt photo pipeline
     export/                       # CES-41 ZIP export (CSV + STORE zip + share)
+    import/                       # CES-70 ZIP import (replace; tests outstanding)
     metrics/                      # CES-66 aggregation
     maintenance/                  # CES-67 date-only + history ledger
     db/
@@ -48,6 +50,7 @@ client/
     consumption/                  # golden fixtures + module purity
     photos/                       # EXIF strip, TTL, cleanup, no-upload invariant
     export/                       # ZIP golden, streaming, photos excluded
+    import/                       # CES-70 — not written yet (see spec § Test expectations)
     db/
     shell_smoke_test.dart
 ```

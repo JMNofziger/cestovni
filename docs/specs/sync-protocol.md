@@ -211,7 +211,7 @@ Dead-letter is a **signal** that something is wrong — either a client bug or a
 - **Push channels.** Options: long-poll on `/changes`, server-sent events, WebSocket. Decision deferred to when real-time UX requirements are set.
 - **Conflict UX.** How to surface (if ever) a rejected amendment to the user. Deferred with the above.
 - **Re-evaluation of managed sync runtime.** Gate defined in ADR 002 revisit gates.
-- **Device-to-device import from a self-produced export ZIP** ([CES-70](https://linear.app/personal-interests-llc/issue/CES-70)) — a real, named roadmap item, not a permanent non-goal: parse the canonical CSV columns from an export ZIP (see [`export-v1.md`](export-v1.md)) and upsert into local SQLite on a second device, so cost-conscious or self-host-only users can move data between devices with **zero server**. Needs its own spec pass before implementation — at minimum: `id` collision handling across devices, how imported rows interact with `row_version`/outbox state for never-synced data, and duplicate-detection UX. Not specified or built in this pass.
+- **Device-to-device import from a self-produced export ZIP** ([CES-70](https://linear.app/personal-interests-llc/issue/CES-70)) — specified in [`export-import.md`](export-import.md) (replace, not merge; no outbox enqueue; `row_version` stays `NULL`). Implementation is in `client/lib/import/` + Settings → **Import data**. Automated tests and merge to `main` are still outstanding. This is **not** live multi-device sync: merge rules, tombstones, and conflict UX remain unspecified and must not be inferred from replace-mode restore.
 
 ## References
 

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/settings_repository.dart';
 import '../../export/export_service.dart';
+import '../../import/import_service.dart';
 import '../active_vehicle.dart';
 import '../theme/cestovni_primitives.dart';
 import '../theme/cestovni_tokens.dart';
 import '../theme/cestovni_typography.dart';
 import 'debug_page.dart';
+import 'import_data_section.dart';
 import 'vehicle_form_page.dart';
 
 /// Settings — pushed route from the shell header gear icon (CES-56).
@@ -17,12 +19,21 @@ import 'vehicle_form_page.dart';
 /// default vehicle) to [SettingsRepository]. Debug stays reachable
 /// from inside Settings until the rollback tooling lands (CES-50).
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key, required this.db, this.onExport});
+  const SettingsPage({
+    super.key,
+    required this.db,
+    this.onExport,
+    this.importService,
+  });
 
   final AppDatabase db;
 
   /// Test hook. Production leaves this null and uses [ExportService].
   final Future<void> Function()? onExport;
+
+  /// Test hook. Production leaves this null so [ImportDataSection]
+  /// builds an [ImportService] backed by the platform file picker.
+  final ImportService? importService;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +59,7 @@ class SettingsPage extends StatelessWidget {
             subtitle: Text('Offline — sign in lands in M3.'),
           ),
           _ExportDataSection(db: db, onExport: onExport),
+          ImportDataSection(db: db, service: importService),
           const HairlineDivider(),
           const _SectionLabel(text: 'Developer'),
           ListTile(
