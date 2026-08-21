@@ -1,6 +1,6 @@
 # Cursor execution prompt — CES-70 ZIP import
 
-> **Status: IMPLEMENTED + TESTS GREEN** (2026-08-21). Mode is `replace`. Code and `client/test/import/` are on draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25).
+> **Status: IMPLEMENTED + TESTS GREEN + GITHUB CI 5/5** (2026-08-21). Mode is `replace`. Code and `client/test/import/` are on draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25) (`db26f36`).
 > **Do not re-implement.** Remaining work is merge to `main`. Device timing stays CES-68.
 > Linear **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** — **In Progress** until this is on `main`. GitHub automation will flip it Done on merge; that is correct only after merge.
 > Do **not** pick up M3 (CES-42–45), CES-51, CES-71, or PWA-lite unless the user explicitly redirects. **Do not unblock CES-71** until import is on `main`.
@@ -16,7 +16,7 @@
 |------|-------|
 | Last coding | **CES-70** import + spec tests — **not on `main`** |
 | M1 | **Closed.** |
-| M2 | CES-41 on `main`. CES-70 tests green on PR #25 |
+| M2 | CES-41 on `main`. CES-70 tests + GitHub CI 5/5 on PR #25; merge outstanding |
 | Parallel (do not do here) | CES-63 · CES-68 · M3 · CES-71 |
 
 **Next:** merge PR #25. Do **not** cut a second implementation branch off stale spec history.
@@ -79,7 +79,7 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 
 ---
 
-## Scope (in) — code done; tests remaining
+## Scope (in) — code + tests done; merge remaining
 
 1. ✅ `client/lib/import/` split per spec § Suggested layout — pure `csv_parse` / `validate` / `plan`, Drift only in `apply`, IO only in `import_service`.
 2. ✅ `client/lib/import/zip_read.dart` (central-directory reader; injected inflate).
@@ -131,8 +131,8 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 3. **Headers.** `validate.dart` imports `client/lib/export/headers.dart`. Drift test: `client/test/import/headers_drift_test.dart` (`same()` identity).
 4. **Drafts/photos.** Apply deletes `photo_refs` then drafts inside the txn; returns `photoIdsToDelete`. `ImportService.commit` deletes files **after** commit. Failures are swallowed — `PhotoService.sweep` collects orphans.
 5. **Errors.** 17 `ImportErrorCode` values + 6 `ImportWarningCode` values. Validation happens before the txn; apply is one Drift transaction (`E_TXN_FAILED` on failure).
-6. **Tests.** `client/test/import/` — 27 cases covering spec items 1–17. Pointer: [`tests/import/README.md`](../../../tests/import/README.md). Full suite: `flutter analyze` clean, `flutter test --no-pub` **303 passed / 1 skipped** (E2E), telemetry-gate PASS.
+6. **Tests.** `client/test/import/` — 27 cases covering spec items 1–17. Pointer: [`tests/import/README.md`](../../../tests/import/README.md). Local: `flutter analyze` clean, `flutter test --no-pub` **303 passed / 1 skipped** (E2E), telemetry-gate PASS. GitHub CI on `db26f36`: verify-fast (`telemetry-gate`, `client-test`) + verify-full (`client-test`, `client-android`, `client-ios`) — **5/5 SUCCESS**.
 7. **Limits.** Device timing deferred to CES-68. Keyword is English-only. Pre-M3 every user with fill-ups has a non-empty outbox — keep "queued changes discarded" quiet.
-8. **PR / Linear.** Draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25). CES-70 **In Progress** until merge. CES-71 **Backlog**.
+8. **PR / Linear.** Draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25). CES-70 **In Progress** until merge. CES-71 **Backlog**. Do **not** mark CES-70 Done until this is on `main`.
 
 Tag: `CES-70 — ZIP import`.

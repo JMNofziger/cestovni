@@ -1,7 +1,8 @@
 # tests/import — pointer
 
 `docs/specs/export-import.md` § Test expectations. Cases live in the
-Flutter client so `flutter test` picks them up without a second runner:
+Flutter client so `flutter test` picks them up without a second runner.
+**Green** on PR #25 (`db26f36`, GitHub CI 5/5); not on `main` yet.
 
 | Spec expectation | Implementation |
 |------------------|----------------|
