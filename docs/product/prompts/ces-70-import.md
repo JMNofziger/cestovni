@@ -135,6 +135,6 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 5. **Errors.** 17 `ImportErrorCode` values + 6 `ImportWarningCode` values. Validation happens before the txn; apply is one Drift transaction (`E_TXN_FAILED` on failure).
 6. **Tests.** None. `client/test/import/` does not exist. Pointer: [`tests/import/README.md`](../../../tests/import/README.md).
 7. **Limits.** Device timing deferred to CES-68. Keyword is English-only. Pre-M3 every user with fill-ups has a non-empty outbox — keep "queued changes discarded" quiet. Confirm dialog currently returns the keyword even on empty DB (service skips the check).
-8. **PR / Linear.** Filled in on the PR once opened. CES-70 stays **In Progress**. CES-71 stays **Backlog**.
+8. **PR / Linear.** Draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25). CES-70 **In Progress**. CES-71 **Backlog** (automation had wrongly marked both Done).
 
 Tag: `CES-70 — ZIP import`.
