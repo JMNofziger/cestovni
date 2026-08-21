@@ -21,6 +21,10 @@ dependencies:
   uuid: ^4.4.0
   # Share sheet for CES-41 ZIP export (sandbox file → user-chosen dest).
   share_plus: ^11.0.0
+  # ZIP picker for CES-70 import. Only the platform picker lives behind
+  # this plugin; parsing and applying an archive never touch it, so the
+  # import module stays testable without a device.
+  file_picker: ^10.0.0
 
   # Visual system fonts (CES-55) — Fraunces (serif), Inter (sans),
   # JetBrains Mono (mono). Per cestovni-styling.md §2 / §14 with

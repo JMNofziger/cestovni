@@ -1,13 +1,12 @@
 # Cursor execution prompt — CES-70 ZIP import
 
-> **Status: READY** (2026-08-16). All product locks resolved — **mode is `replace`**. No prerequisites outstanding.
-> **CES-41 is merged** to `main` ([PR #21](https://github.com/JMNofziger/cestovni/pull/21)), so `client/lib/export/` is available to share from.
-> Linear **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** — **Todo** → set **In Progress** when you start.
-> Do **not** pick up M3 (CES-42–45), CES-51, CES-71, or PWA-lite unless the user explicitly redirects.
+> **Status: IMPLEMENTED + TESTS GREEN** (2026-08-21). Mode is `replace`. Code and `client/test/import/` are on draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25).
+> **Do not re-implement.** Remaining work is merge to `main`. Device timing stays CES-68.
+> Linear **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** — **In Progress** until this is on `main`. GitHub automation will flip it Done on merge; that is correct only after merge.
+> Do **not** pick up M3 (CES-42–45), CES-51, CES-71, or PWA-lite unless the user explicitly redirects. **Do not unblock CES-71** until import is on `main`.
 
-**Branch:** cut `cursor/ces-70-import-<suffix>` from **`main`**
-**Spec (normative):** [`docs/specs/export-import.md`](../../specs/export-import.md) — read it end to end before writing code. It is complete; do not re-litigate its decisions.
-**Also read:** [`docs/specs/export-v1.md`](../../specs/export-v1.md) § v1 amendments · [`docs/specs/data-model.md`](../../specs/data-model.md) · [`docs/specs/si-units.md`](../../specs/si-units.md) · [`docs/specs/photo-pipeline.md`](../../specs/photo-pipeline.md) · `client/lib/export/` · [`client/lib/photos/photo_export_guard.dart`](../../../client/lib/photos/photo_export_guard.dart) · [`AGENTS.md`](../../../AGENTS.md)
+**Branch:** `cursor/ces-70-zip-import-40e4`
+**Spec (normative):** [`docs/specs/export-import.md`](../../specs/export-import.md)
 
 ---
 
@@ -15,14 +14,12 @@
 
 | Item | State |
 |------|-------|
-| Last coding | **CES-41** export — merged to `main` ([PR #21](https://github.com/JMNofziger/cestovni/pull/21)); code in `client/lib/export/` |
-| M1 | **Closed.** Log / History / Metrics / Maint / photos ship on Android |
-| M2 | **CES-41 done.** This ticket is the import half |
-| Prerequisite | None outstanding — import imports `client/lib/export/headers.dart`, never copies it |
-| Parallel (do not do here) | CES-63 iPhone install-doc · CES-68 APK · M3 CES-42–45 · CES-71 cadence rename |
+| Last coding | **CES-70** import + spec tests — **not on `main`** |
+| M1 | **Closed.** |
+| M2 | CES-41 on `main`. CES-70 tests green on PR #25 |
+| Parallel (do not do here) | CES-63 · CES-68 · M3 · CES-71 |
 
-**Git start:** `git fetch origin && git checkout -b cursor/ces-70-import-<suffix> origin/main`
-
+**Next:** merge PR #25. Do **not** cut a second implementation branch off stale spec history.
 ---
 
 ## Goal
@@ -82,14 +79,14 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 
 ---
 
-## Scope (in)
+## Scope (in) — code done; tests remaining
 
-1. `client/lib/import/` split per spec § Suggested layout — pure `csv_parse` / `validate` / `plan`, Drift only in `apply`, IO only in `import_service`.
-2. Promote `client/test/export/zip_read.dart` into `client/lib/import/zip_read.dart` (central-directory reader; CES-41 sets the data-descriptor bit, so local-header sizes are zero). Add DEFLATE via an **injected** inflate callback so the parser stays pure.
-3. Strict CSV coercion: BOM strip, CRLF **and** LF, RFC 4180, empty = null, booleans case-insensitive `true`/`false` only, integers reject `1.0` / grouping / `+5`.
-4. Typed error codes per spec § Error handling (17 codes), each carrying file + line + column where applicable, plus the six warning codes.
-5. Settings UI: **Import data** `LedgerTile` under **Export data**; confirm dialog showing incoming counts, destroyed counts, discarded queue count, affected drafts, both hashes, and the typed field when needed; summary afterwards. User-facing wording is drafted in spec § User-facing explanation — reuse it, do not invent new copy.
-6. Tests per spec § Test expectations (all 17).
+1. ✅ `client/lib/import/` split per spec § Suggested layout — pure `csv_parse` / `validate` / `plan`, Drift only in `apply`, IO only in `import_service`.
+2. ✅ `client/lib/import/zip_read.dart` (central-directory reader; injected inflate).
+3. ✅ Strict CSV coercion.
+4. ✅ 17 error codes + 6 warning codes.
+5. ✅ Settings UI: **Import data** under **Export data**.
+6. ✅ Tests per spec § Test expectations (all 17) — `client/test/import/`.
 
 ## Scope (out)
 
@@ -109,30 +106,33 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 
 ## Acceptance
 
-- [ ] Golden round-trip: export fixture → import into empty DB → canonical columns equal row for row
-- [ ] Importing the same ZIP twice yields identical state (idempotent, no duplicate `id`s)
-- [ ] Replace clears prior history: populated DB + disjoint ZIP → exactly the ZIP's rows remain
-- [ ] `settings` updated in place, `settings.id` unchanged, prefs adopted, `default_vehicle_id` validated
-- [ ] Outbox cleared with the discarded count reported
-- [ ] Drafts reconciled: surviving vehicle keeps draft + photos; destroyed vehicle purges both, files deleted post-commit
-- [ ] Typed keyword enforced when local history is non-empty, skipped when empty
-- [ ] Header mutation, photo-shaped content, duplicate id, FK orphan, and each value violation reject with the DB untouched
-- [ ] Imported rows have `row_version IS NULL`; nothing enqueued
-- [ ] Atomicity: an induced mid-write failure leaves pre-existing rows intact
-- [ ] Module-purity + streaming tests present (device timing deferred to CES-68 per export A4)
-- [ ] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green
-- [ ] `delivery-plan-v1.md` M2 row + Current focus updated; CES-71 unblocked
-- [ ] Linear CES-70 Done + closeout comment
+- [x] Implementation in `client/lib/import/` + Settings → Import data (replace)
+- [x] `delivery-plan-v1.md` M2 row + Current focus updated
+- [x] Golden round-trip: export fixture → import into empty DB → canonical columns equal row for row
+- [x] Importing the same ZIP twice yields identical state (idempotent, no duplicate `id`s)
+- [x] Replace clears prior history: populated DB + disjoint ZIP → exactly the ZIP's rows remain
+- [x] `settings` updated in place, `settings.id` unchanged, prefs adopted, `default_vehicle_id` validated
+- [x] Outbox cleared with the discarded count reported
+- [x] Drafts reconciled: surviving vehicle keeps draft + photos; destroyed vehicle purges both, files deleted post-commit
+- [x] Typed keyword enforced when local history is non-empty, skipped when empty
+- [x] Header mutation, photo-shaped content, duplicate id, FK orphan, and each value violation reject with the DB untouched
+- [x] Imported rows have `row_version IS NULL`; nothing enqueued
+- [x] Atomicity: an induced mid-write failure leaves pre-existing rows intact
+- [x] Module-purity + streaming tests present (device timing deferred to CES-68 per export A4)
+- [x] Header-constant drift test (import expected set *is* the export constant set)
+- [x] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green
+- [ ] CES-71 unblocked — **only after this is on `main`**
+- [ ] Linear CES-70 Done + closeout comment — **not before merge to `main`**
 
-## Status report (required)
+## Implementation status (2026-08-21)
 
-1. How the ZIP reader handles STORE vs DEFLATE and where the inflate is injected
-2. Confirm-dialog contents and how the typed-keyword gate is bypassed on an empty DB
-3. How header constants are shared with `client/lib/export/` and how the drift test asserts it
-4. Draft/photo reconcile: how post-commit file deletion stays crash-safe
-5. Error + warning codes implemented vs spec, and how partial import is prevented
-6. Tests added, including the streaming and module-purity proofs
-7. Known limits — call out device timing as deferred to CES-68
-8. PR URL + Linear CES-70 state
+1. **ZIP reader.** Central-directory sizes (`client/lib/import/zip_read.dart`). STORE is native; DEFLATE via injected `Inflate`. Production inflater is `ZLibDecoder(raw: true)` in `import_service.dart` (`dart:io`), so the parser stays pure.
+2. **Confirm dialog.** Incoming vs replaced counts, both `user_key_hash` values, export-first button. Typed keyword `REPLACE` (`importConfirmationKeyword`). Service enforces the keyword only when `requiresTypedConfirmation` (local history non-empty). Empty DB still shows the dialog; the keyword is not required.
+3. **Headers.** `validate.dart` imports `client/lib/export/headers.dart`. Drift test: `client/test/import/headers_drift_test.dart` (`same()` identity).
+4. **Drafts/photos.** Apply deletes `photo_refs` then drafts inside the txn; returns `photoIdsToDelete`. `ImportService.commit` deletes files **after** commit. Failures are swallowed — `PhotoService.sweep` collects orphans.
+5. **Errors.** 17 `ImportErrorCode` values + 6 `ImportWarningCode` values. Validation happens before the txn; apply is one Drift transaction (`E_TXN_FAILED` on failure).
+6. **Tests.** `client/test/import/` — 27 cases covering spec items 1–17. Pointer: [`tests/import/README.md`](../../../tests/import/README.md). Full suite: `flutter analyze` clean, `flutter test --no-pub` **303 passed / 1 skipped** (E2E), telemetry-gate PASS.
+7. **Limits.** Device timing deferred to CES-68. Keyword is English-only. Pre-M3 every user with fill-ups has a non-empty outbox — keep "queued changes discarded" quiet.
+8. **PR / Linear.** Draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25). CES-70 **In Progress** until merge. CES-71 **Backlog**.
 
 Tag: `CES-70 — ZIP import`.

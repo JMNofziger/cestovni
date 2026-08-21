@@ -216,7 +216,7 @@ Both targets are validated by `tests/export/` fixtures.
 ## Non-goals (v1)
 
 - **No incremental / diff exports.** Every export is the full structured state.
-- **No re-import tool in-app (v1).** The canonical columns + manifest make third-party re-import possible today; we do not build UX for it in v1. **This is deferred, not permanent** — a device-to-device ZIP import (zero-server sync path for cost-conscious/self-host-only users) is a named v1.x+ roadmap item; see [`sync-protocol.md` — v1.x roadmap](sync-protocol.md#v1x-roadmap-pointer-only--tbd-in-this-pass) and [CES-70](https://linear.app/personal-interests-llc/issue/CES-70).
+- **No re-import tool in-app (v1) — historical.** This non-goal was deferred, not permanent. In-app restore is [CES-70](https://linear.app/personal-interests-llc/issue/CES-70): Settings → **Import data**, specified in [`export-import.md`](export-import.md) (replace mode). Implementation + spec tests are on [PR #25](https://github.com/JMNofziger/cestovni/pull/25); not on `main` yet. Merge / live multi-device sync remains a v1.x item in [`sync-protocol.md`](sync-protocol.md#v1x-roadmap-pointer-only--tbd-in-this-pass).
 - **No photos.** Period.
 - **No signed / encrypted ZIP.** User-managed; they can encrypt after export if they want.
 
