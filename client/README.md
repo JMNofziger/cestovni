@@ -1,7 +1,7 @@
 # Cestovni — mobile client
 
 **Stack:** Flutter + Drift (ADR 003).  
-**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** on `main`. **CES-70 import** implemented (Settings → Import data, `client/lib/import/`); automated tests still outstanding. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
+**Milestones:** M0 closed (CES-36, CES-37). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16) — CES-38 math, CES-39 Log/History/vehicles, CES-57/65 prefs, CES-66 Metrics, CES-67 Maint, CES-40 photos. **CES-41 export** on `main`. **CES-70 import** implemented (Settings → Import data, `client/lib/import/`); spec tests green on PR #25, not on `main`. See [`docs/product/delivery-plan-v1.md`](../docs/product/delivery-plan-v1.md).
 
 ## Quick start
 
@@ -37,7 +37,7 @@ client/
     consumption/                  # CES-38 math + validation
     photos/                       # CES-40 receipt photo pipeline
     export/                       # CES-41 ZIP export (CSV + STORE zip + share)
-    import/                       # CES-70 ZIP import (replace; tests outstanding)
+    import/                       # CES-70 ZIP import (replace; spec tests in test/import/)
     metrics/                      # CES-66 aggregation
     maintenance/                  # CES-67 date-only + history ledger
     db/
@@ -50,7 +50,7 @@ client/
     consumption/                  # golden fixtures + module purity
     photos/                       # EXIF strip, TTL, cleanup, no-upload invariant
     export/                       # ZIP golden, streaming, photos excluded
-    import/                       # CES-70 — not written yet (see spec § Test expectations)
+    import/                       # CES-70 spec § Test expectations
     db/
     shell_smoke_test.dart
 ```

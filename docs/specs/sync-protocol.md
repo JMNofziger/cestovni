@@ -211,7 +211,7 @@ Dead-letter is a **signal** that something is wrong — either a client bug or a
 - **Push channels.** Options: long-poll on `/changes`, server-sent events, WebSocket. Decision deferred to when real-time UX requirements are set.
 - **Conflict UX.** How to surface (if ever) a rejected amendment to the user. Deferred with the above.
 - **Re-evaluation of managed sync runtime.** Gate defined in ADR 002 revisit gates.
-- **Device-to-device import from a self-produced export ZIP** ([CES-70](https://linear.app/personal-interests-llc/issue/CES-70)) — specified in [`export-import.md`](export-import.md) (replace, not merge; no outbox enqueue; `row_version` stays `NULL`). Implementation is in `client/lib/import/` + Settings → **Import data**. Automated tests and merge to `main` are still outstanding. This is **not** live multi-device sync: merge rules, tombstones, and conflict UX remain unspecified and must not be inferred from replace-mode restore.
+- **Device-to-device import from a self-produced export ZIP** ([CES-70](https://linear.app/personal-interests-llc/issue/CES-70)) — specified in [`export-import.md`](export-import.md) (replace, not merge; no outbox enqueue; `row_version` stays `NULL`). Implementation is in `client/lib/import/` + Settings → **Import data**. Spec tests green on [PR #25](https://github.com/JMNofziger/cestovni/pull/25); merge to `main` outstanding. This is **not** live multi-device sync: merge rules, tombstones, and conflict UX remain unspecified and must not be inferred from replace-mode restore.
 
 ## References
 

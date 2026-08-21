@@ -216,7 +216,7 @@ Both targets are validated by `tests/export/` fixtures.
 ## Non-goals (v1)
 
 - **No incremental / diff exports.** Every export is the full structured state.
-- **No re-import tool in-app (v1) — historical.** This non-goal was deferred, not permanent. In-app restore is [CES-70](https://linear.app/personal-interests-llc/issue/CES-70): Settings → **Import data**, specified in [`export-import.md`](export-import.md) (replace mode). Implementation is in `client/lib/import/`; automated tests are still outstanding and the code is not on `main` yet. Merge / live multi-device sync remains a v1.x item in [`sync-protocol.md`](sync-protocol.md#v1x-roadmap-pointer-only--tbd-in-this-pass).
+- **No re-import tool in-app (v1) — historical.** This non-goal was deferred, not permanent. In-app restore is [CES-70](https://linear.app/personal-interests-llc/issue/CES-70): Settings → **Import data**, specified in [`export-import.md`](export-import.md) (replace mode). Implementation + spec tests are on [PR #25](https://github.com/JMNofziger/cestovni/pull/25); not on `main` yet. Merge / live multi-device sync remains a v1.x item in [`sync-protocol.md`](sync-protocol.md#v1x-roadmap-pointer-only--tbd-in-this-pass).
 - **No photos.** Period.
 - **No signed / encrypted ZIP.** User-managed; they can encrypt after export if they want.
 
