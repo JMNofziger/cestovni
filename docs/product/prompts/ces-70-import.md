@@ -1,11 +1,11 @@
 # Cursor execution prompt — CES-70 ZIP import
 
-> **Status: IMPLEMENTED + TESTS GREEN** (2026-08-21). Mode is `replace`. Code and `client/test/import/` are on draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25).
-> **Do not re-implement.** Remaining work is merge to `main`. Device timing stays CES-68.
-> Linear **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** — **In Progress** until this is on `main`. GitHub automation will flip it Done on merge; that is correct only after merge.
-> Do **not** pick up M3 (CES-42–45), CES-51, CES-71, or PWA-lite unless the user explicitly redirects. **Do not unblock CES-71** until import is on `main`.
+> **Status: SHIPPED on `main`** (2026-08-21, [PR #25](https://github.com/JMNofziger/cestovni/pull/25), merge `7670226`). Mode is `replace`.
+> **Do not re-implement.** Device timing stays CES-68.
+> Linear **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** — **Done**. **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71)** is unblocked.
+> Do **not** pick up M3 (CES-42–45) or CES-51 unless the user explicitly redirects. Next coding is CES-71.
 
-**Branch:** `cursor/ces-70-zip-import-40e4`
+**Branch:** `main` (merged via `cursor/ces-70-zip-import-40e4`)
 **Spec (normative):** [`docs/specs/export-import.md`](../../specs/export-import.md)
 
 ---
@@ -14,12 +14,12 @@
 
 | Item | State |
 |------|-------|
-| Last coding | **CES-70** import + spec tests — **not on `main`** |
+| Last coding | **CES-70** import — **on `main`** (PR #25) |
 | M1 | **Closed.** |
-| M2 | CES-41 on `main`. CES-70 tests green on PR #25 |
-| Parallel (do not do here) | CES-63 · CES-68 · M3 · CES-71 |
+| M2 | **Closed.** CES-41 + CES-70 on `main` |
+| Parallel (do not do here) | CES-63 · CES-68 · M3 |
 
-**Next:** merge PR #25. Do **not** cut a second implementation branch off stale spec history.
+**Next:** CES-71 cadence rename. Do **not** re-open CES-70 implementation.
 ---
 
 ## Goal
@@ -79,7 +79,7 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 
 ---
 
-## Scope (in) — code done; tests remaining
+## Scope (in) — shipped
 
 1. ✅ `client/lib/import/` split per spec § Suggested layout — pure `csv_parse` / `validate` / `plan`, Drift only in `apply`, IO only in `import_service`.
 2. ✅ `client/lib/import/zip_read.dart` (central-directory reader; injected inflate).
@@ -121,8 +121,8 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 - [x] Module-purity + streaming tests present (device timing deferred to CES-68 per export A4)
 - [x] Header-constant drift test (import expected set *is* the export constant set)
 - [x] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green
-- [ ] CES-71 unblocked — **only after this is on `main`**
-- [ ] Linear CES-70 Done + closeout comment — **not before merge to `main`**
+- [x] CES-71 unblocked (import is on `main`)
+- [x] Linear CES-70 Done + closeout comment
 
 ## Implementation status (2026-08-21)
 
@@ -133,6 +133,6 @@ Validate → `DELETE` children before parents (`maintenance_events` → `fill_up
 5. **Errors.** 17 `ImportErrorCode` values + 6 `ImportWarningCode` values. Validation happens before the txn; apply is one Drift transaction (`E_TXN_FAILED` on failure).
 6. **Tests.** `client/test/import/` — 27 cases covering spec items 1–17. Pointer: [`tests/import/README.md`](../../../tests/import/README.md). Full suite: `flutter analyze` clean, `flutter test --no-pub` **303 passed / 1 skipped** (E2E), telemetry-gate PASS.
 7. **Limits.** Device timing deferred to CES-68. Keyword is English-only. Pre-M3 every user with fill-ups has a non-empty outbox — keep "queued changes discarded" quiet.
-8. **PR / Linear.** Draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25). CES-70 **In Progress** until merge. CES-71 **Backlog**.
+8. **PR / Linear.** Merged [PR #25](https://github.com/JMNofziger/cestovni/pull/25). CES-70 **Done**. CES-71 **unblocked** (Backlog until product starts it).
 
 Tag: `CES-70 — ZIP import`.

@@ -12,20 +12,24 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 ## Current focus
 
-**In flight:** **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70) ZIP import** — implementation + spec tests on draft [PR #25](https://github.com/JMNofziger/cestovni/pull/25); **not on `main` yet**. Product locks resolved 2026-08-16: mode is **replace**, cross-account imports stay a warning. **Do not start M3 (CES-42–45)** unless product redirects. Parallel ops: **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** iPhone install-doc + T1; **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for demo distribution.
+**Shipped:** **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70) ZIP import** is on `main` ([PR #25](https://github.com/JMNofziger/cestovni/pull/25), merge `7670226`). Replace-mode Settings → **Import data**; spec § Test expectations green. **M2 (export + import) is closed.**
+
+**In flight (ops):** **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** iPhone install-doc + T1. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for demo distribution.
+
+**Next coding:** **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71)** `cadence_km` → `cadence_m` — **unblocked**. Import must keep accepting `cadence_km` (schema 1) **and** `cadence_m` (schema 2). **M3 (CES-42–45)** is eligible now that import shipped; do **not** start it until product says so.
 
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
-| **A — M2 import** | **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70)** | CES-41 export shipped; import is the matching restore path | Replace-mode restore of vehicles / fill-ups / maint / settings; photos never imported; spec § Test expectations green |
+| **A — cadence rename** | **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71)** | CES-70 shipped; column name still lies | Migration `0004`; export/import accept old + new header |
 | **B — M-dist (ops)** | **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** | CI deploy live; install doc + phone T1 still open | [`install-ios.md`](install-ios.md) finalized; iPhone T1 on **CES-62** |
 
-**Shipped this cycle:** **CES-41** (Export ZIP — Settings → Export data, STORE ZIP, photos excluded). Earlier: **CES-67** (Maintenance) and **CES-40** (receipt photos). **M3** stays on the spine after import, not before.
+**Shipped this cycle:** **CES-70** (ZIP import, replace) and **CES-41** (Export ZIP). Earlier: **CES-67** (Maintenance) and **CES-40** (receipt photos).
 
 **Prompts (executed):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md) · [`prompts/ces-40-photo-pipeline.md`](prompts/ces-40-photo-pipeline.md) · [`prompts/ces-41-export.md`](prompts/ces-41-export.md) · [`prompts/ces-70-import.md`](prompts/ces-70-import.md)
 
-**Spec:** [`../specs/export-import.md`](../specs/export-import.md) — **Complete (v1)**, replace mode locked. Do **not** start M3 (CES-42–45) until product redirects.
+**Spec:** [`../specs/export-import.md`](../specs/export-import.md) — **Complete (v1)**, on `main`. CES-71 is the next client vertical.
 
-**Manual checklist (CES-40):** [`ces-40-manual-test.md`](ces-40-manual-test.md) — needs a physical Android device with a camera; not runnable in CI or on the Cloud VM. CES-41 device timing (10k rows / 30 s) rides along with **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)**.
+**Manual checklist (CES-40):** [`ces-40-manual-test.md`](ces-40-manual-test.md) — needs a physical Android device with a camera; not runnable in CI or on the Cloud VM. CES-41/CES-70 device timing (10k rows / 30 s) rides along with **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)**.
 
 ---
 
@@ -37,7 +41,7 @@ Ship in dependency order. Each milestone is a coherent Cursor execution; vertica
 flowchart LR
   M0[M0 Bootstrap + DB]
   M1[M1 Local logging + math]
-  M2[M2 Export]
+  M2[M2 Export + import]
   M3[M3 Backup + restore]
   M4[M4 Telemetry + CI gate]
   M5[M5 Hardening + rollback tooling]
@@ -53,7 +57,7 @@ flowchart LR
 
 - **M0 — Bootstrap + DB:** mobile client shell + client DB schema + migrations. Unblocks everything. **Repo status:** client app + Drift `schema_version` **3** (post-CES-57 `default_vehicle_id`; prior CES-53 maintenance migration at v2) + tests + fixtures landed; see `client/README.md`.
 - **M1 — Local logging + math:** fill-up/vehicle UI + consumption math + photo pipeline. Offline app is usable end-to-end without a server.
-- **M2 — Export:** streaming ZIP + manifest + CSVs. Lets users get their data out before backup exists.
+- **M2 — Export + import:** streaming ZIP + manifest + CSVs out; replace-mode ZIP restore in. Lets users get data out and move it between devices before a server exists. **Closed on `main`** (CES-41 + CES-70).
 - **M3 — Backup + restore:** server Postgres + RLS + API + outbox + restore + dead-letter UX. Closes the ADR 002 loop.
 - **M4 — Telemetry + CI gate:** `ci/telemetry-gate.`* + client wiring once SDK landed (ADR 004). Can start in parallel with M1 once M0 ships.
 - **M5 — Hardening:** migration rollback tooling + end-to-end integration tests + Stage 5 exit verification.
@@ -96,7 +100,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M1 — Local logging + math
 
-- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). **CES-41 export shipped** (M2). **CES-70 import** is the remaining M2 work (tests green on PR #25, not on `main`) — not M3.
+- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). **CES-41 export + CES-70 import shipped** (M2 closed). Next client coding is **CES-71**.
   - 🟩 **CES-38 — Consumption math + golden tests** — **Done in repo on `main`** (2026-05): `client/lib/consumption/`, auto-discovery runner over 20 `tests/math/fixtures/`, module-purity test, validation wired in Log/History save paths. Follow-ups: **CES-51** / **CES-52** (non-blocking).
   - 🟩 **CES-39 — Fill-up + vehicle UI (core)** — **Done** (repo 2026-05, Linear 2026-07-17): repos + vehicle CRUD + Log/History UI; 121+ tests. Out of scope → **CES-65** / **CES-66** / **CES-67** / **CES-40**.
   - 🟩 **CES-57 — Settings prefs + default vehicle** — **Done** (PR #9, Linear Done). Display wiring closed as **CES-65**.
@@ -108,13 +112,13 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M2 — Export + import
 
-- 🟨 **M2 rollup** — on-device ZIP export shipped; import implemented with spec tests green on PR #25 (not on `main`).
+- 🟩 **M2 rollup (closed 2026-08-21)** — on-device ZIP export + replace-mode import on `main`.
   - 🟩 **CES-41 — Export ZIP** — **Done in repo** (`client/lib/export/`, Settings → Export data). STORE ZIP (no `archive` write path), A1 headers, `photos_in_export: false`, streaming test over 1 000 lazy rows. Device 10k timing deferred to CES-68. Tests: `client/test/export/` + pointer [`tests/export/README.md`](../../tests/export/README.md).
-  - 🟨 **CES-70 — ZIP import** — **implemented; spec tests green on PR #25, not on `main`.** `client/lib/import/` (`zip_read` · `csv_parse` · `validate` · `plan` · `apply` · `import_service`) + Settings → **Import data**. **Replace** semantics per [`export-import.md`](../specs/export-import.md). Tests: `client/test/import/` mapped in [`tests/import/README.md`](../../tests/import/README.md). **Outstanding before this goes 🟩:** merge to `main`.
+  - 🟩 **CES-70 — ZIP import** — **Done on `main`** ([PR #25](https://github.com/JMNofziger/cestovni/pull/25), merge `7670226`). `client/lib/import/` (`zip_read` · `csv_parse` · `validate` · `plan` · `apply` · `import_service`) + Settings → **Import data**. **Replace** semantics per [`export-import.md`](../specs/export-import.md). Tests: `client/test/import/` mapped in [`tests/import/README.md`](../../tests/import/README.md). Spec 1–17 + GitHub CI 5/5. CES-71 unblocked.
 
 ### M3 — Backup + restore
 
-  - 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests. *(Fill-up outbox gate slice + `server/dev-sync-stub/` already on `main`. Remaining: real Postgres/RLS, production API, vehicles/settings/maint enqueue, restore UX. **Do not start until CES-70 is on `main` or product redirects.**)*
+  - 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests. *(Fill-up outbox gate slice + `server/dev-sync-stub/` already on `main`. Remaining: real Postgres/RLS, production API, vehicles/settings/maint enqueue, restore UX. **CES-70 gate cleared.** Start when product says; next client coding is CES-71.)*
   - 🟥 **CES-42 — Server Postgres + RLS migrations** — `[tests/rls/](../../tests/rls/)`, `[ci/rls-regression.yml](../../ci/rls-regression.yml)`.
   - 🟥 **CES-43 — Server API + auth** — contract tests `[tests/contract/](../../tests/contract/)` (managed + self-host). Dev stub on `main` is **not** this ticket.
   - 🟥 **CES-44 — Backup / outbox (client)** — fill-up enqueue/flush **gate slice on `main`**; vehicles/settings/maint still do not enqueue. Depends on CES-37 + real CES-43.
@@ -166,7 +170,7 @@ PWA-lite gate passed 2026-05-29; **Phase 1+2 merged to `main`** (PR #3 + PR #4).
 Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES-35/delivery-v1-stage-5-engineering-breakdown)**. Every row below is a child of that epic with a literal `Spec:` line and `blockedBy` relations matching this table.
 
 
-| #   | Linear                                                           | Vertical                                 | Milestone | `Spec:`                                                                                                                                                                             | Depends on     | Effort | Repo status (2026-04-22, post-CES-53)                                                                   |
+| #   | Linear                                                           | Vertical                                 | Milestone | `Spec:`                                                                                                                                                                             | Depends on     | Effort | Repo status (2026-08-21)                                                                                |
 | --- | ---------------------------------------------------------------- | ---------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------ | -------------------------------------------------------------------------------------------------------- |
 | 1   | [CES-36](https://linear.app/personal-interests-llc/issue/CES-36) | Mobile client bootstrap                  | M0        | `docs/specs/adr/003-mobile-stack.md`                                                                                                                                                | —              | medium | **In repo** — `client/`, `ci/client-build.yml`, telemetry check 2 active                                 |
 | 2   | [CES-37](https://linear.app/personal-interests-llc/issue/CES-37) | Client DB schema + migrations            | M0        | `docs/specs/data-model.md` + `docs/specs/si-units.md`                                                                                                                               | CES-36         | medium | **In repo** — `client/lib/db/`, `client/test/db/`, `tests/client-db/fixtures/`                           |
@@ -174,6 +178,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 | 4   | [CES-39](https://linear.app/personal-interests-llc/issue/CES-39) | Fill-up + vehicle UI (core logging)      | M1        | `docs/specs/data-model.md` + `docs/product/PRODUCT_BRIEF.md` + `docs/product/ux/cestovni-views.md` + `docs/product/ux/DATA_CONTRACTS.md` + `docs/product/ux/DELIVERY_ACCEPTANCE.md` + `docs/product/ux/UX_IMPLEMENTATION_GAPS.md` | CES-37, CES-38 (CES-53–CES-56 **Done** in repo) | high   | **Done in repo on `main`** (2026-05) — repos + vehicle CRUD (phases 1–2) + Log/History UI (phase 3); 121+ widget/DB tests. Out of CES-39 scope: Metrics/Maint tabs, photo (**CES-40**), Log/History prefs *display* follow-on (post-CES-57) |
 | 5   | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation            | M1        | `docs/specs/photo-pipeline.md`                                                                                                                                                      | CES-37         | medium | **Done** (2026-08-16, PR #18) — `client/lib/photos/` + Log attach UI; isolate decode; 47 tests in `client/test/photos/` + `log_page_photos_test.dart`. Manual device checklist: [`ces-40-manual-test.md`](ces-40-manual-test.md) (not yet run). |
 | 6   | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP                               | M2        | `docs/specs/export-v1.md`                                                                                                                                                           | CES-37         | medium | **Done in repo** — `client/lib/export/`, Settings Export, `client/test/export/`. Prompt [`prompts/ces-41-export.md`](prompts/ces-41-export.md). |
+| 6b  | [CES-70](https://linear.app/personal-interests-llc/issue/CES-70) | ZIP import (replace)                     | M2        | `docs/specs/export-import.md`                                                                                                                                                       | CES-41         | medium | **Done on `main`** (PR #25) — `client/lib/import/` + Settings Import; 17 spec cases in `client/test/import/`. Prompt [`prompts/ces-70-import.md`](prompts/ces-70-import.md). |
 | 7   | [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) | Server Postgres + RLS migrations         | M3        | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md`                                                                                                           | —              | medium | —                                                                                                        |
 | 8   | [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) | Server API + auth                        | M3        | `docs/specs/adr/001-backend-api-boundary.md` + `docs/specs/sync-protocol.md`                                                                                                        | CES-42         | high   | **Backlog** — `server/dev-sync-stub/` (fill-ups only) is **not** CES-43. |
 | 9   | [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) | Backup / outbox (client)                 | M3        | `docs/specs/adr/002-backup-sync-layer.md` + `docs/specs/sync-protocol.md`                                                                                                           | CES-37, CES-43 | high   | **Gate slice on `main`** (fill-up enqueue/flush). Remaining: vehicles/settings/maint + real API. |
@@ -199,6 +204,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 | API contract            | [ADR 001](../specs/adr/001-backend-api-boundary.md), `[sync-protocol.md](../specs/sync-protocol.md)`                          | Contract tests against managed + self-host        | `[tests/contract/](../../tests/contract/)`                                                                                                                             |
 | Backup / restore        | `[sync-protocol.md](../specs/sync-protocol.md)`, [ADR 002](../specs/adr/002-backup-sync-layer.md)                             | Integration (client+server)                       | `tests/backup/` (to land in M3)                                                                                                                                        |
 | Export shape            | `[export-v1.md](../specs/export-v1.md)`                                                                                       | Fixture-driven ZIP assembly + manifest assertions | `client/test/export/` (pointer [`tests/export/README.md`](../../tests/export/README.md))                                                                                |
+| Import / replace        | `[export-import.md](../specs/export-import.md)`                                                                               | Golden round-trip + reject + replace apply        | `client/test/import/` (pointer [`tests/import/README.md`](../../tests/import/README.md)) — **Done on `main`** (PR #25)                                                  |
 | Telemetry drift         | `[telemetry-allowlist.md](../specs/telemetry-allowlist.md)` + `[telemetry-events.v1.yaml](../specs/telemetry-events.v1.yaml)` | YAML + client-source scanner in CI                | `[ci/telemetry-gate.py](../../ci/telemetry-gate.py)` + `[ci/telemetry-gate.yml](../../ci/telemetry-gate.yml)`                                                          |
 | Migration rollback      | `[TBD-migration-rollback.md](../specs/TBD-migration-rollback.md)` (stub)                                                      | Down-migration fixtures                           | `tests/migrations/` (to land in M5)                                                                                                                                    |
 
@@ -210,8 +216,8 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 Leading emoji tracks **exit** state (independent of per-vertical RYG above, but should converge at stage close).
 
 - 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47; M0 follow-ups CES-48/49/50 created 2026-04-22, linked to their downstream verticals via `blocks`.)*
-- 🟨 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed**. **M1 closed** — CES-38/39/57 + CES-65/66/67 + CES-40 all Done. **CES-41 export shipped.** **Next:** CES-70 import — see [Current focus](#current-focus).)*
-- 🟨 M2 lands: ZIP export round-trips for a representative fixture. *(CES-41 **Done**. CES-70 import + spec tests green on PR #25; still 🟨 until merge.)*
+- 🟩 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed**. **M1 closed** — CES-38/39/57 + CES-65/66/67 + CES-40 all Done.)*
+- 🟩 M2 lands: ZIP export round-trips for a representative fixture, and replace-mode import restores it. *(CES-41 **Done**. CES-70 **Done on `main`**, PR #25.)*
 - 🟥 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green.
 - 🟥 M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.
 - 🟥 M5 lands: migration rollback spec real (not stub); rollback tooling proven against fixture.
@@ -234,5 +240,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-08-21 — CES-70 ZIP import implemented; spec § Test expectations green on PR #25, not on `main`.*
+*Last updated: 2026-08-21 — CES-70 ZIP import merged to `main` (PR #25). M2 closed. CES-71 unblocked. M3 eligible; wait for product.*
 

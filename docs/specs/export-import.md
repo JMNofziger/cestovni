@@ -1,9 +1,9 @@
 # Spec: Export ZIP import (device-to-device, zero-server)
 
-**Status:** **Complete (v1) — implemented, tests green on PR #25, not on `main` yet.** All product locks resolved 2026-08-16 (see [§ Product decisions](#product-decisions-locked-2026-08-16)). Mode is **replace**. Code lives in `client/lib/import/` + Settings → **Import data**; the 17 cases in [§ Test expectations](#test-expectations) are in `client/test/import/`. CES-71 stays blocked until this is on `main`.
+**Status:** **Complete (v1) — on `main`** ([PR #25](https://github.com/JMNofziger/cestovni/pull/25), merge `7670226`). All product locks resolved 2026-08-16 (see [§ Product decisions](#product-decisions-locked-2026-08-16)). Mode is **replace**. Code lives in `client/lib/import/` + Settings → **Import data**; the 17 cases in [§ Test expectations](#test-expectations) are in `client/test/import/`. CES-71 is unblocked.
 **Linear:** [CES-70](https://linear.app/personal-interests-llc/issue/CES-70)
 **Depends on:** [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) export ([PR #21](https://github.com/JMNofziger/cestovni/pull/21), `client/lib/export/`)
-**Blocks:** [CES-71](https://linear.app/personal-interests-llc/issue/CES-71) (`cadence_km` → `cadence_m` rename)
+**Blocks:** [CES-71](https://linear.app/personal-interests-llc/issue/CES-71) (`cadence_km` → `cadence_m` rename) — **unblocked** (this shipped)
 **Reads:** [`export-v1.md`](export-v1.md) § v1 amendments · [`data-model.md`](data-model.md) · [`si-units.md`](si-units.md) · [`photo-pipeline.md`](photo-pipeline.md) · [`sync-protocol.md`](sync-protocol.md) § v1.x roadmap
 
 > **Contract source.** The authoritative CSV shape is the **shipped export code**, not the 2026-04 body of `export-v1.md`. Header strings live in `client/lib/export/headers.dart`; cell formatting lives in `client/lib/export/snapshot.dart` + `derived.dart`. Import MUST import those same header constants rather than re-declaring them, so export and import cannot drift.
@@ -22,7 +22,7 @@ Let a user move their structured history between two devices with **zero server*
 | | Current | Done when CES-70 is 🟩 |
 |---|---|---|
 | Export | Settings → **Export data** writes a STORE ZIP: `manifest.json`, `README_export.txt`, five CSVs | unchanged |
-| Import | Settings → **Import data** (`client/lib/import/` + `import_data_section.dart`) replaces local history from a ZIP the app produced. **Not on `main` yet.** Tests live in `client/test/import/` (spec § Test expectations; green on PR #25). | Same code on `main` |
+| Import | Settings → **Import data** (`client/lib/import/` + `import_data_section.dart`) replaces local history from a ZIP the app produced. **On `main`** (PR #25). Tests live in `client/test/import/` (spec § Test expectations). | Same (shipped) |
 | Mode | **Replace** — destructive restore, typed `REPLACE` when there is data to lose. Merge is not built. | unchanged |
 | Photos | never exported (`photos_in_export: false`) | never imported; a photo-shaped ZIP **fails closed** |
 | `row_version` | client never writes it; CSV cells empty, manifest `null` | imported rows keep `row_version = NULL` (never synced) |
