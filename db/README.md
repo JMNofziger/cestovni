@@ -28,8 +28,10 @@ RLS is enabled and **forced** on every backed-up table:
 `volume_uL` and `tank_capacity_uL` are quoted identifiers so the mixed case
 from the data model survives Postgres folding.
 
-Apply as a superuser on an **empty** database. The script is not idempotent
-(`CREATE ROLE` / `CREATE TABLE` will fail on a second run).
+Apply as a superuser on an **empty** database. Tables and policies are not
+idempotent (a second apply into the same database fails). Roles are
+cluster-wide and are created only when missing, so a new database on a
+cluster that already has the roles still applies.
 
 ```bash
 createdb cestovni

@@ -4,7 +4,8 @@
 -- client/lib/db/; numeric alignment is "this file == client schema v5".
 --
 -- Apply as a superuser (or another role that can CREATE ROLE) against an
--- empty database. Not idempotent.
+-- empty database. Tables are not re-runnable. Roles are created only if
+-- missing, because they are cluster-wide.
 --
 -- Runtime DML uses role cestovni_app. RLS reads auth_user_id(), which is a
 -- session-GUC stub until CES-43 replaces it with the JWT claim:
@@ -15,9 +16,21 @@
 -- superuser. cestovni_admin is intentionally not created here.
 -- ---------------------------------------------------------------------------
 
-CREATE ROLE cestovni_migrate NOLOGIN NOINHERIT;
-CREATE ROLE cestovni_app NOLOGIN NOINHERIT;
-CREATE ROLE anon NOLOGIN NOINHERIT;
+-- Roles are cluster-wide. Skip creation when a previous database on this
+-- instance already defined them (a fresh CI container still creates them).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'cestovni_migrate') THEN
+    CREATE ROLE cestovni_migrate NOLOGIN NOINHERIT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'cestovni_app') THEN
+    CREATE ROLE cestovni_app NOLOGIN NOINHERIT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon NOLOGIN NOINHERIT;
+  END IF;
+END
+$$;
 
 COMMENT ON ROLE cestovni_migrate IS
   'DDL during migrations. Not used at request time.';
