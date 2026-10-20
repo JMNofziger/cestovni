@@ -152,6 +152,54 @@ void main() {
       expect(rows.single.read<int>('cost_cents'), 0);
     });
 
+    test('settings rejects id != user_id when user_id is non-null', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+
+      final id = newId();
+      final differentUserId = newId();
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO settings "
+          "(id, user_id, row_version, updated_at, mutation_id, "
+          " preferred_distance_unit, preferred_volume_unit, "
+          " currency_code, timezone) "
+          "VALUES (?, ?, 1, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+          [id, differentUserId, nowIso(), newId()],
+        ),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('settings accepts id = user_id', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+
+      final id = newId();
+      await db.customStatement(
+        "INSERT INTO settings "
+        "(id, user_id, row_version, updated_at, mutation_id, "
+        " preferred_distance_unit, preferred_volume_unit, "
+        " currency_code, timezone) "
+        "VALUES (?, ?, 1, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+        [id, id, nowIso(), newId()],
+      );
+    });
+
+    test('settings accepts user_id = NULL (pre-sync state)', () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+
+      await db.customStatement(
+        "INSERT INTO settings "
+        "(id, user_id, row_version, updated_at, mutation_id, "
+        " preferred_distance_unit, preferred_volume_unit, "
+        " currency_code, timezone) "
+        "VALUES (?, NULL, NULL, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+        [newId(), nowIso(), newId()],
+      );
+    });
+
     test('fill_ups.vehicle_id must reference a live vehicle (FK on)', () async {
       final db = openInMemoryDb();
       addTearDown(db.close);
