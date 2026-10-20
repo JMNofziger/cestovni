@@ -140,6 +140,7 @@ List<MigrationStep> schemaSteps(Iterable<TableInfo> allTables) {
       from: 2,
       to: 3,
       name: '0003_settings_default_vehicle_id',
+
       // Closes CES-57 — see docs/specs/data-model.md §settings and
       // client/lib/db/tables/settings.dart. A plain nullable column
       // add: no NOT NULL/CHECK relaxation is involved (contrast 0002),
@@ -153,6 +154,78 @@ List<MigrationStep> schemaSteps(Iterable<TableInfo> allTables) {
       down: (m) async {
         await m.database.customStatement(
           'ALTER TABLE settings DROP COLUMN default_vehicle_id',
+        );
+      },
+    ),
+    MigrationStep(
+      from: 3,
+      to: 4,
+      name: '0004_rename_cadence_km_to_cadence_m',
+      // Closes CES-71 — rename maintenance_rules.cadence_km → cadence_m.
+      // The column stores canonical meters; the old name was misleading.
+      // SQLite does not support ALTER COLUMN RENAME, so we rebuild the
+      // table. The new table uses Drift's generated CREATE TABLE (via
+      // `m.createTable`) so the schema is byte-identical to a fresh
+      // `onCreate` install.
+      up: (m) async {
+        final maintenanceRulesTable = allTables.firstWhere(
+          (t) => t.actualTableName == 'maintenance_rules',
+        );
+        await m.database.customStatement(
+          'CREATE TEMPORARY TABLE _maintenance_rules_backup AS '
+          'SELECT * FROM maintenance_rules',
+        );
+        await m.deleteTable('maintenance_rules');
+        await m.createTable(maintenanceRulesTable);
+        await m.database.customStatement(
+          'INSERT INTO maintenance_rules ('
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'vehicle_id, name, cadence_m, cadence_days, enabled, notes'
+          ') SELECT '
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'vehicle_id, name, cadence_km, cadence_days, enabled, notes '
+          'FROM _maintenance_rules_backup',
+        );
+        await m.database.customStatement(
+          'DROP TABLE _maintenance_rules_backup',
+        );
+      },
+      // Rollback: rebuild back to cadence_km.
+      down: (m) async {
+        await m.database.customStatement(
+          'CREATE TEMPORARY TABLE _maintenance_rules_backup AS '
+          'SELECT * FROM maintenance_rules',
+        );
+        await m.deleteTable('maintenance_rules');
+        await m.database.customStatement(
+          'CREATE TABLE maintenance_rules ('
+          'id TEXT NOT NULL PRIMARY KEY CHECK (length(id) = 36), '
+          'user_id TEXT NULL CHECK (user_id IS NULL OR length(user_id) = 36), '
+          'row_version INTEGER NULL, '
+          'updated_at TEXT NOT NULL, '
+          'deleted_at TEXT NULL, '
+          'mutation_id TEXT NOT NULL CHECK (length(mutation_id) = 36), '
+          'vehicle_id TEXT NOT NULL CHECK (length(vehicle_id) = 36) '
+          '  REFERENCES vehicles (id), '
+          'name TEXT NOT NULL CHECK (length(name) BETWEEN 1 AND 80), '
+          'cadence_km INTEGER NULL CHECK (cadence_km IS NULL OR cadence_km > 0), '
+          'cadence_days INTEGER NULL CHECK (cadence_days IS NULL OR cadence_days > 0), '
+          'enabled INTEGER NOT NULL DEFAULT 1, '
+          'notes TEXT NULL CHECK (notes IS NULL OR length(notes) <= 500), '
+          'CHECK (cadence_km IS NOT NULL OR cadence_days IS NOT NULL)'
+          ')',
+        );
+        await m.database.customStatement(
+          'INSERT INTO maintenance_rules ('
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'vehicle_id, name, cadence_km, cadence_days, enabled, notes'
+          ') SELECT '
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'vehicle_id, name, cadence_m, cadence_days, enabled, notes '
+          'FROM _maintenance_rules_backup',
+        );
+        await m.database.customStatement(
+          'DROP TABLE _maintenance_rules_backup',
         );
       },
     ),

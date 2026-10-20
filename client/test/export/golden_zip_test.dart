@@ -64,7 +64,7 @@ void main() {
     expect(rules.first, maintenanceRulesCsvHeader);
     final r = parseCsvRecord(rules[1]);
     expect(r[0], seed.ruleId);
-    expect(r[4], '10000000', reason: 'cadence_km is meters, exported verbatim');
+    expect(r[4], '10000000', reason: 'cadence_m is meters, exported verbatim');
     expect(r[6], 'true');
     expect(r[7], 'every 10k km');
 
@@ -96,7 +96,7 @@ void main() {
     expect(manifest['row_counts']['settings'], 1);
 
     final readme = mem.utf8Of('README_export.txt');
-    expect(readme, contains('cadence_km stores canonical METERS'));
+    expect(readme, contains('cadence_m stores canonical METERS'));
     expect(readme, contains('first 8 hex characters of SHA-256'));
     expect(readme.contains('\r\n'), isTrue);
 

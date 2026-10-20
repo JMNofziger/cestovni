@@ -48,7 +48,7 @@ void main() {
     expect(rules, hasLength(1));
     final rule = rules.single;
     expect(rule.id, seed.ruleId);
-    expect(rule.cadenceKm, 10000000, reason: 'cadence_km is meters, verbatim');
+    expect(rule.cadenceM, 10000000, reason: 'cadence_m is meters, verbatim');
     expect(rule.cadenceDays, 365);
     expect(rule.rowVersion, isNull);
 
@@ -109,7 +109,7 @@ void main() {
     expect(fill.odometerM, 120000000);
   });
 
-  test('6 cadence_km = 10000 stores 10000 meters, not 10 or 1e7', () async {
+  test('6 cadence_m = 10000 stores 10000 meters, not 10 or 1e7', () async {
     final source = openInMemoryDb();
     addTearDown(source.close);
     await seedGoldenExport(source);
@@ -118,7 +118,7 @@ void main() {
       csv: entries['maintenance_rules.csv']!,
       file: 'maintenance_rules.csv',
       dataRow: 0,
-      column: 'cadence_km',
+      column: 'cadence_m',
       value: '10000',
     );
 
@@ -128,9 +128,9 @@ void main() {
     await importZip(dest, packZip(entries));
 
     final rule = (await dest.select(dest.maintenanceRules).get()).single;
-    expect(rule.cadenceKm, 10000);
-    expect(rule.cadenceKm, isNot(10));
-    expect(rule.cadenceKm, isNot(10000000));
+    expect(rule.cadenceM, 10000);
+    expect(rule.cadenceM, isNot(10));
+    expect(rule.cadenceM, isNot(10000000));
   });
 
   test('9 imported rows have row_version IS NULL and nothing is enqueued',

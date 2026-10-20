@@ -143,7 +143,7 @@ id,user_key_hash,vehicle_id,filled_at_utc,filled_at_local,odometer_m,odometer_km
 ### `maintenance_rules.csv`
 
 ```csv
-id,user_key_hash,vehicle_id,name,cadence_km,cadence_days,enabled,row_version,updated_at_utc
+id,user_key_hash,vehicle_id,name,cadence_m,cadence_days,enabled,notes,row_version,updated_at_utc
 ```
 
 ### `maintenance_events.csv`
@@ -253,7 +253,7 @@ fill_ups.csv
 id,user_key_hash,vehicle_id,filled_at_utc,filled_at_local,odometer_m,odometer_km,odometer_mi,volume_uL,volume_L,volume_gal,total_price_cents,total_price_major,currency_code,is_full,missed_before,odometer_reset,notes,row_version,updated_at_utc
 
 maintenance_rules.csv
-id,user_key_hash,vehicle_id,name,cadence_km,cadence_days,enabled,notes,row_version,updated_at_utc
+id,user_key_hash,vehicle_id,name,cadence_m,cadence_days,enabled,notes,row_version,updated_at_utc
 
 maintenance_events.csv
 id,user_key_hash,vehicle_id,rule_id,performed_at_utc,performed_at_local,odometer_m,odometer_km,odometer_mi,cost_cents,cost_major,currency_code,category,shop,notes,row_version,updated_at_utc
@@ -270,9 +270,9 @@ Every derived column ships on every export regardless of `settings` preferences:
 
 Reason: a fixed header makes the golden-ZIP test independent of user settings, and gives CES-70 import exactly one header contract to parse. `unit_preferences` in `manifest.json` still records what the user was looking at.
 
-### A3 — `cadence_km` carries meters
+### A3 — `cadence_m` (formerly `cadence_km`)
 
-`maintenance_rules.cadence_km` is **canonical meters** despite its name (see [`data-model.md`](data-model.md) § `maintenance_rules`). Export it verbatim under its schema name, and say so in `README_export.txt`. Do **not** rename or add a converted column in v1 — a rename is a migration, and CES-70 must round-trip against the same header. Renaming to `cadence_m` is a follow-up ticket.
+`maintenance_rules.cadence_m` is **canonical meters**. CES-71 renamed the column from `cadence_km` to `cadence_m` (client migration `0004`, export schema version 2). Import accepts both the old `cadence_km` header (schema 1 ZIPs) and the current `cadence_m` header.
 
 ### A4 — Performance targets are device-validated, not CI gates
 

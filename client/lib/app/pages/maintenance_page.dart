@@ -324,9 +324,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
       _remindMonthsCtrl.clear();
       return;
     }
-    if (rule.cadenceKm != null) {
+    if (rule.cadenceM != null) {
       _remindDistanceCtrl.text =
-          metersToDisplayWhole(rule.cadenceKm!, _distanceUnit).toString();
+          metersToDisplayWhole(rule.cadenceM!, _distanceUnit).toString();
     } else {
       _remindDistanceCtrl.clear();
     }
@@ -405,7 +405,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         MaintenanceRuleDraft(
           vehicleId: vehicleId,
           name: _category,
-          cadenceKmMeters: cadenceMeters,
+          cadenceMeters: cadenceMeters,
           cadenceDays: cadenceDays,
         ),
       );

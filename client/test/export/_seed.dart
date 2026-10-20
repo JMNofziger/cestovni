@@ -57,7 +57,7 @@ Future<GoldenSeed> seedGoldenExport(AppDatabase db) async {
     MaintenanceRuleDraft(
       vehicleId: vehicleId,
       name: 'oil',
-      cadenceKmMeters: 10000000,
+      cadenceMeters: 10000000,
       cadenceDays: 365,
       notes: 'every 10k km',
     ),

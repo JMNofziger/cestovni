@@ -202,7 +202,7 @@ List<Object?> ruleCsvRow(MaintenanceRuleRow r, String hash) => [
       hash,
       r.vehicleId,
       r.name,
-      r.cadenceKm, // meters, despite the name (A3)
+      r.cadenceM,
       r.cadenceDays,
       r.enabled,
       r.notes,

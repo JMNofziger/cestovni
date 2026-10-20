@@ -138,7 +138,7 @@ void main() {
       csv: entries['maintenance_rules.csv']!,
       file: 'maintenance_rules.csv',
       dataRow: 0,
-      column: 'cadence_km',
+      column: 'cadence_m',
       value: '',
     );
     entries['maintenance_rules.csv'] = mutateCsvCell(

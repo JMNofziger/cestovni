@@ -1923,17 +1923,17 @@ class $MaintenanceRulesTable extends MaintenanceRules
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _cadenceKmMeta = const VerificationMeta(
-    'cadenceKm',
+  static const VerificationMeta _cadenceMMeta = const VerificationMeta(
+    'cadenceM',
   );
   @override
-  late final GeneratedColumn<int> cadenceKm = GeneratedColumn<int>(
-    'cadence_km',
+  late final GeneratedColumn<int> cadenceM = GeneratedColumn<int>(
+    'cadence_m',
     aliasedName,
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    $customConstraints: 'CHECK (cadence_km IS NULL OR cadence_km > 0)',
+    $customConstraints: 'CHECK (cadence_m IS NULL OR cadence_m > 0)',
   );
   static const VerificationMeta _cadenceDaysMeta = const VerificationMeta(
     'cadenceDays',
@@ -1982,7 +1982,7 @@ class $MaintenanceRulesTable extends MaintenanceRules
     mutationId,
     vehicleId,
     name,
-    cadenceKm,
+    cadenceM,
     cadenceDays,
     enabled,
     notes,
@@ -2054,10 +2054,10 @@ class $MaintenanceRulesTable extends MaintenanceRules
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('cadence_km')) {
+    if (data.containsKey('cadence_m')) {
       context.handle(
-        _cadenceKmMeta,
-        cadenceKm.isAcceptableOrUnknown(data['cadence_km']!, _cadenceKmMeta),
+        _cadenceMMeta,
+        cadenceM.isAcceptableOrUnknown(data['cadence_m']!, _cadenceMMeta),
       );
     }
     if (data.containsKey('cadence_days')) {
@@ -2122,9 +2122,9 @@ class $MaintenanceRulesTable extends MaintenanceRules
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
-      cadenceKm: attachedDatabase.typeMapping.read(
+      cadenceM: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}cadence_km'],
+        data['${effectivePrefix}cadence_m'],
       ),
       cadenceDays: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -2173,7 +2173,7 @@ class MaintenanceRuleRow extends DataClass
   final String name;
 
   /// Canonical meters.
-  final int? cadenceKm;
+  final int? cadenceM;
   final int? cadenceDays;
   final bool enabled;
   final String? notes;
@@ -2186,7 +2186,7 @@ class MaintenanceRuleRow extends DataClass
     required this.mutationId,
     required this.vehicleId,
     required this.name,
-    this.cadenceKm,
+    this.cadenceM,
     this.cadenceDays,
     required this.enabled,
     this.notes,
@@ -2208,8 +2208,8 @@ class MaintenanceRuleRow extends DataClass
     map['mutation_id'] = Variable<String>(mutationId);
     map['vehicle_id'] = Variable<String>(vehicleId);
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || cadenceKm != null) {
-      map['cadence_km'] = Variable<int>(cadenceKm);
+    if (!nullToAbsent || cadenceM != null) {
+      map['cadence_m'] = Variable<int>(cadenceM);
     }
     if (!nullToAbsent || cadenceDays != null) {
       map['cadence_days'] = Variable<int>(cadenceDays);
@@ -2237,9 +2237,9 @@ class MaintenanceRuleRow extends DataClass
       mutationId: Value(mutationId),
       vehicleId: Value(vehicleId),
       name: Value(name),
-      cadenceKm: cadenceKm == null && nullToAbsent
+      cadenceM: cadenceM == null && nullToAbsent
           ? const Value.absent()
-          : Value(cadenceKm),
+          : Value(cadenceM),
       cadenceDays: cadenceDays == null && nullToAbsent
           ? const Value.absent()
           : Value(cadenceDays),
@@ -2264,7 +2264,7 @@ class MaintenanceRuleRow extends DataClass
       mutationId: serializer.fromJson<String>(json['mutationId']),
       vehicleId: serializer.fromJson<String>(json['vehicleId']),
       name: serializer.fromJson<String>(json['name']),
-      cadenceKm: serializer.fromJson<int?>(json['cadenceKm']),
+      cadenceM: serializer.fromJson<int?>(json['cadenceM']),
       cadenceDays: serializer.fromJson<int?>(json['cadenceDays']),
       enabled: serializer.fromJson<bool>(json['enabled']),
       notes: serializer.fromJson<String?>(json['notes']),
@@ -2282,7 +2282,7 @@ class MaintenanceRuleRow extends DataClass
       'mutationId': serializer.toJson<String>(mutationId),
       'vehicleId': serializer.toJson<String>(vehicleId),
       'name': serializer.toJson<String>(name),
-      'cadenceKm': serializer.toJson<int?>(cadenceKm),
+      'cadenceM': serializer.toJson<int?>(cadenceM),
       'cadenceDays': serializer.toJson<int?>(cadenceDays),
       'enabled': serializer.toJson<bool>(enabled),
       'notes': serializer.toJson<String?>(notes),
@@ -2298,7 +2298,7 @@ class MaintenanceRuleRow extends DataClass
     String? mutationId,
     String? vehicleId,
     String? name,
-    Value<int?> cadenceKm = const Value.absent(),
+    Value<int?> cadenceM = const Value.absent(),
     Value<int?> cadenceDays = const Value.absent(),
     bool? enabled,
     Value<String?> notes = const Value.absent(),
@@ -2311,7 +2311,7 @@ class MaintenanceRuleRow extends DataClass
     mutationId: mutationId ?? this.mutationId,
     vehicleId: vehicleId ?? this.vehicleId,
     name: name ?? this.name,
-    cadenceKm: cadenceKm.present ? cadenceKm.value : this.cadenceKm,
+    cadenceM: cadenceM.present ? cadenceM.value : this.cadenceM,
     cadenceDays: cadenceDays.present ? cadenceDays.value : this.cadenceDays,
     enabled: enabled ?? this.enabled,
     notes: notes.present ? notes.value : this.notes,
@@ -2330,7 +2330,7 @@ class MaintenanceRuleRow extends DataClass
           : this.mutationId,
       vehicleId: data.vehicleId.present ? data.vehicleId.value : this.vehicleId,
       name: data.name.present ? data.name.value : this.name,
-      cadenceKm: data.cadenceKm.present ? data.cadenceKm.value : this.cadenceKm,
+      cadenceM: data.cadenceM.present ? data.cadenceM.value : this.cadenceM,
       cadenceDays: data.cadenceDays.present
           ? data.cadenceDays.value
           : this.cadenceDays,
@@ -2350,7 +2350,7 @@ class MaintenanceRuleRow extends DataClass
           ..write('mutationId: $mutationId, ')
           ..write('vehicleId: $vehicleId, ')
           ..write('name: $name, ')
-          ..write('cadenceKm: $cadenceKm, ')
+          ..write('cadenceM: $cadenceM, ')
           ..write('cadenceDays: $cadenceDays, ')
           ..write('enabled: $enabled, ')
           ..write('notes: $notes')
@@ -2368,7 +2368,7 @@ class MaintenanceRuleRow extends DataClass
     mutationId,
     vehicleId,
     name,
-    cadenceKm,
+    cadenceM,
     cadenceDays,
     enabled,
     notes,
@@ -2385,7 +2385,7 @@ class MaintenanceRuleRow extends DataClass
           other.mutationId == this.mutationId &&
           other.vehicleId == this.vehicleId &&
           other.name == this.name &&
-          other.cadenceKm == this.cadenceKm &&
+          other.cadenceM == this.cadenceM &&
           other.cadenceDays == this.cadenceDays &&
           other.enabled == this.enabled &&
           other.notes == this.notes);
@@ -2400,7 +2400,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
   final Value<String> mutationId;
   final Value<String> vehicleId;
   final Value<String> name;
-  final Value<int?> cadenceKm;
+  final Value<int?> cadenceM;
   final Value<int?> cadenceDays;
   final Value<bool> enabled;
   final Value<String?> notes;
@@ -2414,7 +2414,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
     this.mutationId = const Value.absent(),
     this.vehicleId = const Value.absent(),
     this.name = const Value.absent(),
-    this.cadenceKm = const Value.absent(),
+    this.cadenceM = const Value.absent(),
     this.cadenceDays = const Value.absent(),
     this.enabled = const Value.absent(),
     this.notes = const Value.absent(),
@@ -2429,7 +2429,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
     required String mutationId,
     required String vehicleId,
     required String name,
-    this.cadenceKm = const Value.absent(),
+    this.cadenceM = const Value.absent(),
     this.cadenceDays = const Value.absent(),
     this.enabled = const Value.absent(),
     this.notes = const Value.absent(),
@@ -2448,7 +2448,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
     Expression<String>? mutationId,
     Expression<String>? vehicleId,
     Expression<String>? name,
-    Expression<int>? cadenceKm,
+    Expression<int>? cadenceM,
     Expression<int>? cadenceDays,
     Expression<bool>? enabled,
     Expression<String>? notes,
@@ -2463,7 +2463,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
       if (mutationId != null) 'mutation_id': mutationId,
       if (vehicleId != null) 'vehicle_id': vehicleId,
       if (name != null) 'name': name,
-      if (cadenceKm != null) 'cadence_km': cadenceKm,
+      if (cadenceM != null) 'cadence_m': cadenceM,
       if (cadenceDays != null) 'cadence_days': cadenceDays,
       if (enabled != null) 'enabled': enabled,
       if (notes != null) 'notes': notes,
@@ -2480,7 +2480,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
     Value<String>? mutationId,
     Value<String>? vehicleId,
     Value<String>? name,
-    Value<int?>? cadenceKm,
+    Value<int?>? cadenceM,
     Value<int?>? cadenceDays,
     Value<bool>? enabled,
     Value<String?>? notes,
@@ -2495,7 +2495,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
       mutationId: mutationId ?? this.mutationId,
       vehicleId: vehicleId ?? this.vehicleId,
       name: name ?? this.name,
-      cadenceKm: cadenceKm ?? this.cadenceKm,
+      cadenceM: cadenceM ?? this.cadenceM,
       cadenceDays: cadenceDays ?? this.cadenceDays,
       enabled: enabled ?? this.enabled,
       notes: notes ?? this.notes,
@@ -2530,8 +2530,8 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (cadenceKm.present) {
-      map['cadence_km'] = Variable<int>(cadenceKm.value);
+    if (cadenceM.present) {
+      map['cadence_m'] = Variable<int>(cadenceM.value);
     }
     if (cadenceDays.present) {
       map['cadence_days'] = Variable<int>(cadenceDays.value);
@@ -2559,7 +2559,7 @@ class MaintenanceRulesCompanion extends UpdateCompanion<MaintenanceRuleRow> {
           ..write('mutationId: $mutationId, ')
           ..write('vehicleId: $vehicleId, ')
           ..write('name: $name, ')
-          ..write('cadenceKm: $cadenceKm, ')
+          ..write('cadenceM: $cadenceM, ')
           ..write('cadenceDays: $cadenceDays, ')
           ..write('enabled: $enabled, ')
           ..write('notes: $notes, ')
@@ -7312,7 +7312,7 @@ typedef $$MaintenanceRulesTableCreateCompanionBuilder =
       required String mutationId,
       required String vehicleId,
       required String name,
-      Value<int?> cadenceKm,
+      Value<int?> cadenceM,
       Value<int?> cadenceDays,
       Value<bool> enabled,
       Value<String?> notes,
@@ -7328,7 +7328,7 @@ typedef $$MaintenanceRulesTableUpdateCompanionBuilder =
       Value<String> mutationId,
       Value<String> vehicleId,
       Value<String> name,
-      Value<int?> cadenceKm,
+      Value<int?> cadenceM,
       Value<int?> cadenceDays,
       Value<bool> enabled,
       Value<String?> notes,
@@ -7436,8 +7436,8 @@ class $$MaintenanceRulesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get cadenceKm => $composableBuilder(
-    column: $table.cadenceKm,
+  ColumnFilters<int> get cadenceM => $composableBuilder(
+    column: $table.cadenceM,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7549,8 +7549,8 @@ class $$MaintenanceRulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get cadenceKm => $composableBuilder(
-    column: $table.cadenceKm,
+  ColumnOrderings<int> get cadenceM => $composableBuilder(
+    column: $table.cadenceM,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7627,8 +7627,8 @@ class $$MaintenanceRulesTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<int> get cadenceKm =>
-      $composableBuilder(column: $table.cadenceKm, builder: (column) => column);
+  GeneratedColumn<int> get cadenceM =>
+      $composableBuilder(column: $table.cadenceM, builder: (column) => column);
 
   GeneratedColumn<int> get cadenceDays => $composableBuilder(
     column: $table.cadenceDays,
@@ -7729,7 +7729,7 @@ class $$MaintenanceRulesTableTableManager
                 Value<String> mutationId = const Value.absent(),
                 Value<String> vehicleId = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<int?> cadenceKm = const Value.absent(),
+                Value<int?> cadenceM = const Value.absent(),
                 Value<int?> cadenceDays = const Value.absent(),
                 Value<bool> enabled = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
@@ -7743,7 +7743,7 @@ class $$MaintenanceRulesTableTableManager
                 mutationId: mutationId,
                 vehicleId: vehicleId,
                 name: name,
-                cadenceKm: cadenceKm,
+                cadenceM: cadenceM,
                 cadenceDays: cadenceDays,
                 enabled: enabled,
                 notes: notes,
@@ -7759,7 +7759,7 @@ class $$MaintenanceRulesTableTableManager
                 required String mutationId,
                 required String vehicleId,
                 required String name,
-                Value<int?> cadenceKm = const Value.absent(),
+                Value<int?> cadenceM = const Value.absent(),
                 Value<int?> cadenceDays = const Value.absent(),
                 Value<bool> enabled = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
@@ -7773,7 +7773,7 @@ class $$MaintenanceRulesTableTableManager
                 mutationId: mutationId,
                 vehicleId: vehicleId,
                 name: name,
-                cadenceKm: cadenceKm,
+                cadenceM: cadenceM,
                 cadenceDays: cadenceDays,
                 enabled: enabled,
                 notes: notes,

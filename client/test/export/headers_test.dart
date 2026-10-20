@@ -21,7 +21,7 @@ void main() {
   test('maintenance_rules.csv header includes notes', () {
     expect(
       maintenanceRulesCsvHeader,
-      'id,user_key_hash,vehicle_id,name,cadence_km,cadence_days,enabled,notes,row_version,updated_at_utc',
+      'id,user_key_hash,vehicle_id,name,cadence_m,cadence_days,enabled,notes,row_version,updated_at_utc',
     );
   });
 

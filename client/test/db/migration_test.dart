@@ -32,7 +32,7 @@ void main() {
         'settings',
         'vehicles',
       });
-      expect(db.schemaVersion, 3);
+      expect(db.schemaVersion, 4);
     });
 
     test('onCreate settings has the v3 default_vehicle_id column', () async {

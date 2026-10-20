@@ -212,9 +212,7 @@ class ImportApplier {
             mutationId: _newId(),
             vehicleId: row.vehicleId,
             name: row.name,
-            // Canonical meters, verbatim. The column is still named
-            // `cadence_km` until CES-71 renames it.
-            cadenceKm: Value(row.cadenceMeters),
+            cadenceM: Value(row.cadenceMeters),
             cadenceDays: Value(row.cadenceDays),
             enabled: Value(row.enabled),
             notes: Value(row.notes),
