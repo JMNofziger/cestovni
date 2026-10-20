@@ -10,7 +10,7 @@ Verify that Postgres roles are configured with minimum necessary privileges and 
 
 | Role | Purpose | Allowed | Denied |
 |------|---------|---------|--------|
-| `cestovni_app` (runtime) | Normal API operations | SELECT, INSERT, UPDATE, DELETE on product tables via RLS | CREATE, ALTER, DROP, GRANT, TRUNCATE; access to migration-only tables |
+| `cestovni_app` (runtime) | Normal API operations | SELECT, INSERT, UPDATE on product tables via RLS. Soft-delete is an UPDATE of `deleted_at`. No DELETE grant (CES-42) | CREATE, ALTER, DROP, GRANT, TRUNCATE, DELETE |
 | `cestovni_migrate` (migration) | Schema changes during deploy | DDL on all product tables; runs migrations | Should not be used during normal operation; time-bound to migration window |
 | `cestovni_admin` (break-glass) | Emergency access only | Full superuser-equivalent | Must not be used without incident record; credentials rotated after use |
 | `anon` (anonymous) | Unauthenticated requests | None (deny by default) | All data access |
@@ -34,4 +34,4 @@ Verify that Postgres roles are configured with minimum necessary privileges and 
 
 ## CI integration
 
-Runs as part of `ci/promotion-gates.yml` migration dry-run job (role checks after migration apply).
+Not invoked. `ci/promotion-gates.yml` is still a stub and is not a registered GitHub workflow. The live RLS suite is `tests/rls/run.sh`.

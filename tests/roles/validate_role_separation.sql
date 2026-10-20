@@ -1,5 +1,6 @@
 -- Least-privilege role validation
--- Scaffold — adapt to actual table names when data model spec (CES-32) is finalized.
+-- Scaffold. Not invoked by CI. Shipped grants are in db/migrations/0001_init.sql:
+-- cestovni_app has SELECT, INSERT, UPDATE only. Soft-delete is an UPDATE.
 --
 -- Run after migrations are applied to verify role configuration.
 
@@ -36,5 +37,5 @@ SELECT grantee, privilege_type
 SELECT privilege_type, table_name
   FROM information_schema.role_table_grants
  WHERE grantee = 'cestovni_app'
-   AND privilege_type NOT IN ('SELECT', 'INSERT', 'UPDATE', 'DELETE');
--- EXPECT: 0 rows (no unexpected privileges like TRUNCATE, REFERENCES, TRIGGER)
+   AND privilege_type NOT IN ('SELECT', 'INSERT', 'UPDATE');
+-- EXPECT: 0 rows. DELETE is not granted. Soft-delete is an UPDATE of deleted_at.

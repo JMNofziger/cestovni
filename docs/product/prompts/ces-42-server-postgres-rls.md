@@ -1,10 +1,10 @@
 # Cursor execution prompt — CES-42 Server Postgres + RLS migrations
 
-> **Status: NOT STARTED.**
-> **Linear:** [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) — Backlog.
-> **Blocked by:** nothing (CES-41, CES-49 shipped; M2 closed).
-> **Blocks:** CES-43 (Server API + auth), and transitively CES-44/45 and the portal.
-> This is the **M3 gateway ticket**. Do not start CES-43 until this merges.
+> **Status: EXECUTED** (2026-10-20) — on `main` ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)).
+> Linear **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** Done.
+> Next in this chain was **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)**.
+>
+> Kept as an archive of the execution brief (do not re-run).
 
 **Branch:** cut from **`main`**
 **Spec (normative):** [`docs/specs/data-model.md`](../../specs/data-model.md) + [`docs/specs/adr/001-backend-api-boundary.md`](../../specs/adr/001-backend-api-boundary.md)
@@ -146,15 +146,15 @@ This reads `user_id` from a session variable (`SET LOCAL app.user_id = '...'`). 
 
 ## Acceptance
 
-- [ ] `db/migrations/0001_init.sql` creates all 5 tables with correct columns, types, constraints, indexes, RLS policies, roles, sequence, and `auth_user_id()`.
-- [ ] Each backed-up table has tests for: own read ✓, cross-user read ✗, own update ✓, cross-user update ✗, cross-user delete ✗, valid-ownership insert ✓, invalid-ownership insert ✗.
-- [ ] `tests/rls/run.sh` runs against a fresh Postgres and exits 0 on success.
-- [ ] `ci/rls-regression.yml` no longer has TODO stubs; CI runs the actual tests.
-- [ ] `settings` table has `CHECK (user_id IS NULL OR id = user_id)` parity with client.
-- [ ] `cadence_m` (not `cadence_km`) on `maintenance_rules`.
-- [ ] `db/README.md` documents the migration approach.
-- [ ] `delivery-plan-v1.md` M3 rollup / CES-42 row → 🟩.
-- [ ] Linear CES-42 Done + closeout comment.
+- [x] `db/migrations/0001_init.sql` creates all 5 tables with correct columns, types, constraints, indexes, RLS policies, roles, sequence, and `auth_user_id()`.
+- [x] Each backed-up table has tests for: own read ✓, cross-user read ✗, own update ✓, cross-user update ✗, cross-user delete ✗, valid-ownership insert ✓, invalid-ownership insert ✗.
+- [x] `tests/rls/run.sh` runs against a fresh Postgres and exits 0 on success.
+- [x] `ci/rls-regression.yml` no longer has TODO stubs; CI runs the actual tests.
+- [x] `settings` table has `CHECK (user_id IS NULL OR id = user_id)` parity with client.
+- [x] `cadence_m` (not `cadence_km`) on `maintenance_rules`.
+- [x] `db/README.md` documents the migration approach.
+- [x] `delivery-plan-v1.md` M3 rollup / CES-42 row → 🟩.
+- [x] Linear CES-42 Done + closeout comment.
 
 ## Status report (required)
 

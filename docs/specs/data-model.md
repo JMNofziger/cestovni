@@ -189,6 +189,14 @@ In-progress fill-ups not yet promoted to `fill_ups`. Never outboxed; never expor
 
 Schema defined in [`photo-pipeline.md` — `photo_refs` table](photo-pipeline.md#photo_refs-table-client-only-never-outboxed). Client-only; referenced here so there is one place that lists every client-side table.
 
+### `sync_cursors`
+
+CES-45. One row per backed-up table. `table_name` is the primary key, `last_row_version` is the last `GET /changes` cursor committed with that page, `updated_at` is UTC ISO-8601. Never outboxed.
+
+### `backup_marks`
+
+CES-45. Written when the user discards a dead-letter `insert`. Primary key is (`table_name`, `row_id`). `created_at` is UTC ISO-8601. The domain row stays; Settings → Backup lists the mark as not backed up. Never outboxed.
+
 ## RLS (Postgres)
 
 Every backed-up table is `ENABLE ROW LEVEL SECURITY`. Policies are identical across tables except for table name; managed by a shared SQL macro in `db/migrations/`. The policy shape:
@@ -216,7 +224,7 @@ CREATE POLICY fill_ups_delete_own
   USING (user_id = auth_user_id());
 ```
 
-- `auth_user_id()` is a SECURITY-DEFINER function that reads the verified JWT claim, defined once in migrations. Self-host operators install the same function; the token source differs but the claim shape does not (see [ADR 001 identity model](adr/001-backend-api-boundary.md#security-model)). v1 init implements it as a stub over `current_setting('app.user_id')` until CES-43 wires the token.
+- `auth_user_id()` is a SECURITY-DEFINER function that reads the verified JWT claim, defined once in migrations. Self-host operators install the same function; the token source differs but the claim shape does not (see [ADR 001 identity model](adr/001-backend-api-boundary.md#security-model)). v1 `auth_user_id()` reads `current_setting('app.user_id', true)`. CES-43 sets that GUC from the verified JWT `sub` on each request. The function stays a GUC reader so CI and self-host can set the same session variable.
 - The v1 migration expresses the four command policies above as two policies: `<table>_select_own` (`FOR SELECT`) and `<table>_modify_own` (`FOR ALL` with `USING` and `WITH CHECK`). `cestovni_app` is not granted `DELETE`; soft-delete is an `UPDATE`.
 - The runtime role `cestovni_app` has only `SELECT, INSERT, UPDATE` on backed-up tables and **no BYPASSRLS**, per [ADR 001 role model](adr/001-backend-api-boundary.md#role-model).
 - The RLS regression suite in `tests/rls/` covers allow/deny for each table and cross-user checks (ADR 001 gate).
@@ -266,7 +274,7 @@ Numbers are aligned: every server migration `NNNN_*.sql` has a matching client D
 Client-side rollback (if a release corrupts the local DB) is handled by:
 
 - Drift's automatic migration execution (forward only);
-- a **hard reset + restore** fallback path — the user signs in again and the app rebuilds local SQLite from `GET /changes` (see [`sync-protocol.md`](sync-protocol.md)). Tooling to trigger this manually from Settings is **Stage 5** work.
+- a **hard reset + restore** fallback path — the user signs in again and the app rebuilds local SQLite from `GET /changes` (see [`sync-protocol.md`](sync-protocol.md)). Settings → Backup → **Restore from backup** (CES-45) runs that download. A separate wipe-and-rebuild control is still CES-47.
 
 ## Constraints summary (one place)
 

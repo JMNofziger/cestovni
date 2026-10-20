@@ -1,14 +1,15 @@
 -- CES-42: server schema at the current client shape (post-CES-71 cadence_m,
 -- post-CES-49 settings CHECK). One init file because there is no existing
 -- server database to migrate. Client history remains 0001–0005 under
--- client/lib/db/; numeric alignment is "this file == client schema v5".
+-- client/lib/db/. This file matches the backed-up columns at client schema
+-- v5. Client v6 (0006_sync_cursors) is local-only and has no server file.
 --
 -- Apply as a superuser (or another role that can CREATE ROLE) against an
 -- empty database. Tables are not re-runnable. Roles are created only if
 -- missing, because they are cluster-wide.
 --
--- Runtime DML uses role cestovni_app. RLS reads auth_user_id(), which is a
--- session-GUC stub until CES-43 replaces it with the JWT claim:
+-- Runtime DML uses role cestovni_app. RLS reads auth_user_id(), which reads
+-- the session GUC. CES-43 sets it from the verified JWT sub:
 --   SELECT set_config('app.user_id', '<uuid>', true);
 
 -- ---------------------------------------------------------------------------

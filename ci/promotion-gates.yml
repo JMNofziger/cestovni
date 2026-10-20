@@ -1,7 +1,9 @@
 # CI workflow stub: staging promotion gates
 # Gate 6 in ADR 001 acceptance gate
 #
-# Adapt to chosen CI platform (GitHub Actions, etc.) when implementation starts.
+# Not registered under .github/workflows/. Do not copy it there until the
+# steps are real. Each unfinished step exits 1 so a release branch cannot
+# report "all gates passed" from echo TODOs.
 #
 # Trigger: release branch push, manual promotion request
 #
@@ -36,9 +38,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Clean DB migration dry-run
-        run: echo "TODO: apply all migrations to clean DB and verify success"
+        run: echo "Gate 6 not implemented: apply all migrations to a clean DB" && exit 1
       - name: Snapshot DB migration dry-run
-        run: echo "TODO: apply migrations to representative snapshot and verify success"
+        run: echo "Gate 6 not implemented: apply migrations to a representative snapshot" && exit 1
 
   rls-regression:
     needs: migration-dry-run
@@ -53,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run contract tests (${{ matrix.target }})
-        run: echo "TODO: run tests/contract/ against ${{ matrix.target }} target"
+        run: echo "Gate 6 not implemented: tests/contract against ${{ matrix.target }}" && exit 1
 
   restore-smoke:
     needs: migration-dry-run
@@ -62,14 +64,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Backup, restore, and verify
         run: |
-          echo "TODO: create backup via pg_dump"
-          echo "TODO: restore via pg_restore"
-          echo "TODO: run migrations post-restore"
-          echo "TODO: verify signed-in user can read data through API"
+          echo "Gate 6 not implemented: pg_dump, pg_restore, migrate, and a signed-in read"
+          exit 1
 
   gate-summary:
     needs: [migration-dry-run, rls-regression, contract-tests, restore-smoke]
     runs-on: ubuntu-latest
     steps:
       - name: All gates passed
-        run: echo "All promotion gates passed. Ready for staging deployment."
+        run: echo "Reached only when migration, RLS, contract, and restore-smoke jobs succeed."
