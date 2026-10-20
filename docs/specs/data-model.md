@@ -88,12 +88,12 @@ CREATE INDEX fill_ups_vehicle_id_idx       ON fill_ups (vehicle_id);
 | *(protocol cols)* | *(see above)*     |                                                                 |                                     |
 | `vehicle_id`      | `UUID`            | NOT NULL, FK → `vehicles.id`                                    |                                     |
 | `name`            | `TEXT`            | NOT NULL, `length BETWEEN 1 AND 80`                             | e.g. "Oil change".                  |
-| `cadence_km`      | `BIGINT NULL`     | `CHECK (cadence_km IS NULL OR cadence_km > 0)`                  | Canonical meters.                   |
+| `cadence_m`       | `BIGINT NULL`     | `CHECK (cadence_m IS NULL OR cadence_m > 0)`                    | Canonical meters.                   |
 | `cadence_days`    | `INTEGER NULL`    | `CHECK (cadence_days IS NULL OR cadence_days > 0)`              |                                     |
 | `enabled`         | `BOOLEAN`         | NOT NULL DEFAULT `true`                                          |                                     |
 | `notes`           | `TEXT NULL`       | `length <= 500`                                                 |                                     |
 
-Rule: `cadence_km` OR `cadence_days` (or both) must be non-null; enforced by table-level `CHECK (cadence_km IS NOT NULL OR cadence_days IS NOT NULL)`.
+Rule: `cadence_m` OR `cadence_days` (or both) must be non-null; enforced by table-level `CHECK (cadence_m IS NOT NULL OR cadence_days IS NOT NULL)`.
 
 **Indexes:**
 
@@ -230,6 +230,7 @@ db/
     0001_init.sql
     0002_add_maintenance_events_category_shop.sql
     0003_settings_default_vehicle_id.sql
+    0004_rename_cadence_km_to_cadence_m.sql
     ...
 client/
   drift/
@@ -237,12 +238,13 @@ client/
       0001_init.dart
       0002_add_maintenance_events_category_shop.dart
       0003_settings_default_vehicle_id.dart
+      0004_rename_cadence_km_to_cadence_m.dart
       ...
 ```
 
 Numbers are aligned: every server migration `NNNN_*.sql` has a matching client Drift migration `NNNN_*.dart` (or equivalent in whichever client stack ships).
 
-**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
+**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
 
 ### Rules
 
@@ -267,7 +269,7 @@ Client-side rollback (if a release corrupts the local DB) is handled by:
 | Enum membership        | `fuel_type IN (...)`                                       | DB CHECK + TS/Dart enum type          |
 | ISO 4217 format        | `currency_code ~ '^[A-Z]{3}$'`                             | DB CHECK + client validator           |
 | Odometer regression    | `odometer_m >= prev.odometer_m` unless `odometer_reset`    | Server handler + client validation    |
-| At-least-one cadence   | `cadence_km IS NOT NULL OR cadence_days IS NOT NULL`       | DB table CHECK + client form logic    |
+| At-least-one cadence   | `cadence_m IS NOT NULL OR cadence_days IS NOT NULL`        | DB table CHECK + client form logic    |
 | Soft-delete consistency| exports / math exclude `deleted_at IS NOT NULL`             | Application layer                     |
 
 ## Non-goals (v1)

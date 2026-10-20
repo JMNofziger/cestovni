@@ -3,7 +3,7 @@
 **Status:** **Complete (v1) — on `main`** ([PR #25](https://github.com/JMNofziger/cestovni/pull/25), merge `7670226`). All product locks resolved 2026-08-16 (see [§ Product decisions](#product-decisions-locked-2026-08-16)). Mode is **replace**. Code lives in `client/lib/import/` + Settings → **Import data**; the 17 cases in [§ Test expectations](#test-expectations) are in `client/test/import/`. CES-71 is unblocked.
 **Linear:** [CES-70](https://linear.app/personal-interests-llc/issue/CES-70)
 **Depends on:** [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) export ([PR #21](https://github.com/JMNofziger/cestovni/pull/21), `client/lib/export/`)
-**Blocks:** [CES-71](https://linear.app/personal-interests-llc/issue/CES-71) (`cadence_km` → `cadence_m` rename) — **unblocked** (this shipped)
+**Blocks:** [CES-71](https://linear.app/personal-interests-llc/issue/CES-71) (`cadence_km` → `cadence_m` rename) — **done** (import accepts both headers)
 **Reads:** [`export-v1.md`](export-v1.md) § v1 amendments · [`data-model.md`](data-model.md) · [`si-units.md`](si-units.md) · [`photo-pipeline.md`](photo-pipeline.md) · [`sync-protocol.md`](sync-protocol.md) § v1.x roadmap
 
 > **Contract source.** The authoritative CSV shape is the **shipped export code**, not the 2026-04 body of `export-v1.md`. Header strings live in `client/lib/export/headers.dart`; cell formatting lives in `client/lib/export/snapshot.dart` + `derived.dart`. Import MUST import those same header constants rather than re-declaring them, so export and import cannot drift.
@@ -89,7 +89,7 @@ Rationale: amendment **A2** deliberately made headers independent of user prefer
 ## Invariants
 
 1. **Canonical only.** Import reads canonical INT64 columns and **ignores every derived column**: `odometer_km`, `odometer_mi`, `volume_L`, `volume_gal`, `total_price_major`, `cost_major`, `tank_capacity_L`, and all `*_local` timestamps. They must be *present* (header strictness) but their values are never read. `si-units.md` canonical columns are the only source of truth.
-2. **`cadence_km` is meters, verbatim.** Read the `cadence_km` cell straight into the `cadence_km` column with **no conversion**. The audit in [§ Cadence units](#cadence-units-audit-result) confirms every existing write path already stores meters. Never accept a converted or renamed cadence column while `schema_version` is `1`.
+2. **`cadence_m` is meters, verbatim.** Read the `cadence_m` cell (or legacy `cadence_km` from schema 1 ZIPs) straight into the `cadence_m` column with **no conversion**. The audit in [§ Cadence units](#cadence-units-audit-result) confirms every existing write path already stores meters. Import accepts both `cadence_km` (schema 1) and `cadence_m` (schema 2) headers.
 3. **Photos never enter.** `photos_in_export == false` or fail closed. No `photos/` entry, no image bytes, no `photo_refs` row created **from the ZIP**. Reuse `client/lib/photos/photo_export_guard.dart` (`isPhotoSandboxPath`, `photosInExport`) — do not re-decide which paths are safe.
 4. **No local-only rows are created.** Import never inserts into `drafts`, `photo_refs`, or `outbox`. Their *removal* under replace is governed by [§ Replace semantics](#replace-semantics).
 5. **Imported rows are never-synced.** `row_version = NULL`, `user_id` left unset (server-assigned on first write per `data-model.md` § Protocol columns), `deleted_at = NULL`, `mutation_id` **freshly generated** locally. An imported row must not look "already backed up".
@@ -184,7 +184,7 @@ Rationale:
 Re-validate every canonical value against the same constraints the DB enforces (`data-model.md` § Constraints summary) **before** any write, because a ZIP is a user-editable file:
 
 - non-negative: `odometer_m`, `volume_uL`, `total_price_cents`, `cost_cents`, `tank_capacity_uL`
-- `cadence_km > 0` / `cadence_days > 0`, and **at least one non-null** per rule
+- `cadence_m > 0` (or legacy `cadence_km > 0`) / `cadence_days > 0`, and **at least one non-null** per rule
 - enums: `fuel_type`, `category`, `preferred_distance_unit`, `preferred_volume_unit`
 - `currency_code` matches `^[A-Z]{3}$`
 - length bounds: `name` 1–80, `notes` ≤ 500, `shop` 1–120, `vin` ≤ 32, `timezone` 1–64
@@ -290,9 +290,9 @@ Run 2026-08-16 against `main` (`dc6f2f9`), read-only, as the blocking preconditi
 
 | Path | Finding |
 |---|---|
-| `MaintenanceEventsRepository.upsertReminderRule` | Only writer of `cadence_km`. Writes `MaintenanceRuleDraft.cadenceKmMeters` verbatim — no conversion, correctly. |
+| `MaintenanceEventsRepository.upsertReminderRule` | Only writer of `cadence_m`. Writes `MaintenanceRuleDraft.cadenceMeters` verbatim — no conversion, correctly. |
 | `maintenance_page.dart` `_save` | Only caller. Converts through `distanceToMeters(distVal, _distanceUnit)` before building the draft. |
-| `maintenance_page.dart` `_loadRule` | Reads back through `metersToDisplayWhole(rule.cadenceKm!, _distanceUnit)` — round-trips. |
+| `maintenance_page.dart` `_loadRule` | Reads back through `metersToDisplayWhole(rule.cadenceM!, _distanceUnit)` — round-trips. |
 | `constraints_test.dart`, `roundtrip_test.dart` | Raw SQL inserts write `NULL` cadence to exercise the table CHECK. No unit exposure. |
 | `maintenance_events_repository_test.dart` | `10_000_000` / `15_000_000` = 10 000 / 15 000 km. Plausible service intervals; intent matches meters. |
 | PWA-lite (`client/web-lite/`), `tests/client-db/fixtures/` | No cadence references at all. |
@@ -311,7 +311,7 @@ A user typing `10` with `km` prefs persists `10000`, and `mi` prefs convert. The
 
 **One real gap, not a bug:** no test covers the **form-level** cadence conversion. `maintenance_page_test.dart` fills only the months field (asserts `cadenceDays == 180`) and leaves remind-distance empty; the repository test passes meters directly, bypassing `distanceToMeters`. So `maintenance_page.dart` `_save` — the single line where a unit mistake could ever enter — is uncovered. CES-71 renames exactly that path, so it should add the assertion as part of its own regression net.
 
-**CES-71 obligation carried forward:** after the rename, import must accept `cadence_km` for `schema_version: 1` ZIPs **and** `cadence_m` for `schema_version: 2`, or the manifest bump must document the break. A user's existing backup file must not become unreadable.
+**CES-71 obligation fulfilled:** after the rename, import accepts `cadence_km` for `schema_version: 1` ZIPs **and** `cadence_m` for `schema_version: 2`. A user's existing backup file remains importable.
 
 ---
 
@@ -331,7 +331,7 @@ Every code below aborts before or inside the transaction and leaves the database
 | `E_HEADER_MISMATCH` | Header not byte-equal to the `headers.dart` constant. Reports expected vs found. |
 | `E_ROW_MALFORMED` | Wrong field count, unterminated quote. Reports file + line. |
 | `E_VALUE_INVALID` | Non-integer in a canonical column, negative value, enum miss, bad currency, length bound, bad boolean, empty in `NOT NULL`. Reports file + line + column. |
-| `E_CADENCE_MISSING` | Rule row with both `cadence_km` and `cadence_days` empty. |
+| `E_CADENCE_MISSING` | Rule row with both `cadence_m` (or legacy `cadence_km`) and `cadence_days` empty. |
 | `E_FK_ORPHAN` | `vehicle_id` / `rule_id` does not resolve **within the ZIP**. |
 | `E_DUPLICATE_ID` | The same `id` appears twice in one CSV. |
 | `E_SETTINGS_ROW_COUNT` | `settings.csv` does not have exactly one data row. |
@@ -370,7 +370,7 @@ Land in `client/test/import/` with a pointer row added to `tests/export/README.m
 3. **Header strictness** — mutate one header cell → `E_HEADER_MISMATCH`, zero writes.
 4. **Photo fail-closed** — inject `photos/x.jpg`; and separately set `photos_in_export: true` → `E_PHOTOS_PRESENT` both times, zero writes.
 5. **Derived columns ignored** — corrupt `odometer_km` to a wrong value; assert the stored `odometer_m` still comes from the canonical cell.
-6. **Cadence meters** — a rule with `cadence_km = 10000` stores `10000` (not `10`, not `10000000`).
+6. **Cadence meters** — a rule with `cadence_m = 10000` stores `10000` (not `10`, not `10000000`). Import also accepts legacy `cadence_km` header from schema 1 ZIPs.
 7. **Value validation** — negative `volume_uL`, `1.0` in an INT column, bad `currency_code`, unknown `fuel_type`, unknown `category`, duplicate `id`: each rejects with the DB untouched.
 8. **Atomicity** — induce a failure while writing the last table; assert the DB is byte-identical to before, including that pre-existing rows were *not* destroyed.
 9. **Never-synced state** — imported rows have `row_version IS NULL`.
