@@ -28,20 +28,22 @@
 | Telemetry / crash SDK | [`adr/004-telemetry-crash-sdk.md`](adr/004-telemetry-crash-sdk.md) | Accepted |
 | Telemetry transport (Stage 1) | [`adr/004-addendum-glitchtip-transport.md`](adr/004-addendum-glitchtip-transport.md) | Accepted |
 | Stage 1 distribution | [`adr/005-distribution-channels.md`](adr/005-distribution-channels.md) | Accepted |
+| Browser client (non-Android, phone-first) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | Accepted |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
-## Stage 1 client distribution (2026-05-17)
+## Client distribution (2026-10-20)
 
-Per [ADR 005](adr/005-distribution-channels.md):
+Per [ADR 005](adr/005-distribution-channels.md) + [ADR 006](adr/006-browser-client.md):
 
 ```text
-[Android ~70%]  Flutter native APK — Log/History + sync proof first (CES-39 → M3 slice → E2E)
-[iPhone ~30%]   PWA-lite (Add to Home Screen) — after Android E2E gate; see pwa-lite-gate.md
-[Deferred]      App Store native iOS ($99/yr)
+[Android ~70%]        Flutter native APK (primary client, offline-first)
+[iPhone — PWA-lite]   Parked (CES-62/63); client/web-lite/ on main, not the portal
+[Non-Android portal]  Phone-browser portal (online-first, requires M3) — ADR 006, stack TBD
+[Deferred]            App Store native iOS ($99/yr)
 ```
 
-- Gate: [`pwa-lite-gate.md`](pwa-lite-gate.md) — PWA-lite blocked until Android offline → sync E2E on `main`.
-- Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md) (blocked).
+- PWA-lite gate passed 2026-05-29; Phase 1+2 on `main`. Deploy track (CES-63) parked.
+- Portal requires M3 (CES-42 + CES-43) before implementation.
 - Spike archive: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 - Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 
