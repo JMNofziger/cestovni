@@ -16,6 +16,10 @@
 /// Drafts are **not** enqueued — only `complete` (`create`), `amend`,
 /// and `soft_delete` transitions on the source repos call into this
 /// repo, inside the same Drift transaction.
+///
+/// Rows whose `last_error` starts with [outboxDeadLetterPrefix] have
+/// exhausted non-429 retries (or hit a non-retriable HTTP status).
+/// [pendingBatch] skips them. CES-45 owns the user-facing list.
 library;
 
 import 'dart:convert';
@@ -24,6 +28,11 @@ import 'package:drift/drift.dart';
 
 import '../app_database.dart';
 import 'protocol_writes.dart';
+
+/// Prefix stored in `outbox.last_error` when a row leaves the flush
+/// queue. No extra column: the gate-slice schema has nowhere else to
+/// mark it.
+const String outboxDeadLetterPrefix = 'dead-letter: ';
 
 /// Allowed `op` values per `client/lib/db/tables/outbox.dart` CHECK
 /// constraint and `sync-protocol.md`.
@@ -153,10 +162,16 @@ class OutboxRepository {
   // ---------------------------------------------------------------- read
 
   /// Pending entries oldest-first, capped to the protocol batch ceiling
-  /// of 100 (`sync-protocol.md` §POST /mutations).
+  /// of 100 (`sync-protocol.md` §POST /mutations). Dead-lettered rows
+  /// stay in the table but are not sent again.
   Future<List<OutboxRow>> pendingBatch({int limit = 100}) {
     final clamped = limit.clamp(1, 100);
     final query = _db.select(_db.outbox)
+      ..where(
+        (o) =>
+            o.lastError.isNull() |
+            o.lastError.like('$outboxDeadLetterPrefix%').not(),
+      )
       ..orderBy([(o) => OrderingTerm.asc(o.id)])
       ..limit(clamped);
     return query.get();
@@ -189,7 +204,6 @@ class OutboxRepository {
   }
 
   /// Bump `attempts` and persist the latest error envelope for diagnostics.
-  /// Full dead-letter UX (CES-45) is out of scope for the gate slice.
   Future<void> recordRetry(int id, {required String lastError}) async {
     final row = await (_db.select(_db.outbox)..where((o) => o.id.equals(id)))
         .getSingleOrNull();
@@ -200,5 +214,54 @@ class OutboxRepository {
         lastError: Value(lastError),
       ),
     );
+  }
+
+  /// Record one sync failure.
+  ///
+  /// [towardDeadLetter] is false for HTTP 429: `attempts` still
+  /// increments, but those tries never cross the 6-failure ceiling.
+  /// Returns true when this call moved the row to the dead-letter mark.
+  Future<bool> recordSyncFailure(
+    int id, {
+    required String message,
+    required bool towardDeadLetter,
+  }) async {
+    final row = await (_db.select(_db.outbox)..where((o) => o.id.equals(id)))
+        .getSingleOrNull();
+    if (row == null) return false;
+    final nextNon429 = _non429Count(row) + (towardDeadLetter ? 1 : 0);
+    final dead = towardDeadLetter && nextNon429 >= 6;
+    final stored = dead
+        ? '$outboxDeadLetterPrefix$message'
+        : 'n429=$nextNon429; $message';
+    await (_db.update(_db.outbox)..where((o) => o.id.equals(id))).write(
+      OutboxCompanion(
+        attempts: Value(row.attempts + 1),
+        lastError: Value(stored),
+      ),
+    );
+    return dead;
+  }
+
+  /// Non-retriable failure (HTTP 400/403/409, or a rejected mutation
+  /// with `retriable: false`). Leaves the flush queue immediately.
+  Future<void> markDeadLetter(int id, {required String message}) async {
+    final row = await (_db.select(_db.outbox)..where((o) => o.id.equals(id)))
+        .getSingleOrNull();
+    if (row == null) return;
+    await (_db.update(_db.outbox)..where((o) => o.id.equals(id))).write(
+      OutboxCompanion(
+        attempts: Value(row.attempts + 1),
+        lastError: Value('$outboxDeadLetterPrefix$message'),
+      ),
+    );
+  }
+
+  static int _non429Count(OutboxRow row) {
+    final err = row.lastError;
+    if (err == null) return 0;
+    final match = RegExp(r'^n429=(\d+);').firstMatch(err);
+    if (match == null) return 0;
+    return int.parse(match.group(1)!);
   }
 }

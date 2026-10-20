@@ -4,18 +4,15 @@
 /// columns) + `docs/product/ux/DELIVERY_ACCEPTANCE.md` §"Settings &
 /// vehicles" (must-ship list).
 ///
-/// M1 (offline-first) responsibilities:
-///   - create / amend / soft-delete / archive vehicles locally,
-///   - read live vs archived,
-///   - stream live vehicles for the shell selector.
-///
-/// M3 will layer the outbox-enqueue side-effect on top of these calls;
-/// today the repo writes directly to the local table.
+/// Every local write and its outbox enqueue share one Drift
+/// transaction (same pattern as [FillUpsRepository]). Pass
+/// `enqueue: false` in tests that must not queue a backup row.
 library;
 
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import 'outbox_repository.dart';
 import 'protocol_writes.dart';
 
 /// Allowed values for `fuel_type` per `docs/specs/data-model.md`
@@ -64,13 +61,25 @@ class VehicleDraft {
 }
 
 class VehiclesRepository {
-  VehiclesRepository(this._db, {String Function()? newId, String Function()? now})
-      : _newId = newId ?? newUuid,
-        _now = now ?? nowIsoUtc;
+  VehiclesRepository(
+    AppDatabase db, {
+    String Function()? newId,
+    String Function()? now,
+    OutboxRepository? outbox,
+    bool enqueue = true,
+  })  : _db = db,
+        _newId = newId ?? newUuid,
+        _now = now ?? nowIsoUtc,
+        _outbox = enqueue
+            ? (outbox ?? OutboxRepository(db, newId: newId, now: now))
+            : null;
 
   final AppDatabase _db;
   final String Function() _newId;
   final String Function() _now;
+  final OutboxRepository? _outbox;
+
+  static const String wireTable = 'vehicles';
 
   // --------------------------------------------------------------- read
 
@@ -114,20 +123,26 @@ class VehiclesRepository {
   /// can immediately set it as the active vehicle.
   Future<String> create(VehicleDraft draft) async {
     final id = _newId();
-    await _db.into(_db.vehicles).insert(
-          VehiclesCompanion(
-            id: Value(id),
-            name: Value(draft.name),
-            fuelType: Value(draft.fuelType.wire),
-            make: Value(draft.make),
-            model: Value(draft.model),
-            year: Value(draft.year),
-            vin: Value(draft.vin),
-            tankCapacityUL: Value(draft.tankCapacityUL),
-            updatedAt: Value(_now()),
-            mutationId: Value(_newId()),
-          ),
-        );
+    final updatedAt = _now();
+    final mutationId = _newId();
+    await _db.transaction(() async {
+      await _db.into(_db.vehicles).insert(
+            VehiclesCompanion(
+              id: Value(id),
+              name: Value(draft.name),
+              fuelType: Value(draft.fuelType.wire),
+              make: Value(draft.make),
+              model: Value(draft.model),
+              year: Value(draft.year),
+              vin: Value(draft.vin),
+              tankCapacityUL: Value(draft.tankCapacityUL),
+              updatedAt: Value(updatedAt),
+              mutationId: Value(mutationId),
+            ),
+          );
+      final row = await _row(id);
+      await _enqueueInsert(row!);
+    });
     return id;
   }
 
@@ -135,22 +150,28 @@ class VehiclesRepository {
   /// the row does not exist or is soft-deleted. Returns `true` when a
   /// row was updated.
   Future<bool> update(String id, VehicleDraft draft) async {
-    final updated = await (_db.update(_db.vehicles)
-          ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
-        .write(
-      VehiclesCompanion(
-        name: Value(draft.name),
-        fuelType: Value(draft.fuelType.wire),
-        make: Value(draft.make),
-        model: Value(draft.model),
-        year: Value(draft.year),
-        vin: Value(draft.vin),
-        tankCapacityUL: Value(draft.tankCapacityUL),
-        updatedAt: Value(_now()),
-        mutationId: Value(_newId()),
-      ),
-    );
-    return updated > 0;
+    final updatedAt = _now();
+    final mutationId = _newId();
+    return _db.transaction(() async {
+      final wrote = await (_db.update(_db.vehicles)
+            ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
+          .write(
+        VehiclesCompanion(
+          name: Value(draft.name),
+          fuelType: Value(draft.fuelType.wire),
+          make: Value(draft.make),
+          model: Value(draft.model),
+          year: Value(draft.year),
+          vin: Value(draft.vin),
+          tankCapacityUL: Value(draft.tankCapacityUL),
+          updatedAt: Value(updatedAt),
+          mutationId: Value(mutationId),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _enqueueUpdate(await _row(id));
+      return true;
+    });
   }
 
   /// Soft-delete: set `deleted_at` so the row drops out of every live
@@ -158,47 +179,106 @@ class VehiclesRepository {
   /// delete from the UI per CES-39 acceptance.
   Future<bool> softDelete(String id) async {
     final ts = _now();
-    final updated = await (_db.update(_db.vehicles)
-          ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
-        .write(
-      VehiclesCompanion(
-        deletedAt: Value(ts),
-        updatedAt: Value(ts),
-        mutationId: Value(_newId()),
-      ),
-    );
-    return updated > 0;
+    return _db.transaction(() async {
+      final wrote = await (_db.update(_db.vehicles)
+            ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
+          .write(
+        VehiclesCompanion(
+          deletedAt: Value(ts),
+          updatedAt: Value(ts),
+          mutationId: Value(_newId()),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _outbox?.enqueueSoftDelete(table: wireTable, rowId: id);
+      return true;
+    });
   }
 
   /// Archive: keep the vehicle visible in "show archived" surfaces but
   /// drop it from the active selector. Distinct from soft-delete (the
   /// row is still considered live for math + export).
+  ///
+  /// Archive is an `update` on the outbox (full row, including
+  /// `archived_at`).
   Future<bool> archive(String id) async {
     final ts = _now();
-    final updated = await (_db.update(_db.vehicles)
-          ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
-        .write(
-      VehiclesCompanion(
-        archivedAt: Value(ts),
-        updatedAt: Value(ts),
-        mutationId: Value(_newId()),
-      ),
-    );
-    return updated > 0;
+    return _db.transaction(() async {
+      final wrote = await (_db.update(_db.vehicles)
+            ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
+          .write(
+        VehiclesCompanion(
+          archivedAt: Value(ts),
+          updatedAt: Value(ts),
+          mutationId: Value(_newId()),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _enqueueUpdate(await _row(id));
+      return true;
+    });
   }
 
-  /// Inverse of [archive].
+  /// Inverse of [archive]. Also an outbox `update`.
   Future<bool> unarchive(String id) async {
     final ts = _now();
-    final updated = await (_db.update(_db.vehicles)
-          ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
-        .write(
-      VehiclesCompanion(
-        archivedAt: const Value<String?>(null),
-        updatedAt: Value(ts),
-        mutationId: Value(_newId()),
-      ),
+    return _db.transaction(() async {
+      final wrote = await (_db.update(_db.vehicles)
+            ..where((v) => v.id.equals(id) & v.deletedAt.isNull()))
+          .write(
+        VehiclesCompanion(
+          archivedAt: const Value<String?>(null),
+          updatedAt: Value(ts),
+          mutationId: Value(_newId()),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _enqueueUpdate(await _row(id));
+      return true;
+    });
+  }
+
+  Future<VehicleRow?> _row(String id) {
+    final query = _db.select(_db.vehicles)..where((v) => v.id.equals(id));
+    return query.getSingleOrNull();
+  }
+
+  Future<void> _enqueueInsert(VehicleRow row) async {
+    final box = _outbox;
+    if (box == null) return;
+    await box.enqueueInsert(
+      table: wireTable,
+      rowId: row.id,
+      payload: _payload(row),
     );
-    return updated > 0;
+  }
+
+  Future<void> _enqueueUpdate(VehicleRow? row) async {
+    final box = _outbox;
+    if (box == null || row == null) return;
+    await box.enqueueUpdate(
+      table: wireTable,
+      rowId: row.id,
+      payload: _payload(row),
+    );
+  }
+
+  /// Snake_case body for `POST /api/v1/mutations`. `user_id` and
+  /// `row_version` stay off the wire; the server assigns both.
+  Map<String, dynamic> _payload(VehicleRow row) {
+    return <String, dynamic>{
+      'id': row.id,
+      'name': row.name,
+      'make': row.make,
+      'model': row.model,
+      'year': row.year,
+      'vin': row.vin,
+      'fuel_type': row.fuelType,
+      'tank_capacity_uL': row.tankCapacityUL,
+      'archived_at': row.archivedAt,
+      'updated_at': row.updatedAt,
+      'deleted_at': row.deletedAt,
+      'mutation_id': row.mutationId,
+    };
   }
 }

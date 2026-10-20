@@ -4,14 +4,15 @@
 /// §`maintenance_rules` + `docs/product/ux/DATA_CONTRACTS.md`
 /// §"Maintenance entry contract".
 ///
-/// Local-only for CES-67: no outbox enqueue (vehicles/settings/maint
-/// outbox is M3 / CES-44). Soft-delete is still used so History and
-/// export can honor `deleted_at`.
+/// Event and rule writes enqueue to the outbox in the same Drift
+/// transaction as the local row. Pass `enqueue: false` in tests that
+/// must not queue a backup row.
 library;
 
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import 'outbox_repository.dart';
 import 'protocol_writes.dart';
 
 /// Closed category enum — keep in lockstep with the SQLite CHECK on
@@ -92,13 +93,22 @@ class MaintenanceEventsRepository {
     AppDatabase db, {
     String Function()? newId,
     String Function()? now,
+    OutboxRepository? outbox,
+    bool enqueue = true,
   })  : _db = db,
         _newId = newId ?? newUuid,
-        _now = now ?? nowIsoUtc;
+        _now = now ?? nowIsoUtc,
+        _outbox = enqueue
+            ? (outbox ?? OutboxRepository(db, newId: newId, now: now))
+            : null;
 
   final AppDatabase _db;
   final String Function() _newId;
   final String Function() _now;
+  final OutboxRepository? _outbox;
+
+  static const String eventsTable = 'maintenance_events';
+  static const String rulesTable = 'maintenance_rules';
 
   // --------------------------------------------------------------- read
 
@@ -152,22 +162,27 @@ class MaintenanceEventsRepository {
     _assertCategory(draft.category);
     final String id = _newId();
     final String updatedAt = _now();
-    await _db.into(_db.maintenanceEvents).insert(
-          MaintenanceEventsCompanion(
-            id: Value(id),
-            vehicleId: Value(draft.vehicleId),
-            ruleId: Value(draft.ruleId),
-            performedAt: Value(draft.performedAt.toUtc().toIso8601String()),
-            odometerM: Value(draft.odometerM),
-            costCents: Value(draft.costCents),
-            currencyCode: Value(draft.currencyCode),
-            category: Value(draft.category),
-            shop: Value(_blankToNull(draft.shop, max: 120)),
-            notes: Value(_blankToNull(draft.notes, max: 500)),
-            updatedAt: Value(updatedAt),
-            mutationId: Value(_newId()),
-          ),
-        );
+    final String mutationId = _newId();
+    await _db.transaction(() async {
+      await _db.into(_db.maintenanceEvents).insert(
+            MaintenanceEventsCompanion(
+              id: Value(id),
+              vehicleId: Value(draft.vehicleId),
+              ruleId: Value(draft.ruleId),
+              performedAt: Value(draft.performedAt.toUtc().toIso8601String()),
+              odometerM: Value(draft.odometerM),
+              costCents: Value(draft.costCents),
+              currencyCode: Value(draft.currencyCode),
+              category: Value(draft.category),
+              shop: Value(_blankToNull(draft.shop, max: 120)),
+              notes: Value(_blankToNull(draft.notes, max: 500)),
+              updatedAt: Value(updatedAt),
+              mutationId: Value(mutationId),
+            ),
+          );
+      final row = await _event(id);
+      await _enqueue(eventsTable, row!, insert: true);
+    });
     return id;
   }
 
@@ -175,59 +190,132 @@ class MaintenanceEventsRepository {
   /// updated.
   Future<bool> softDelete(String id) async {
     final String ts = _now();
-    final int wrote = await (_db.update(_db.maintenanceEvents)
-          ..where((e) => e.id.equals(id) & e.deletedAt.isNull()))
-        .write(
-      MaintenanceEventsCompanion(
-        deletedAt: Value(ts),
-        updatedAt: Value(ts),
-        mutationId: Value(_newId()),
-      ),
-    );
-    return wrote > 0;
+    return _db.transaction(() async {
+      final int wrote = await (_db.update(_db.maintenanceEvents)
+            ..where((e) => e.id.equals(id) & e.deletedAt.isNull()))
+          .write(
+        MaintenanceEventsCompanion(
+          deletedAt: Value(ts),
+          updatedAt: Value(ts),
+          mutationId: Value(_newId()),
+        ),
+      );
+      if (wrote == 0) return false;
+      await _outbox?.enqueueSoftDelete(table: eventsTable, rowId: id);
+      return true;
+    });
   }
 
   /// Create or update the reminder rule for [draft.name] on this
   /// vehicle. Returns the rule id. Requires at least one cadence.
+  ///
+  /// A new rule enqueues `insert`. An existing rule enqueues `update`.
+  /// [OutboxRepository.enqueueUpdate] coalesces into a still-pending
+  /// insert for the same row.
   Future<String> upsertReminderRule(MaintenanceRuleDraft draft) async {
     if (draft.cadenceMeters == null && draft.cadenceDays == null) {
       throw ArgumentError(
         'Reminder rule needs cadenceMeters and/or cadenceDays',
       );
     }
-    final MaintenanceRuleRow? existing =
-        await findRuleByVehicleAndName(draft.vehicleId, draft.name);
-    final String updatedAt = _now();
-    if (existing != null) {
-      await (_db.update(_db.maintenanceRules)
-            ..where((r) => r.id.equals(existing.id)))
-          .write(
-        MaintenanceRulesCompanion(
-          cadenceM: Value(draft.cadenceMeters),
-          cadenceDays: Value(draft.cadenceDays),
-          notes: Value(_blankToNull(draft.notes, max: 500)),
-          enabled: const Value(true),
-          updatedAt: Value(updatedAt),
-          mutationId: Value(_newId()),
-        ),
-      );
-      return existing.id;
-    }
-    final String id = _newId();
-    await _db.into(_db.maintenanceRules).insert(
+    return _db.transaction(() async {
+      final MaintenanceRuleRow? existing =
+          await findRuleByVehicleAndName(draft.vehicleId, draft.name);
+      final String updatedAt = _now();
+      if (existing != null) {
+        await (_db.update(_db.maintenanceRules)
+              ..where((r) => r.id.equals(existing.id)))
+            .write(
           MaintenanceRulesCompanion(
-            id: Value(id),
-            vehicleId: Value(draft.vehicleId),
-            name: Value(draft.name),
             cadenceM: Value(draft.cadenceMeters),
             cadenceDays: Value(draft.cadenceDays),
-            enabled: const Value(true),
             notes: Value(_blankToNull(draft.notes, max: 500)),
+            enabled: const Value(true),
             updatedAt: Value(updatedAt),
             mutationId: Value(_newId()),
           ),
         );
-    return id;
+        final row = await _rule(existing.id);
+        await _enqueue(rulesTable, row!, insert: false);
+        return existing.id;
+      }
+      final String id = _newId();
+      await _db.into(_db.maintenanceRules).insert(
+            MaintenanceRulesCompanion(
+              id: Value(id),
+              vehicleId: Value(draft.vehicleId),
+              name: Value(draft.name),
+              cadenceM: Value(draft.cadenceMeters),
+              cadenceDays: Value(draft.cadenceDays),
+              enabled: const Value(true),
+              notes: Value(_blankToNull(draft.notes, max: 500)),
+              updatedAt: Value(updatedAt),
+              mutationId: Value(_newId()),
+            ),
+          );
+      final row = await _rule(id);
+      await _enqueue(rulesTable, row!, insert: true);
+      return id;
+    });
+  }
+
+  Future<MaintenanceEventRow?> _event(String id) {
+    final query = _db.select(_db.maintenanceEvents)
+      ..where((e) => e.id.equals(id));
+    return query.getSingleOrNull();
+  }
+
+  Future<MaintenanceRuleRow?> _rule(String id) {
+    final query = _db.select(_db.maintenanceRules)
+      ..where((r) => r.id.equals(id));
+    return query.getSingleOrNull();
+  }
+
+  Future<void> _enqueue(String table, dynamic row, {required bool insert}) async {
+    final box = _outbox;
+    if (box == null) return;
+    final String id = row.id as String;
+    final payload = table == eventsTable
+        ? _eventPayload(row as MaintenanceEventRow)
+        : _rulePayload(row as MaintenanceRuleRow);
+    if (insert) {
+      await box.enqueueInsert(table: table, rowId: id, payload: payload);
+    } else {
+      await box.enqueueUpdate(table: table, rowId: id, payload: payload);
+    }
+  }
+
+  Map<String, dynamic> _eventPayload(MaintenanceEventRow row) {
+    return <String, dynamic>{
+      'id': row.id,
+      'vehicle_id': row.vehicleId,
+      'rule_id': row.ruleId,
+      'performed_at': row.performedAt,
+      'odometer_m': row.odometerM,
+      'cost_cents': row.costCents,
+      'currency_code': row.currencyCode,
+      'category': row.category,
+      'shop': row.shop,
+      'notes': row.notes,
+      'updated_at': row.updatedAt,
+      'deleted_at': row.deletedAt,
+      'mutation_id': row.mutationId,
+    };
+  }
+
+  Map<String, dynamic> _rulePayload(MaintenanceRuleRow row) {
+    return <String, dynamic>{
+      'id': row.id,
+      'vehicle_id': row.vehicleId,
+      'name': row.name,
+      'cadence_m': row.cadenceM,
+      'cadence_days': row.cadenceDays,
+      'enabled': row.enabled,
+      'notes': row.notes,
+      'updated_at': row.updatedAt,
+      'deleted_at': row.deletedAt,
+      'mutation_id': row.mutationId,
+    };
   }
 
   static void _assertCategory(String category) {

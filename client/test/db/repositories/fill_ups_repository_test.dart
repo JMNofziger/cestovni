@@ -191,7 +191,9 @@ void main() {
           isFull: true,
         ),
       );
-      var rows = await db.select(db.outbox).get();
+      var rows = await (db.select(db.outbox)
+            ..where((o) => o.table_.equals('fill_ups')))
+          .get();
       expect(rows.map((r) => r.op), ['insert'],
           reason: 'exactly one insert row after create');
 
@@ -211,13 +213,17 @@ void main() {
           isFull: true,
         ),
       );
-      rows = await db.select(db.outbox).get();
+      rows = await (db.select(db.outbox)
+            ..where((o) => o.table_.equals('fill_ups')))
+          .get();
       expect(rows.map((r) => r.op), ['update'],
           reason: 'amend after a synced row enqueues a fresh update');
 
       await db.delete(db.outbox).go();
       await repo.softDelete(id);
-      rows = await db.select(db.outbox).get();
+      rows = await (db.select(db.outbox)
+            ..where((o) => o.table_.equals('fill_ups')))
+          .get();
       expect(rows.map((r) => r.op), ['soft_delete']);
       expect(rows.single.payloadJson, isNull);
     });

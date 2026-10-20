@@ -47,7 +47,7 @@ void main() {
         ),
       );
 
-      final rows = await db.select(db.outbox).get();
+      final rows = await _fillUps(db);
       expect(rows, hasLength(1),
           reason: 'create must enqueue exactly one outbox row');
 
@@ -129,7 +129,7 @@ void main() {
         ),
       );
 
-      final rows = await db.select(db.outbox).get();
+      final rows = await _fillUps(db);
       expect(rows, hasLength(1),
           reason: 'sync-protocol.md §Fill-up lifecycle: multiple pending '
               'updates coalesce into a single outbox entry before send');
@@ -169,7 +169,7 @@ void main() {
 
       await repo.softDelete(id);
 
-      final rows = await db.select(db.outbox).get();
+      final rows = await _fillUps(db);
       expect(rows, hasLength(1));
       final entry = rows.single;
       expect(entry.op, 'soft_delete');
@@ -259,4 +259,8 @@ void main() {
       expect(row.lastError, 'http 500');
     });
   });
+}
+
+Future<List<OutboxRow>> _fillUps(AppDatabase db) {
+  return (db.select(db.outbox)..where((o) => o.table_.equals('fill_ups'))).get();
 }
