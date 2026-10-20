@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cestovni/db/app_database.dart';
 import 'package:cestovni/db/repositories/maintenance_events_repository.dart';
 import 'package:cestovni/db/repositories/outbox_repository.dart';
 import 'package:cestovni/db/repositories/settings_repository.dart';
@@ -254,7 +255,7 @@ void main() {
   });
 }
 
-Future<List<OutboxRow>> _table(dynamic db, String table) {
+Future<List<OutboxRow>> _table(AppDatabase db, String table) {
   return (db.select(db.outbox)..where((o) => o.table_.equals(table))).get();
 }
 

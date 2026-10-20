@@ -5,6 +5,9 @@ import 'package:cestovni/db/repositories/outbox_repository.dart';
 import 'package:cestovni/sync/outbox_flush_worker.dart';
 import 'package:cestovni/sync/sync_client.dart';
 import 'package:drift/drift.dart';
+// Transitive through flutter_test; the client has no direct fake_async dep.
+// ignore: depend_on_referenced_packages
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';

@@ -324,7 +324,7 @@ class OutboxFlushWorker {
       }
       if (_consecutive429 > 10) {
         debugPrint(
-          'OutboxFlushWorker: ${_consecutive429} consecutive 429s; '
+          'OutboxFlushWorker: $_consecutive429 consecutive 429s; '
           'automatic flush waits ${seconds}s',
         );
       }
