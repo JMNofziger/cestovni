@@ -130,16 +130,16 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 CES-42..45 acceptance in the execution prompts is met. These holes are outside those checklists, or they are spec lines the code does not finish. They are not a reason to re-run the prompts.
 
-- **Merge.** CES-42 ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)) and CES-43 ([PR #34](https://github.com/JMNofziger/cestovni/pull/34)) are on `main`. CES-44 is draft [PR #35](https://github.com/JMNofziger/cestovni/pull/35). CES-45 is draft [PR #36](https://github.com/JMNofziger/cestovni/pull/36), stacked on #35. M3 is not on `main` until both merge.
-- **No sign-in UI.** HTTP 401 pauses automatic flush. The protocol's re-auth flow has no screen.
-- **Settings id.** A fresh settings row uses a local UUID. The server CHECK requires `settings.id = user_id = JWT sub`, so the first settings insert is rejected until restore replaces that row.
-- **Dead-letter mark sticks across a later edit.** Rewriting the payload does not clear `dead-letter: `. The user retries or discards from Backup.
-- **429 pause indicator.** After more than 10 consecutive HTTP 429s the flush worker waits and writes a debug log. The protocol string "Backup paused by server — will retry" is not on screen.
-- **Telemetry.** `restore_start` / `restore_result` are `debugPrint` stubs. `sync_backup_result` is not emitted. SDK wiring is CES-46.
-- **Restore tests hit an in-memory HTTP fixture**, not Postgres plus `server/api`. Contract tests cover the API. There is no client-to-live-API restore test.
-- **10k-row restore timing** stays with CES-68. The Linear CES-45 acceptance line that asks for a 10k fixture, and the line that asks for telemetry after M4, were left to those later tickets on purpose.
-- **Staging Gate 6** ([`ci/promotion-gates.yml`](../../ci/promotion-gates.yml)) is still a stub and is not registered under `.github/workflows/`. Its steps exit 1 so a copied workflow cannot report success. [`tests/roles/`](../../tests/roles/) is a scaffold and is not invoked by CI. RLS coverage that does run is [`tests/rls/`](../../tests/rls/).
-- **PWA-lite** still targets the dev stub, enqueues fill-up inserts only, and has no Backup screen. Parked with CES-62 / CES-63.
+- **Merge.** CES-42 ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)) and CES-43 ([PR #34](https://github.com/JMNofziger/cestovni/pull/34)) are on `main`. CES-44 is draft [PR #35](https://github.com/JMNofziger/cestovni/pull/35). CES-45 is draft [PR #36](https://github.com/JMNofziger/cestovni/pull/36), stacked on #35. M3 is not on `main` until both merge. No extra issue: the PRs are the record.
+- **No sign-in UI.** HTTP 401 pauses automatic flush. The protocol's re-auth flow has no screen. [Issue #37](https://github.com/JMNofziger/cestovni/issues/37).
+- **Settings id.** A fresh settings row uses a local UUID. The server CHECK requires `settings.id = user_id = JWT sub`, so the first settings insert is rejected until restore replaces that row. [Issue #38](https://github.com/JMNofziger/cestovni/issues/38).
+- **Dead-letter mark sticks across a later edit.** Rewriting the payload does not clear `dead-letter: `. The user retries or discards from Backup. [Issue #39](https://github.com/JMNofziger/cestovni/issues/39).
+- **429 pause indicator.** After more than 10 consecutive HTTP 429s the flush worker waits and writes a debug log. The protocol string "Backup paused by server — will retry" is not on screen. [Issue #40](https://github.com/JMNofziger/cestovni/issues/40).
+- **Telemetry.** `restore_start` / `restore_result` are `debugPrint` stubs. `sync_backup_result` is not emitted. SDK wiring stays [CES-46](https://linear.app/personal-interests-llc/issue/CES-46). The M3 call sites are [issue #45](https://github.com/JMNofziger/cestovni/issues/45).
+- **Restore tests hit an in-memory HTTP fixture**, not Postgres plus `server/api`. Contract tests cover the API. There is no client-to-live-API restore test. [Issue #41](https://github.com/JMNofziger/cestovni/issues/41).
+- **10k-row device timing** for export and restore. [CES-68](https://linear.app/personal-interests-llc/issue/CES-68) is the APK that makes a device pass possible and does not list the measurements. [Issue #44](https://github.com/JMNofziger/cestovni/issues/44).
+- **Staging Gate 6** ([`ci/promotion-gates.yml`](../../ci/promotion-gates.yml)) is still a stub and is not registered under `.github/workflows/`. Its steps exit 1 so a copied workflow cannot report success. [`tests/roles/`](../../tests/roles/) is a scaffold and is not invoked by CI. RLS coverage that does run is [`tests/rls/`](../../tests/rls/). [Issue #42](https://github.com/JMNofziger/cestovni/issues/42).
+- **PWA-lite** still targets the dev stub, enqueues fill-up inserts only, and has no Backup screen. Parked with CES-62 / CES-63. Parity work is [issue #43](https://github.com/JMNofziger/cestovni/issues/43).
 
 Bugs fixed while building the chain, so they are not open: Drift `Column` clashed with Flutter's `Column` (hide it on the drift import); tests hide matcher `isNull`; the settings table getter is `appSettings`; `flutter analyze` rewrites `client/analysis_options.yaml` and that rewrite stays reverted; restore uses INSERT or UPDATE because `INSERT OR REPLACE` on a parent drops children while foreign keys are on.
 
@@ -259,5 +259,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-10-20 — M3 chain audit. CES-42..45 prompt acceptance is met. Open holes are under [M3 known gaps](#m3-known-gaps-2026-10-20). Next is CES-46. Do not start CES-46 in the same change. CES-62/63 parked.*
+*Last updated: 2026-10-20 — M3 gaps filed as GitHub issues #37–#45. Index: [M3 known gaps](#m3-known-gaps-2026-10-20). Next is CES-46. Do not start CES-46 in the same change. CES-62/63 parked.*
 
