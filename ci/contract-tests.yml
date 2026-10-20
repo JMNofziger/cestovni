@@ -1,0 +1,96 @@
+# API contract tests (CES-43, sync-protocol.md).
+#
+# GitHub Actions runs .github/workflows/contract-tests.yml (workflow_call +
+# pull_request). This file is the same job, kept next to the other gate
+# stubs so promotion-gates readers see the live steps. Do not leave TODO
+# echoes here — the runner is tests/contract/run.sh.
+#
+# Postgres 15 service user is a superuser (official image). The API SETs
+# ROLE cestovni_app inside each request; product SQL does not run as the
+# DSN user. Rate-limit env is left at the server defaults (60 / 120).
+
+name: contract-tests
+
+on:
+  workflow_call:
+
+  pull_request:
+    paths:
+      - 'server/api/**'
+      - 'tests/contract/**'
+      - 'db/**'
+      - '.github/workflows/contract-tests.yml'
+      - 'ci/contract-tests.yml'
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_DB: cestovni_test
+          POSTGRES_USER: cestovni_test
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cestovni_test -d cestovni_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/api/package-lock.json
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Install API dependencies
+        working-directory: server/api
+        run: npm ci
+
+      - name: Apply schema, start API, run contract tests
+        env:
+          DATABASE_URL: postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni_test
+          JWT_SECRET: test-secret-ces-43
+          API_BASE_URL: http://127.0.0.1:8080
+          PORT: '8080'
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f db/migrations/0001_init.sql
+          node server/api/src/server.js > test-results/api.log 2>&1 &
+          echo $! > test-results/api.pid
+          ready=0
+          for _ in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8080/healthz >/dev/null; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$(cat test-results/api.pid)" 2>/dev/null; then
+              echo "API exited before healthz" >&2
+              cat test-results/api.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          if [[ "$ready" -ne 1 ]]; then
+            echo "API did not become healthy" >&2
+            cat test-results/api.log >&2
+            exit 1
+          fi
+          ./tests/contract/run.sh | tee test-results/contract.log
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-results
+          path: test-results/
+          if-no-files-found: ignore
