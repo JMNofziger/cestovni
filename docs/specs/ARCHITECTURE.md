@@ -28,7 +28,7 @@
 | Telemetry / crash SDK | [`adr/004-telemetry-crash-sdk.md`](adr/004-telemetry-crash-sdk.md) | Accepted |
 | Telemetry transport (Stage 1) | [`adr/004-addendum-glitchtip-transport.md`](adr/004-addendum-glitchtip-transport.md) | Accepted |
 | Stage 1 distribution | [`adr/005-distribution-channels.md`](adr/005-distribution-channels.md) | Accepted |
-| Browser client (non-Android, phone-first) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | Accepted |
+| Browser client (non-Android) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | **Proposed** (2026-10-20) |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
 ## Client distribution (2026-10-20)
@@ -36,14 +36,15 @@
 Per [ADR 005](adr/005-distribution-channels.md) + [ADR 006](adr/006-browser-client.md):
 
 ```text
-[Android ~70%]        Flutter native APK (primary client, offline-first)
-[iPhone — PWA-lite]   Parked (CES-62/63); client/web-lite/ on main, not the portal
-[Non-Android portal]  Phone-browser portal (online-first, requires M3) — ADR 006, stack TBD
-[Deferred]            App Store native iOS ($99/yr)
+[Android]       Flutter native APK — primary client (M0–M2 on main)
+[Non-Android]   Browser client — phone browsers first (ADR 006 Proposed; no code yet)
+[Parked]        iPhone PWA-lite (client/web-lite/ stays on main; CES-62/63)
+[Deferred]      App Store native iOS ($99/yr)
 ```
 
-- PWA-lite gate passed 2026-05-29; Phase 1+2 on `main`. Deploy track (CES-63) parked.
-- Portal requires M3 (CES-42 + CES-43) before implementation.
+- Gate: [`pwa-lite-gate.md`](pwa-lite-gate.md) — historical; iPhone T1 parked.
+- Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md) (parked).
+- Browser client: [`adr/006-browser-client.md`](adr/006-browser-client.md) (**Proposed**).
 - Spike archive: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 - Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 

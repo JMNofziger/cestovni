@@ -90,9 +90,9 @@ Re-open this ADR when **any** of:
 
 On revisit: restore [`ci/paused/verify-ios-weekly.yml`](../../../ci/paused/verify-ios-weekly.yml) to `.github/workflows/`, update compliance store sections, and schedule App Store submission work under Stage 6.
 
-## Amendment: browser portal (2026-10-20)
+## 2026-10-20 — iPhone parked; browser client Proposed
 
-[ADR 006](006-browser-client.md) **Accepted** — adds a phone-browser portal row to the distribution table above. iPhone PWA-lite (CES-62/63) is **parked**; the portal is a separate new client, online-first, requiring M3. See ADR 006 for the locked capability matrix.
+Product parked CES-62 / CES-63. PWA-lite code stays on `main`; do not delete it. Non-Android users are intended to use a **browser client** (phone browsers first) per [ADR 006](006-browser-client.md) (**Proposed**). Amend this table on 006 Accept — not before. Flutter web offline PWA on iOS Safari remains NO-GO.
 
 ## Related
 
