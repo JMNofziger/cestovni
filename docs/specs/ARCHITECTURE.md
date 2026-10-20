@@ -28,7 +28,7 @@
 | Telemetry / crash SDK | [`adr/004-telemetry-crash-sdk.md`](adr/004-telemetry-crash-sdk.md) | Accepted |
 | Telemetry transport (Stage 1) | [`adr/004-addendum-glitchtip-transport.md`](adr/004-addendum-glitchtip-transport.md) | Accepted |
 | Stage 1 distribution | [`adr/005-distribution-channels.md`](adr/005-distribution-channels.md) | Accepted |
-| Browser client (non-Android) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | **Proposed** (2026-10-20) |
+| Browser client (non-Android) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | Accepted (2026-10-20; stack: Preact + TS) |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
 ## Client distribution (2026-10-20)
@@ -37,14 +37,14 @@ Per [ADR 005](adr/005-distribution-channels.md) + [ADR 006](adr/006-browser-clie
 
 ```text
 [Android]       Flutter native APK — primary client (M0–M2 on main)
-[Non-Android]   Browser client — phone browsers first (ADR 006 Proposed; no code yet)
+[Non-Android]   Browser portal — Preact + TS, phone browsers first (ADR 006 Accepted; gated on M3)
 [Parked]        iPhone PWA-lite (client/web-lite/ stays on main; CES-62/63)
 [Deferred]      App Store native iOS ($99/yr)
 ```
 
 - Gate: [`pwa-lite-gate.md`](pwa-lite-gate.md) — historical; iPhone T1 parked.
 - Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md) (parked).
-- Browser client: [`adr/006-browser-client.md`](adr/006-browser-client.md) (**Proposed**).
+- Browser portal: [`adr/006-browser-client.md`](adr/006-browser-client.md) (Accepted; Preact + TS; gated on M3).
 - Spike archive: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 - Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 

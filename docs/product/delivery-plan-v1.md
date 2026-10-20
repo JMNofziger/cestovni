@@ -12,26 +12,25 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 ## Current focus
 
-**Shipped:** **M2 closed** (CES-41 + CES-70 on `main`). **CES-71** cadence rename ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **CES-49** settings CHECK ([PR #30](https://github.com/JMNofziger/cestovni/pull/30)). **ADR 006 Accepted** (Preact + TS; CES-72 + CES-73).
+**Shipped:** **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71) cadence rename** merged to `main` ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **[ADR 006](../specs/adr/006-browser-client.md) Accepted** ([PR #28](https://github.com/JMNofziger/cestovni/pull/28), 2026-10-20) — phone-browser portal with locked capability matrix; stack TBD (**[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)**). **M2 (export + import) closed** (CES-41 + CES-70).
 
-**Next: M3 (CES-42 → CES-43 → CES-44 → CES-45).** Execution prompts ready. Execute in dependency order: CES-42 first (gateway), then CES-43 (blocks CES-44), then CES-44 (blocks CES-45), then CES-45 (closes M3).
+**In flight:** **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** enforce `settings.id = user_id` CHECK at DB level (M0 follow-up, blocks CES-42).
 
 **Parked:** **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** / **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** iPhone PWA-lite install-doc + T1. `client/web-lite/` stays on `main`.
 
-**Available:** **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
+**Next:** **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)** portal stack selection spike (ADR 006 follow-up). **M3 (CES-42–45)** unblocked by ADR 006 Accept — start after CES-49 + CES-73 land. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
 
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
-| **A — M3 Backup + restore** | **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** → **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** → **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)** → **[CES-45](https://linear.app/personal-interests-llc/issue/CES-45)** | ADR 002 loop closed; portal prerequisite | All 4 tickets Done; M3 rollup 🟩 |
-| **B — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
+| **A — M0 hygiene** | **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** | Blocks M3; low effort | `CHECK (user_id IS NULL OR id = user_id)` on `settings`; migration 0005 |
+| **B — portal stack** | **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)** | ADR 006 follow-up | Stack locked in ADR 006 amendment or ADR 007 |
+| **C — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
 
-**Shipped this cycle:** **CES-71** (cadence rename), **CES-49** (settings CHECK), **CES-72** + **CES-73** (ADR 006 Accept + portal stack). Earlier: **CES-70** (ZIP import), **CES-41** (Export ZIP), **CES-67** (Maintenance), **CES-40** (receipt photos).
+**Shipped this cycle:** **CES-71** (cadence rename), **ADR 006** (Accepted), **CES-70** (ZIP import), **CES-41** (Export ZIP). Earlier: **CES-67** (Maintenance) and **CES-40** (receipt photos).
 
 **Prompts (executed):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md) · [`prompts/ces-40-photo-pipeline.md`](prompts/ces-40-photo-pipeline.md) · [`prompts/ces-41-export.md`](prompts/ces-41-export.md) · [`prompts/ces-70-import.md`](prompts/ces-70-import.md)
 
-**Prompts (M3, ready to execute):** [`prompts/ces-42-server-postgres-rls.md`](prompts/ces-42-server-postgres-rls.md) · [`prompts/ces-43-server-api-auth.md`](prompts/ces-43-server-api-auth.md) · [`prompts/ces-44-client-outbox-expansion.md`](prompts/ces-44-client-outbox-expansion.md) · [`prompts/ces-45-restore-dead-letter-ux.md`](prompts/ces-45-restore-dead-letter-ux.md)
-
-**Spec:** [`../specs/adr/006-browser-client.md`](../specs/adr/006-browser-client.md) — **Accepted** (Preact + TS; CES-73). Import spec remains [`../specs/export-import.md`](../specs/export-import.md).
+**Spec:** [`../specs/adr/006-browser-client.md`](../specs/adr/006-browser-client.md) — **Accepted** (2026-10-20). Import spec remains [`../specs/export-import.md`](../specs/export-import.md).
 
 **Manual checklist (CES-40):** [`ces-40-manual-test.md`](ces-40-manual-test.md) — needs a physical Android device with a camera; not runnable in CI or on the Cloud VM. CES-41/CES-70 device timing (10k rows / 30 s) rides along with **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)**.
 
@@ -104,7 +103,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M1 — Local logging + math
 
-- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). **CES-41 export + CES-70 import shipped** (M2 closed). Next client coding is **CES-71**.
+- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). **CES-41 export + CES-70 import shipped** (M2 closed). **CES-71 Done** (cadence rename, PR #29). Next client coding: **CES-49** (settings invariant).
   - 🟩 **CES-38 — Consumption math + golden tests** — **Done in repo on `main`** (2026-05): `client/lib/consumption/`, auto-discovery runner over 20 `tests/math/fixtures/`, module-purity test, validation wired in Log/History save paths. Follow-ups: **CES-51** / **CES-52** (non-blocking).
   - 🟩 **CES-39 — Fill-up + vehicle UI (core)** — **Done** (repo 2026-05, Linear 2026-07-17): repos + vehicle CRUD + Log/History UI; 121+ tests. Out of scope → **CES-65** / **CES-66** / **CES-67** / **CES-40**.
   - 🟩 **CES-57 — Settings prefs + default vehicle** — **Done** (PR #9, Linear Done). Display wiring closed as **CES-65**.
@@ -136,13 +135,13 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M-dist — Distribution (parallel, non-blocking)
 
-Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **PWA-lite gate passed 2026-05-29** — Android E2E + Phase 1+2 on `main`. **CES-62 / CES-63 parked** (2026-10-20). Non-Android option is [ADR 006](../specs/adr/006-browser-client.md) (Proposed).
+Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **PWA-lite gate passed 2026-05-29** — Android E2E + Phase 1+2 on `main`. **CES-62 / CES-63 parked** (2026-10-20). Non-Android path: [ADR 006](../specs/adr/006-browser-client.md) **Accepted** (2026-10-20); stack selection in **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)**.
 
 #### PWA-lite gate
 
 PWA-lite gate passed 2026-05-29; **Phase 1+2 merged to `main`** (PR #3 + PR #4). Active execution: [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md). Phase 1+2 prompt [`prompts/pwa-lite-phase1-2.md`](prompts/pwa-lite-phase1-2.md) is **complete** (do not re-run).
 
-- 🟨 **M-dist rollup** — Android-first; gate + PWA-lite Phase 1+2 done; **iPhone install-doc parked**; browser client [ADR 006](../specs/adr/006-browser-client.md) Proposed; production API (CES-43) after 006 Accept.
+- 🟨 **M-dist rollup** — Android-first; gate + PWA-lite Phase 1+2 done; **iPhone install-doc parked**; browser client [ADR 006](../specs/adr/006-browser-client.md) **Accepted** (2026-10-20); portal stack selection **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)**; portal implementation gated on M3 (CES-43).
   - 🟩 **ADR 005 + brief + Glitchtip addendum** — accepted 2026-05-17.
   - 🟩 **Weekly native iOS CI paused** — [`ci/paused/verify-ios-weekly.yml`](../../ci/paused/verify-ios-weekly.yml) (no GitHub triggers until App Store re-scoped).
   - 🟩 **PWA offline spike** — NO-GO; archived [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
@@ -244,5 +243,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-10-20 — ADR 006 Accepted (Preact + TS; CES-72 + CES-73). CES-71 + CES-49 shipped. M3 prompts (CES-42–45) ready to execute. CES-62/63 parked.*
+*Last updated: 2026-10-20 — ADR 006 Accepted (PR #28); CES-71 Done (PR #29); CES-72 Done. CES-49 in flight; CES-73 next. CES-62/63 parked. M3 unblocked.*
 
