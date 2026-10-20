@@ -23,7 +23,9 @@ Android (~70%), hosting costs ($0), and App Store deferral are unchanged.
 
 ## Sequencing (Option B, 2026-05-21)
 
-PWA-lite iPhone work started **after** Android proved offline → online → server round-trip (gate passed 2026-05-29). **Phase 1+2 shipped on `main`** (PR #3 + #4): `client/web-lite/` offline Log + History + sync vs `server/dev-sync-stub/`. **Next:** Cloudflare Pages preview deploy + [`install-ios.md`](../../product/install-ios.md) ([`pwa-lite-phase3-deploy.md`](../../product/prompts/pwa-lite-phase3-deploy.md)); production API remains full CES-43 scope.
+PWA-lite iPhone work started **after** Android proved offline → online → server round-trip (gate passed 2026-05-29). **Phase 1+2 shipped on `main`** (PR #3 + #4): `client/web-lite/` offline Log + History + sync vs `server/dev-sync-stub/`.
+
+**2026-10-20:** CES-62 / CES-63 **parked**. Do not finalize [`install-ios.md`](../../product/install-ios.md) or run iPhone T1 until product unparks this path. Non-Android option is the phone-first browser client in [ADR 006](006-browser-client.md) (Proposed). `client/web-lite/` stays on `main`.
 
 ## iOS capability matrix (revised)
 

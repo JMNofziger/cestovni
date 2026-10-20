@@ -24,7 +24,7 @@ Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: `
 
 ## Delivery (Phase 3 / Stage 5)
 
-Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (RYG checklist is source of truth). Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**. **M0 closed** (**CES-36** / **CES-37**). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16): **CES-38** / **CES-39** / **CES-57** / **CES-65** / **CES-66** / **CES-67** / **CES-40** **Done**. **M2 closed:** **CES-41** export + **CES-70** import on `main` (PR #25). Next coding: **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71)** cadence rename. Ops: **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)**. Prerequisites **CES-53**–**CES-56** **Done**. Linear MCP/API: [`../linear/mcp-setup.md`](../linear/mcp-setup.md).
+Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (RYG checklist is source of truth). Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**. **M0 closed** (**CES-36** / **CES-37**). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16). **M2 closed:** **CES-41** export + **CES-70** import. **CES-62 / CES-63 parked.** Next: **[ADR 006](../specs/adr/006-browser-client.md)** (phone-browser client, Proposed) — no portal code until Accepted. Prerequisites **CES-53**–**CES-56** **Done**. Linear MCP/API: [`../linear/mcp-setup.md`](../linear/mcp-setup.md).
 
 ## Specs
 

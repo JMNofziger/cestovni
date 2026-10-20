@@ -89,6 +89,10 @@ Re-open this ADR when **any** of:
 
 On revisit: restore [`ci/paused/verify-ios-weekly.yml`](../../../ci/paused/verify-ios-weekly.yml) to `.github/workflows/`, update compliance store sections, and schedule App Store submission work under Stage 6.
 
+## 2026-10-20 — iPhone parked; browser client Proposed
+
+Product parked CES-62 / CES-63. PWA-lite code stays on `main`; do not delete it. Non-Android users are intended to use a **browser client** (phone browsers first) per [ADR 006](006-browser-client.md) (**Proposed**). Amend this table on 006 Accept — not before. Flutter web offline PWA on iOS Safari remains NO-GO.
+
 ## Related
 
 - [ADR 003](003-mobile-stack.md) — Flutter + Drift (Android native).

@@ -1,6 +1,6 @@
 # Installing Cestovni on iPhone (Stage 1 PWA-lite)
 
-**Status:** **Draft** — PWA-lite Phase 1+2 + Pages CI shipped on `main`. Production URL exists (`https://cestovni-pwa.pages.dev`) but this doc is not finalized (TBD steps, default `apiBase` still `127.0.0.1:8787`). Remaining work is **CES-63** — prompt [`prompts/pwa-lite-phase3-install-doc.md`](prompts/pwa-lite-phase3-install-doc.md).
+**Status:** **Draft / PARKED** (2026-10-20) — CES-62 / CES-63 deferred. PWA-lite Phase 1+2 + Pages CI remain on `main`. Do not finalize this doc until product unparks the iPhone path. Non-Android option is [ADR 006](../specs/adr/006-browser-client.md) (phone-browser portal, Proposed).
 
 iPhone users install Cestovni as a **web app** (Add to Home Screen), not from the App Store. See [ADR 005 addendum](../specs/adr/005-addendum-pwa-lite-ios.md) for capability limits vs Android native.
 
