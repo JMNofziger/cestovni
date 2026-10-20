@@ -67,22 +67,22 @@ class MaintenanceEventDraft {
 
 /// Reminder cadence fields persisted on `maintenance_rules`.
 ///
-/// At least one of [cadenceKmMeters] / [cadenceDays] must be non-null
-/// (table CHECK). [cadenceKmMeters] is canonical meters despite the
-/// SQL column name `cadence_km`. Months in the form map to
+/// At least one of [cadenceMeters] / [cadenceDays] must be non-null
+/// (table CHECK). [cadenceMeters] is canonical meters
+/// (`maintenance_rules.cadence_m`). Months in the form map to
 /// `cadence_days = months * 30`.
 class MaintenanceRuleDraft {
   const MaintenanceRuleDraft({
     required this.vehicleId,
     required this.name,
-    this.cadenceKmMeters,
+    this.cadenceMeters,
     this.cadenceDays,
     this.notes,
   });
 
   final String vehicleId;
   final String name;
-  final int? cadenceKmMeters;
+  final int? cadenceMeters;
   final int? cadenceDays;
   final String? notes;
 }
@@ -190,9 +190,9 @@ class MaintenanceEventsRepository {
   /// Create or update the reminder rule for [draft.name] on this
   /// vehicle. Returns the rule id. Requires at least one cadence.
   Future<String> upsertReminderRule(MaintenanceRuleDraft draft) async {
-    if (draft.cadenceKmMeters == null && draft.cadenceDays == null) {
+    if (draft.cadenceMeters == null && draft.cadenceDays == null) {
       throw ArgumentError(
-        'Reminder rule needs cadenceKmMeters and/or cadenceDays',
+        'Reminder rule needs cadenceMeters and/or cadenceDays',
       );
     }
     final MaintenanceRuleRow? existing =
@@ -203,7 +203,7 @@ class MaintenanceEventsRepository {
             ..where((r) => r.id.equals(existing.id)))
           .write(
         MaintenanceRulesCompanion(
-          cadenceKm: Value(draft.cadenceKmMeters),
+          cadenceM: Value(draft.cadenceMeters),
           cadenceDays: Value(draft.cadenceDays),
           notes: Value(_blankToNull(draft.notes, max: 500)),
           enabled: const Value(true),
@@ -219,7 +219,7 @@ class MaintenanceEventsRepository {
             id: Value(id),
             vehicleId: Value(draft.vehicleId),
             name: Value(draft.name),
-            cadenceKm: Value(draft.cadenceKmMeters),
+            cadenceM: Value(draft.cadenceMeters),
             cadenceDays: Value(draft.cadenceDays),
             enabled: const Value(true),
             notes: Value(_blankToNull(draft.notes, max: 500)),
