@@ -12,24 +12,26 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 ## Current focus
 
-**Shipped:** **[CES-70](https://linear.app/personal-interests-llc/issue/CES-70) ZIP import** is on `main` ([PR #25](https://github.com/JMNofziger/cestovni/pull/25), merge `7670226`). **M2 (export + import) is closed.**
+**Shipped:** **M2 closed** (CES-41 + CES-70 on `main`). **CES-71** cadence rename ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **CES-49** settings CHECK ([PR #30](https://github.com/JMNofziger/cestovni/pull/30)). **ADR 006 Accepted** (Preact + TS; CES-72 + CES-73).
 
-**In flight (docs):** **[ADR 006](../specs/adr/006-browser-client.md)** — browser client for non-Android users, **phone-browser-first**, **Proposed**. No portal code until product Accepts.
+**Next: M3 (CES-42 → CES-43 → CES-44 → CES-45).** Execution prompts ready. Execute in dependency order: CES-42 first (gateway), then CES-43 (blocks CES-44), then CES-44 (blocks CES-45), then CES-45 (closes M3).
 
 **Parked:** **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** / **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** iPhone PWA-lite install-doc + T1. `client/web-lite/` stays on `main`.
 
-**Not started:** **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71)** cadence rename (unblocked; Android-only hygiene). **M3 (CES-42–45)** is the likely portal prerequisite after 006 Accept — do **not** start until then. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
+**Available:** **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
 
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
-| **A — browser client ADR** | **[CES-72](https://linear.app/personal-interests-llc/issue/CES-72)** / ADR 006 | Non-Android path; phone browsers first | Product Accepts; stack + capability matrix locked |
+| **A — M3 Backup + restore** | **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** → **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** → **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)** → **[CES-45](https://linear.app/personal-interests-llc/issue/CES-45)** | ADR 002 loop closed; portal prerequisite | All 4 tickets Done; M3 rollup 🟩 |
 | **B — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
 
-**Shipped this cycle:** **CES-70** (ZIP import, replace) and **CES-41** (Export ZIP). Earlier: **CES-67** (Maintenance) and **CES-40** (receipt photos).
+**Shipped this cycle:** **CES-71** (cadence rename), **CES-49** (settings CHECK), **CES-72** + **CES-73** (ADR 006 Accept + portal stack). Earlier: **CES-70** (ZIP import), **CES-41** (Export ZIP), **CES-67** (Maintenance), **CES-40** (receipt photos).
 
 **Prompts (executed):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md) · [`prompts/ces-40-photo-pipeline.md`](prompts/ces-40-photo-pipeline.md) · [`prompts/ces-41-export.md`](prompts/ces-41-export.md) · [`prompts/ces-70-import.md`](prompts/ces-70-import.md)
 
-**Spec:** [`../specs/adr/006-browser-client.md`](../specs/adr/006-browser-client.md) — **Proposed**. Import spec remains [`../specs/export-import.md`](../specs/export-import.md).
+**Prompts (M3, ready to execute):** [`prompts/ces-42-server-postgres-rls.md`](prompts/ces-42-server-postgres-rls.md) · [`prompts/ces-43-server-api-auth.md`](prompts/ces-43-server-api-auth.md) · [`prompts/ces-44-client-outbox-expansion.md`](prompts/ces-44-client-outbox-expansion.md) · [`prompts/ces-45-restore-dead-letter-ux.md`](prompts/ces-45-restore-dead-letter-ux.md)
+
+**Spec:** [`../specs/adr/006-browser-client.md`](../specs/adr/006-browser-client.md) — **Accepted** (Preact + TS; CES-73). Import spec remains [`../specs/export-import.md`](../specs/export-import.md).
 
 **Manual checklist (CES-40):** [`ces-40-manual-test.md`](ces-40-manual-test.md) — needs a physical Android device with a camera; not runnable in CI or on the Cloud VM. CES-41/CES-70 device timing (10k rows / 30 s) rides along with **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)**.
 
@@ -242,5 +244,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-10-20 — CES-62/63 parked. ADR 006 Proposed (phone-browser portal). No portal code until Accept. CES-71 / M3 wait.*
+*Last updated: 2026-10-20 — ADR 006 Accepted (Preact + TS; CES-72 + CES-73). CES-71 + CES-49 shipped. M3 prompts (CES-42–45) ready to execute. CES-62/63 parked.*
 
