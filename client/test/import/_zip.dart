@@ -180,7 +180,7 @@ Future<String> historyFingerprint(AppDatabase db) async {
     ],
     'rules': [
       for (final row in rules)
-        [row.id, row.cadenceKm, row.cadenceDays, row.notes],
+        [row.id, row.cadenceM, row.cadenceDays, row.notes],
     ],
     'events': [
       for (final row in events) [row.id, row.category, row.shop, row.costCents],

@@ -62,7 +62,7 @@ void main() {
       );
     });
 
-    test('maintenance_rules requires cadence_km OR cadence_days', () async {
+    test('maintenance_rules requires cadence_m OR cadence_days', () async {
       final db = openInMemoryDb();
       addTearDown(db.close);
       final vehicleId = await _seedVehicle(db);
@@ -71,7 +71,7 @@ void main() {
         () => db.customStatement(
           "INSERT INTO maintenance_rules "
           "(id, user_id, row_version, updated_at, mutation_id, "
-          " vehicle_id, name, cadence_km, cadence_days, enabled) "
+          " vehicle_id, name, cadence_m, cadence_days, enabled) "
           "VALUES (?, ?, 1, ?, ?, ?, 'No cadence', NULL, NULL, 1)",
           [newId(), newId(), nowIso(), newId(), vehicleId],
         ),

@@ -111,7 +111,7 @@ void main() {
         MaintenanceRuleDraft(
           vehicleId: vehicleId,
           name: 'oil',
-          cadenceKmMeters: 10_000_000,
+          cadenceMeters: 10_000_000,
           cadenceDays: 180,
         ),
       );
@@ -119,14 +119,14 @@ void main() {
         MaintenanceRuleDraft(
           vehicleId: vehicleId,
           name: 'oil',
-          cadenceKmMeters: 15_000_000,
+          cadenceMeters: 15_000_000,
         ),
       );
       expect(id2, id1);
 
       final rule = await repo.findRuleByVehicleAndName(vehicleId, 'oil');
       expect(rule, isNotNull);
-      expect(rule!.cadenceKm, 15_000_000);
+      expect(rule!.cadenceM, 15_000_000);
       expect(rule.cadenceDays, isNull);
       expect(rule.enabled, isTrue);
     });

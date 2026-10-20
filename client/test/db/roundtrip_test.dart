@@ -67,7 +67,7 @@ void main() {
       expect(row.read<int>('is_full'), 1);
     });
 
-    test('maintenance_rules: cadence_km or cadence_days required', () async {
+    test('maintenance_rules: cadence_m or cadence_days required', () async {
       final db = openInMemoryDb();
       addTearDown(db.close);
       final vehicleId = await _seedVehicle(db);
@@ -75,7 +75,7 @@ void main() {
       await db.customStatement(
         "INSERT INTO maintenance_rules "
         "(id, user_id, row_version, updated_at, mutation_id, "
-        " vehicle_id, name, cadence_km, cadence_days, enabled) "
+        " vehicle_id, name, cadence_m, cadence_days, enabled) "
         "VALUES (?, ?, ?, ?, ?, ?, 'Oil change', 15000000, NULL, 1)",
         [newId(), newId(), 1, nowIso(), newId(), vehicleId],
       );
