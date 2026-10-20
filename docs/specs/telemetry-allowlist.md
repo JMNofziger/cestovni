@@ -100,7 +100,7 @@ Because the user's telemetry key is a **pepper-HMAC** of the user id, server-sid
 A script at `ci/telemetry-gate.*` runs on every PR (see [`ci/telemetry-gate.py`](../../ci/telemetry-gate.py)):
 
 1. Parses [`telemetry-events.v1.yaml`](telemetry-events.v1.yaml).
-2. Static-analyzes **`client/lib/**/*.dart`** for **`Telemetry.emit('event_name', …)`** (or `telemetry.emit`) with a **string literal** first argument; every name MUST appear in the YAML. Unknown names or non-literal first arguments **fail the build** (active as of M0 / CES-36; convention until CES-46 wires the real emit helper).
+2. Static-analyzes **`client/lib/**/*.dart`** for **`Telemetry.emit('event_name', …)`** (or `telemetry.emit`) with a **string literal** first argument; every name MUST appear in the YAML. Unknown names or non-literal first arguments **fail the build** (active as of M0 / CES-36; convention until CES-46 wires the real emit helper). CES-45 logs `restore_start` and `restore_result` with `debugPrint` only (`client/lib/sync/restore_telemetry.dart`). It does not call `Telemetry.emit`.
 3. Validates the YAML against a JSON Schema (`ci/telemetry-schema.json`) that enforces the property typing, `pii_class`, retention, and banned classes.
 4. Compares YAML category totals to the Apple privacy manifest and fails on drift (implementation still **skips** until `PrivacyInfo.xcprivacy` exists — see `ci/README.md`).
 

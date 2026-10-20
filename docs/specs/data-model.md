@@ -247,9 +247,11 @@ client/
 
 Numbers are aligned: every server migration `NNNN_*.sql` has a matching client Drift migration `NNNN_*.dart` (or equivalent in whichever client stack ships).
 
-**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4, `0005_settings_check_id_eq_user_id` = v4→v5). The illustrative `client/drift/migrations/` tree above is conceptual.
+**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4, `0005_settings_check_id_eq_user_id` = v4→v5, `0006_sync_cursors` = v5→v6). The illustrative `client/drift/migrations/` tree above is conceptual.
 
-**Server layout (CES-42):** [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql) creates all five backed-up tables at the **current** shape (post-0005: `cadence_m`, settings `CHECK (user_id IS NULL OR id = user_id)`, RLS, roles, `cestovni_row_version_seq`, `auth_user_id()`). The server does not replay 0002–0005; there was no server database at the old column names. Later server changes add `0006_….sql` and a matching client step so the numbers stay aligned from here.
+**Client-only exception (CES-45):** `0006_sync_cursors` creates `sync_cursors` and `backup_marks`. Those tables are never backed up and have **no** server migration. The next shared client/server change uses `0007`, so backed-up numbers stay aligned after this local step.
+
+**Server layout (CES-42):** [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql) creates all five backed-up tables at the **current** backed-up shape (post-0005: `cadence_m`, settings `CHECK (user_id IS NULL OR id = user_id)`, RLS, roles, `cestovni_row_version_seq`, `auth_user_id()`). The server does not replay 0002–0005; there was no server database at the old column names. Client schema v6 does not change that shape.
 
 ### Rules
 

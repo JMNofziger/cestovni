@@ -9,8 +9,9 @@ Server schema for the five v1 backed-up tables (`vehicles`, `fill_ups`,
 
 One migration, not a replay of client steps 0002–0005. There is no existing
 server data. The file creates the schema at the **current** client shape
-(schema v5): `cadence_m`, settings `CHECK (user_id IS NULL OR id = user_id)`,
-native Postgres types.
+(schema v5 backed-up columns): `cadence_m`, settings `CHECK (user_id IS NULL OR id = user_id)`,
+native Postgres types. Client schema v6 (CES-45) adds local-only `sync_cursors`
+and `backup_marks`. Those tables are not on the server.
 
 | Object | Purpose |
 | --- | --- |
