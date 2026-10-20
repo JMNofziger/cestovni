@@ -1,8 +1,8 @@
 /// `README_export.txt` template (CES-41).
 ///
 /// ASCII + CRLF. Amendments A2/A3/locked decision 6 are spelled out
-/// so a spreadsheet user is not surprised by both unit columns, the
-/// `cadence_km` name, or the `user_key_hash` stand-in.
+/// so a spreadsheet user is not surprised by both unit columns or the
+/// `user_key_hash` stand-in.
 library;
 
 import 'csv.dart';
@@ -39,9 +39,7 @@ String buildReadmeExport({
     '  Prices:      2 decimals',
     '',
     'CADENCE',
-    '  maintenance_rules.cadence_km stores canonical METERS despite the',
-    '  column name. Do not treat the value as kilometres. (CES-71 will',
-    '  rename the column; until then the header is cadence_km.)',
+    '  maintenance_rules.cadence_m stores canonical METERS.',
     '',
     'RECEIPT PHOTOS',
     '  Photos are stored only on your device with a 30-day time-to-live.',

@@ -11,7 +11,7 @@ const String fillUpsCsvHeader =
     'id,user_key_hash,vehicle_id,filled_at_utc,filled_at_local,odometer_m,odometer_km,odometer_mi,volume_uL,volume_L,volume_gal,total_price_cents,total_price_major,currency_code,is_full,missed_before,odometer_reset,notes,row_version,updated_at_utc';
 
 const String maintenanceRulesCsvHeader =
-    'id,user_key_hash,vehicle_id,name,cadence_km,cadence_days,enabled,notes,row_version,updated_at_utc';
+    'id,user_key_hash,vehicle_id,name,cadence_m,cadence_days,enabled,notes,row_version,updated_at_utc';
 
 const String maintenanceEventsCsvHeader =
     'id,user_key_hash,vehicle_id,rule_id,performed_at_utc,performed_at_local,odometer_m,odometer_km,odometer_mi,cost_cents,cost_major,currency_code,category,shop,notes,row_version,updated_at_utc';

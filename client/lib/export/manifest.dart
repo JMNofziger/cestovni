@@ -8,7 +8,7 @@ import 'dart:convert';
 
 import '../photos/photo_export_guard.dart';
 
-const int exportSchemaVersion = 1;
+const int exportSchemaVersion = 2;
 
 Map<String, Object?> exportManifest({
   required String exportedAtUtc,

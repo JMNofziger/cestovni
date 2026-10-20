@@ -86,10 +86,8 @@ class ImportedMaintenanceRule {
   final String vehicleId;
   final String name;
 
-  /// The `cadence_km` column, which carries canonical **meters** despite
-  /// its name (`export-v1.md` § A3). Imported verbatim, never converted.
-  /// Named `cadenceMeters` here so no caller can misread it; the column
-  /// name is restored in `apply.dart`.
+  /// Canonical meters from the `cadence_m` column (or legacy `cadence_km`).
+  /// Imported verbatim, never converted.
   final int? cadenceMeters;
 
   final int? cadenceDays;

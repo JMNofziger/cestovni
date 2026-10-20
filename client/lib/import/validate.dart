@@ -21,11 +21,11 @@ import 'csv_parse.dart';
 import 'import_errors.dart';
 import 'plan.dart';
 
-/// Manifest `schema_version` this build understands.
+/// Manifest `schema_version` values this build understands.
 ///
-/// Taken from the export module rather than restated, so bumping the
-/// export format cannot leave import silently accepting the old one.
-const int supportedImportSchemaVersion = exportSchemaVersion;
+/// Schema 1: pre-CES-71, uses `cadence_km` header in maintenance_rules.csv.
+/// Schema 2: post-CES-71, uses `cadence_m` header.
+const Set<int> supportedImportSchemaVersions = {1, exportSchemaVersion};
 
 const String manifestEntryName = 'manifest.json';
 const String readmeEntryName = 'README_export.txt';
@@ -78,6 +78,12 @@ const Map<String, String> importCsvHeaders = <String, String>{
   'maintenance_events.csv': maintenanceEventsCsvHeader,
   'settings.csv': settingsCsvHeader,
 };
+
+/// Pre-CES-71 header for maintenance_rules.csv used `cadence_km`.
+/// Import accepts both the old and new header so previously exported
+/// ZIPs remain importable.
+const String _legacyMaintenanceRulesHeader =
+    'id,user_key_hash,vehicle_id,name,cadence_km,cadence_days,enabled,notes,row_version,updated_at_utc';
 
 /// Build a validated [ImportPlan] from raw ZIP entries.
 ///
@@ -271,11 +277,11 @@ ImportedManifest _readManifest(Uint8List bytes) {
       file: manifestEntryName,
     );
   }
-  if (schemaVersion != supportedImportSchemaVersion) {
+  if (!supportedImportSchemaVersions.contains(schemaVersion)) {
     throw ImportException(
       ImportErrorCode.schemaVersionUnsupported,
       'This archive uses export format $schemaVersion; this version of '
-      'Cestovni reads format $supportedImportSchemaVersion. Update the '
+      'Cestovni reads formats $supportedImportSchemaVersions. Update the '
       'app and try again.',
       file: manifestEntryName,
     );
@@ -393,22 +399,35 @@ _Table _records(Map<String, Uint8List> entries, String file) {
   }
 
   final actualHeader = records.first.fields.join(',');
+  // Accept both the current header and legacy headers for backward
+  // compatibility with ZIPs produced before CES-71.
+  String matchedHeader = expected;
   if (actualHeader != expected) {
-    throw ImportException(
-      ImportErrorCode.headerMismatch,
-      'Unexpected columns in $file.\nExpected: $expected\nFound:    '
-      '$actualHeader',
-      file: file,
-      line: records.first.line,
-    );
+    final legacy = _legacyHeaders[file];
+    if (legacy != null && actualHeader == legacy) {
+      matchedHeader = legacy;
+    } else {
+      throw ImportException(
+        ImportErrorCode.headerMismatch,
+        'Unexpected columns in $file.\nExpected: $expected\nFound:    '
+        '$actualHeader',
+        file: file,
+        line: records.first.line,
+      );
+    }
   }
 
   return _Table(
     file: file,
-    columns: expected.split(','),
+    columns: matchedHeader.split(','),
     rows: records.skip(1).toList(),
   );
 }
+
+/// Legacy headers accepted on import for backward compatibility.
+const Map<String, String> _legacyHeaders = {
+  'maintenance_rules.csv': _legacyMaintenanceRulesHeader,
+};
 
 /// A header-validated CSV: fixed column order plus its data records.
 class _Table {
@@ -699,9 +718,12 @@ List<ImportedMaintenanceRule> _readRules(_Table table) {
     final id = row.uuid('id');
     _assertUniqueId(seen, id, row);
 
-    // `cadence_km` holds canonical meters (export-v1.md § A3). Read
-    // verbatim — no conversion in either direction.
-    final cadenceMeters = row.nullablePositiveInt('cadence_km');
+    // Column holds canonical meters. Pre-CES-71 exports used the header
+    // `cadence_km`; current exports use `cadence_m`. Both are accepted.
+    final cadenceCol = table.columns.contains('cadence_m')
+        ? 'cadence_m'
+        : 'cadence_km';
+    final cadenceMeters = row.nullablePositiveInt(cadenceCol);
     final cadenceDays = row.nullablePositiveInt('cadence_days');
     if (cadenceMeters == null && cadenceDays == null) {
       throw ImportException(
