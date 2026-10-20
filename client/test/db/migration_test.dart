@@ -32,7 +32,7 @@ void main() {
         'settings',
         'vehicles',
       });
-      expect(db.schemaVersion, 4);
+      expect(db.schemaVersion, 5);
     });
 
     test('onCreate settings has the v3 default_vehicle_id column', () async {
@@ -287,6 +287,98 @@ void main() {
         expect(
           colsAfterDown.any((r) => r.read<String>('name') == 'default_vehicle_id'),
           isFalse,
+        );
+      },
+    );
+
+    test(
+      '0005 adds CHECK (user_id IS NULL OR id = user_id) to settings',
+      () async {
+        final db = openInMemoryDb();
+        addTearDown(db.close);
+        await db.customSelect('SELECT 1').get();
+
+        // Recreate a v4 settings table (no id=user_id CHECK) so we
+        // can exercise the upgrade path.
+        final settingsId = '00000000-0000-4000-8000-000000000501';
+        final mutationId = '00000000-0000-4000-8000-0000000000c1';
+        await db.customStatement('DROP TABLE settings');
+        await db.customStatement(
+          'CREATE TABLE settings ('
+          'id TEXT NOT NULL PRIMARY KEY CHECK (length(id) = 36), '
+          'user_id TEXT NULL CHECK (user_id IS NULL OR length(user_id) = 36), '
+          'row_version INTEGER NULL, '
+          'updated_at TEXT NOT NULL, '
+          'deleted_at TEXT NULL, '
+          'mutation_id TEXT NOT NULL CHECK (length(mutation_id) = 36), '
+          "preferred_distance_unit TEXT NOT NULL CHECK (preferred_distance_unit IN ('km','mi')), "
+          "preferred_volume_unit TEXT NOT NULL CHECK (preferred_volume_unit IN ('L','gal')), "
+          "currency_code TEXT NOT NULL CHECK (currency_code GLOB '[A-Z][A-Z][A-Z]'), "
+          'timezone TEXT NOT NULL CHECK (length(timezone) BETWEEN 1 AND 64), '
+          'default_vehicle_id TEXT NULL'
+          ')',
+        );
+        await db.customStatement(
+          'INSERT INTO settings '
+          '(id, user_id, row_version, updated_at, mutation_id, '
+          " preferred_distance_unit, preferred_volume_unit, currency_code, timezone) "
+          "VALUES (?, NULL, NULL, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+          [settingsId, '2026-10-20T12:00:00Z', mutationId],
+        );
+
+        final step = db.migrationRunner.steps.firstWhere(
+          (s) => s.name == '0005_settings_check_id_eq_user_id',
+        );
+        await db.transaction(() async {
+          final migrator = Migrator(db);
+          await step.up(migrator);
+        });
+
+        // Existing row (user_id NULL) must survive the rebuild.
+        final rows = await db
+            .customSelect(
+              'SELECT currency_code FROM settings WHERE id = ?',
+              variables: [Variable.withString(settingsId)],
+            )
+            .get();
+        expect(rows, hasLength(1));
+        expect(rows.single.read<String>('currency_code'), 'EUR');
+
+        // The CHECK now rejects mismatched id/user_id.
+        await expectLater(
+          () => db.customStatement(
+            'INSERT INTO settings '
+            '(id, user_id, row_version, updated_at, mutation_id, '
+            " preferred_distance_unit, preferred_volume_unit, currency_code, timezone) "
+            "VALUES (?, ?, 1, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+            [
+              '00000000-0000-4000-8000-000000000502',
+              '00000000-0000-4000-8000-999999999999',
+              '2026-10-20T12:01:00Z',
+              '00000000-0000-4000-8000-0000000000c2',
+            ],
+          ),
+          throwsA(isA<Exception>()),
+        );
+
+        // Rollback removes the CHECK.
+        await db.transaction(() async {
+          final migrator = Migrator(db);
+          await step.down(migrator);
+        });
+
+        // After rollback, mismatched id/user_id must be accepted.
+        await db.customStatement(
+          'INSERT INTO settings '
+          '(id, user_id, row_version, updated_at, mutation_id, '
+          " preferred_distance_unit, preferred_volume_unit, currency_code, timezone) "
+          "VALUES (?, ?, 1, ?, ?, 'km', 'L', 'EUR', 'UTC')",
+          [
+            '00000000-0000-4000-8000-000000000503',
+            '00000000-0000-4000-8000-888888888888',
+            '2026-10-20T12:02:00Z',
+            '00000000-0000-4000-8000-0000000000c3',
+          ],
         );
       },
     );

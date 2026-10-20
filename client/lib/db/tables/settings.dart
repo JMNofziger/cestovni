@@ -5,8 +5,10 @@ import 'protocol.dart';
 /// Mirror of `settings` from docs/specs/data-model.md.
 ///
 /// Exactly one row per user. The `id` column equals the `user_id` —
-/// legal because both are UUIDs. Enforced at the app layer (and, on
-/// server side, via trigger per the spec).
+/// legal because both are UUIDs. Enforced at the DB level with
+/// `CHECK (user_id IS NULL OR id = user_id)` (NULL allowed because
+/// `user_id` is server-assigned; see ProtocolColumns). On the server
+/// side, a trigger per the spec does the equivalent.
 @DataClassName('SettingsRow')
 class AppSettings extends Table with ProtocolColumns {
   TextColumn get preferredDistanceUnit => text()
@@ -45,4 +47,9 @@ class AppSettings extends Table with ProtocolColumns {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => [
+        'CHECK (user_id IS NULL OR id = user_id)',
+      ];
 }

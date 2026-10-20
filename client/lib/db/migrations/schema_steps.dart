@@ -229,5 +229,77 @@ List<MigrationStep> schemaSteps(Iterable<TableInfo> allTables) {
         );
       },
     ),
+    MigrationStep(
+      from: 4,
+      to: 5,
+      name: '0005_settings_check_id_eq_user_id',
+      // Closes CES-49 — enforce `id = user_id` at the DB level on the
+      // `settings` table. The spec says "enforced by trigger (or
+      // app-level invariant)"; this upgrades the client from app-level
+      // to a CHECK constraint. SQLite requires a table rebuild to add
+      // a table-level CHECK.
+      up: (m) async {
+        final settingsTable = allTables.firstWhere(
+          (t) => t.actualTableName == 'settings',
+        );
+        await m.database.customStatement(
+          'CREATE TEMPORARY TABLE _settings_backup AS '
+          'SELECT * FROM settings',
+        );
+        await m.deleteTable('settings');
+        await m.createTable(settingsTable);
+        await m.database.customStatement(
+          'INSERT INTO settings ('
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'preferred_distance_unit, preferred_volume_unit, currency_code, '
+          'timezone, default_vehicle_id'
+          ') SELECT '
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'preferred_distance_unit, preferred_volume_unit, currency_code, '
+          'timezone, default_vehicle_id '
+          'FROM _settings_backup',
+        );
+        await m.database.customStatement(
+          'DROP TABLE _settings_backup',
+        );
+      },
+      // Rollback: rebuild without the CHECK.
+      down: (m) async {
+        await m.database.customStatement(
+          'CREATE TEMPORARY TABLE _settings_backup AS '
+          'SELECT * FROM settings',
+        );
+        await m.deleteTable('settings');
+        await m.database.customStatement(
+          'CREATE TABLE settings ('
+          'id TEXT NOT NULL PRIMARY KEY CHECK (length(id) = 36), '
+          'user_id TEXT NULL CHECK (user_id IS NULL OR length(user_id) = 36), '
+          'row_version INTEGER NULL, '
+          'updated_at TEXT NOT NULL, '
+          'deleted_at TEXT NULL, '
+          'mutation_id TEXT NOT NULL CHECK (length(mutation_id) = 36), '
+          "preferred_distance_unit TEXT NOT NULL CHECK (preferred_distance_unit IN ('km','mi')), "
+          "preferred_volume_unit TEXT NOT NULL CHECK (preferred_volume_unit IN ('L','gal')), "
+          "currency_code TEXT NOT NULL CHECK (currency_code GLOB '[A-Z][A-Z][A-Z]'), "
+          'timezone TEXT NOT NULL CHECK (length(timezone) BETWEEN 1 AND 64), '
+          'default_vehicle_id TEXT NULL'
+          ')',
+        );
+        await m.database.customStatement(
+          'INSERT INTO settings ('
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'preferred_distance_unit, preferred_volume_unit, currency_code, '
+          'timezone, default_vehicle_id'
+          ') SELECT '
+          'id, user_id, row_version, updated_at, deleted_at, mutation_id, '
+          'preferred_distance_unit, preferred_volume_unit, currency_code, '
+          'timezone, default_vehicle_id '
+          'FROM _settings_backup',
+        );
+        await m.database.customStatement(
+          'DROP TABLE _settings_backup',
+        );
+      },
+    ),
   ];
 }

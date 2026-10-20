@@ -134,7 +134,7 @@ Exactly one row per user. The `id` column equals the `user_id` for simplicity; t
 
 | Column                   | Type           | Constraints                                                              | Notes                                     |
 | ------------------------ | -------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
-| *(protocol cols)*        | *(see above)*  | `id = user_id` enforced by trigger (or app-level invariant).              |                                           |
+| *(protocol cols)*        | *(see above)*  | `CHECK (user_id IS NULL OR id = user_id)` (client, migration 0005); server trigger equivalent. |                                           |
 | `preferred_distance_unit`| `TEXT`         | NOT NULL, `CHECK (preferred_distance_unit IN ('km','mi'))`               |                                           |
 | `preferred_volume_unit`  | `TEXT`         | NOT NULL, `CHECK (preferred_volume_unit IN ('L','gal'))`                 |                                           |
 | `currency_code`          | `CHAR(3)`      | NOT NULL, same check as above                                             | Default currency for new fill-ups/events. |
@@ -231,6 +231,7 @@ db/
     0002_add_maintenance_events_category_shop.sql
     0003_settings_default_vehicle_id.sql
     0004_rename_cadence_km_to_cadence_m.sql
+    0005_settings_check_id_eq_user_id.sql
     ...
 client/
   drift/
@@ -239,12 +240,13 @@ client/
       0002_add_maintenance_events_category_shop.dart
       0003_settings_default_vehicle_id.dart
       0004_rename_cadence_km_to_cadence_m.dart
+      0005_settings_check_id_eq_user_id.dart
       ...
 ```
 
 Numbers are aligned: every server migration `NNNN_*.sql` has a matching client Drift migration `NNNN_*.dart` (or equivalent in whichever client stack ships).
 
-**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
+**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4, `0005_settings_check_id_eq_user_id` = v4→v5). The illustrative `client/drift/migrations/` tree above is conceptual — keep **numeric alignment** with `db/migrations/` when the server lands.
 
 ### Rules
 
