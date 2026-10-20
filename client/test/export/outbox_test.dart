@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../db/_harness.dart';
 
 void main() {
-  test('manifest records three pending outbox mutations and a stable hash',
+  test('manifest records the vehicle insert and three fill-ups',
       () async {
     final db = openInMemoryDb();
     addTearDown(db.close);
@@ -32,7 +32,8 @@ void main() {
     }
 
     final ids = await OutboxRepository(db).pendingMutationIds();
-    expect(ids, hasLength(3));
+    expect(ids, hasLength(4),
+        reason: 'the vehicle insert is queued along with the three fill-ups');
     final expectedHash = outboxPendingHash(ids);
 
     final snapshot = await takeExportSnapshot(db);
@@ -46,7 +47,7 @@ void main() {
       appVersion: '0.0.1',
       exportedAt: DateTime.utc(2026, 8, 16, 12),
     );
-    expect(mem.utf8Of('manifest.json'), contains('"outbox_pending_count": 3'));
+    expect(mem.utf8Of('manifest.json'), contains('"outbox_pending_count": 4'));
     expect(mem.utf8Of('manifest.json'), contains(expectedHash!));
     expect(
       outboxPendingHash(ids),

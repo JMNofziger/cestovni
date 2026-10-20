@@ -64,8 +64,8 @@ void main() {
 
     final outboxRows = await db.select(db.outbox).get();
 
-    expect(outboxRows, hasLength(1),
-        reason: 'only the fill-up insert may be enqueued; attaching a photo '
+    expect(outboxRows.map((row) => row.table_).toSet(), {'vehicles', 'fill_ups'},
+        reason: 'the vehicle and the fill-up are queued; attaching a photo '
             'must enqueue nothing');
 
     for (final row in outboxRows) {

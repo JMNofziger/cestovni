@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../db/app_database.dart';
+import '../db/repositories/outbox_repository.dart';
 import '../db/repositories/settings_repository.dart';
+import '../sync/outbox_flush_worker.dart';
+import '../sync/sync_client.dart';
+import '../sync/sync_config.dart';
 import 'active_vehicle.dart';
 import 'pages/history_page.dart';
 import 'pages/log_page.dart';
@@ -35,17 +39,21 @@ class CestovniShell extends StatefulWidget {
   State<CestovniShell> createState() => _CestovniShellState();
 }
 
-class _CestovniShellState extends State<CestovniShell> {
+class _CestovniShellState extends State<CestovniShell>
+    with WidgetsBindingObserver {
   late final VehicleRepository _vehicles;
   late final SettingsRepository _settings;
   late final ActiveVehicle _activeVehicle;
   late final Stream<List<VehicleRow>> _liveVehicles;
+  SyncClient? _syncClient;
+  OutboxFlushWorker? _flusher;
   int _index = 0;
   ThemeMode _themeMode = ThemeMode.dark;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _vehicles = VehicleRepository(widget.db);
     _settings = SettingsRepository(widget.db);
     _activeVehicle = ActiveVehicle();
@@ -54,6 +62,43 @@ class _CestovniShellState extends State<CestovniShell> {
     // rebuild (which would loop with the active-vehicle notifier).
     _liveVehicles = _vehicles.watchLive();
     _seedActiveVehicle();
+    _onForeground();
+  }
+
+  /// 30s drain while [SyncConfig] has a URL and a bearer (dev token or
+  /// JWT). Unconfigured launches stay fully offline.
+  void _onForeground() {
+    const cfg = SyncConfig.fromEnvironment;
+    if (!cfg.isConfigured) return;
+    _syncClient ??= SyncClient(
+      baseUrl: cfg.baseUrl,
+      bearerToken: cfg.bearerToken,
+    );
+    _flusher ??= OutboxFlushWorker(
+      outbox: OutboxRepository(widget.db),
+      client: _syncClient!,
+    );
+    _flusher!.startPeriodicFlush();
+    _flusher!.flushOnce();
+  }
+
+  void _onBackground() {
+    _flusher?.stopPeriodicFlush();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _onForeground();
+        break;
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        _onBackground();
+    }
   }
 
   /// CES-57: `settings.defaultVehicleId` wins over "first vehicle
@@ -74,6 +119,9 @@ class _CestovniShellState extends State<CestovniShell> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _onBackground();
+    _syncClient?.close();
     _activeVehicle.dispose();
     super.dispose();
   }

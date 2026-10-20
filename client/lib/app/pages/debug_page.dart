@@ -9,8 +9,9 @@ import '../../sync/sync_client.dart';
 import '../../sync/sync_config.dart';
 
 /// Debug tab — exposes schema version, migration step names, an
-/// integrity check, and (CES-44 gate slice) a **Sync now** button that
-/// flushes the local outbox against the configured dev sync stub.
+/// integrity check, and a **Sync now** button that flushes the local
+/// outbox against [SyncConfig] (dev stub on `:8787`, or the CES-43 API).
+/// Manual flush ignores backoff. A 401 still pauses the shell timer.
 class DebugPage extends StatefulWidget {
   const DebugPage({super.key, required this.db});
 

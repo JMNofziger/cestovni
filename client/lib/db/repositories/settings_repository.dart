@@ -14,6 +14,7 @@ library;
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import 'outbox_repository.dart';
 import 'protocol_writes.dart';
 
 /// Defaults for a brand-new install. Aligned with M1 brief — Czech
@@ -35,15 +36,24 @@ const Object _unset = Object();
 
 class SettingsRepository {
   SettingsRepository(
-    this._db, {
+    AppDatabase db, {
     String Function()? newId,
     String Function()? now,
-  })  : _newId = newId ?? newUuid,
-        _now = now ?? nowIsoUtc;
+    OutboxRepository? outbox,
+    bool enqueue = true,
+  })  : _db = db,
+        _newId = newId ?? newUuid,
+        _now = now ?? nowIsoUtc,
+        _outbox = enqueue
+            ? (outbox ?? OutboxRepository(db, newId: newId, now: now))
+            : null;
 
   final AppDatabase _db;
   final String Function() _newId;
   final String Function() _now;
+  final OutboxRepository? _outbox;
+
+  static const String wireTable = 'settings';
 
   /// Read the single settings row, creating it with defaults if it
   /// does not yet exist. Always returns a row.
@@ -69,6 +79,11 @@ class SettingsRepository {
   /// clear it, or pass an id to set it (see `_unset` sentinel above).
   /// Bootstraps the row first if necessary so the UI never has to
   /// special-case "settings not yet created".
+  /// User-intentional write. [_bootstrap] does not enqueue: a fresh
+  /// install has never been on the server. The first [update] sends
+  /// `insert` while `row_version` is null; a later update sends
+  /// `update` once the server has assigned `row_version`. A second
+  /// edit before that hydrate coalesces into the pending insert.
   Future<SettingsRow> update({
     String? preferredDistanceUnit,
     String? preferredVolumeUnit,
@@ -76,32 +91,75 @@ class SettingsRepository {
     String? timezone,
     Object? defaultVehicleId = _unset,
   }) async {
-    final row = await getOrBootstrap();
-    await (_db.update(_db.appSettings)..where((s) => s.id.equals(row.id)))
-        .write(
-      AppSettingsCompanion(
-        preferredDistanceUnit: preferredDistanceUnit == null
-            ? const Value.absent()
-            : Value(preferredDistanceUnit),
-        preferredVolumeUnit: preferredVolumeUnit == null
-            ? const Value.absent()
-            : Value(preferredVolumeUnit),
-        currencyCode: currencyCode == null
-            ? const Value.absent()
-            : Value(currencyCode),
-        timezone:
-            timezone == null ? const Value.absent() : Value(timezone),
-        defaultVehicleId: identical(defaultVehicleId, _unset)
-            ? const Value.absent()
-            : Value(defaultVehicleId as String?),
-        updatedAt: Value(_now()),
-        mutationId: Value(_newId()),
-      ),
+    return _db.transaction(() async {
+      final row = await getOrBootstrap();
+      await (_db.update(_db.appSettings)..where((s) => s.id.equals(row.id)))
+          .write(
+        AppSettingsCompanion(
+          preferredDistanceUnit: preferredDistanceUnit == null
+              ? const Value.absent()
+              : Value(preferredDistanceUnit),
+          preferredVolumeUnit: preferredVolumeUnit == null
+              ? const Value.absent()
+              : Value(preferredVolumeUnit),
+          currencyCode: currencyCode == null
+              ? const Value.absent()
+              : Value(currencyCode),
+          timezone:
+              timezone == null ? const Value.absent() : Value(timezone),
+          defaultVehicleId: identical(defaultVehicleId, _unset)
+              ? const Value.absent()
+              : Value(defaultVehicleId as String?),
+          updatedAt: Value(_now()),
+          mutationId: Value(_newId()),
+        ),
+      );
+      final updated = await (_db.select(_db.appSettings)
+            ..where((s) => s.id.equals(row.id)))
+          .getSingle();
+      await _enqueue(updated);
+      return updated;
+    });
+  }
+
+  Future<void> _enqueue(SettingsRow row) async {
+    final box = _outbox;
+    if (box == null) return;
+    final payload = _payload(row);
+    final pending = await (_db.select(_db.outbox)..where(
+          (o) =>
+              o.table_.equals(wireTable) &
+              o.rowId.equals(row.id) &
+              o.op.isIn([OutboxOp.insert.wire, OutboxOp.update.wire]),
+        ))
+        .get();
+    if (row.rowVersion == null && pending.isEmpty) {
+      await box.enqueueInsert(
+        table: wireTable,
+        rowId: row.id,
+        payload: payload,
+      );
+      return;
+    }
+    await box.enqueueUpdate(
+      table: wireTable,
+      rowId: row.id,
+      payload: payload,
     );
-    final updated =
-        await (_db.select(_db.appSettings)..where((s) => s.id.equals(row.id)))
-            .getSingle();
-    return updated;
+  }
+
+  Map<String, dynamic> _payload(SettingsRow row) {
+    return <String, dynamic>{
+      'id': row.id,
+      'preferred_distance_unit': row.preferredDistanceUnit,
+      'preferred_volume_unit': row.preferredVolumeUnit,
+      'currency_code': row.currencyCode,
+      'timezone': row.timezone,
+      'default_vehicle_id': row.defaultVehicleId,
+      'updated_at': row.updatedAt,
+      'deleted_at': row.deletedAt,
+      'mutation_id': row.mutationId,
+    };
   }
 
   /// Runs in a transaction with a re-check so concurrent first-run

@@ -40,6 +40,7 @@ void main() {
           isFull: true,
         ),
       );
+      await _dropVehicleOutbox(db);
 
       late Map<String, String> capturedHeaders;
       late Map<String, dynamic> capturedBody;
@@ -124,6 +125,7 @@ void main() {
           isFull: true,
         ),
       );
+      await _dropVehicleOutbox(db);
 
       final mock = MockClient((req) async {
         final body = jsonDecode(req.body) as Map<String, dynamic>;
@@ -177,6 +179,7 @@ void main() {
           isFull: true,
         ),
       );
+      await _dropVehicleOutbox(db);
 
       final mock = MockClient(
         (req) async => http.Response('upstream', 503),
@@ -222,4 +225,11 @@ void main() {
       expect(calls, 0);
     });
   });
+}
+
+Future<void> _dropVehicleOutbox(dynamic db) {
+  return db.customStatement(
+    'DELETE FROM outbox WHERE "table" = ?',
+    ['vehicles'],
+  );
 }

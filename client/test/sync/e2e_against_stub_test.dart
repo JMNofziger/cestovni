@@ -74,6 +74,12 @@ void main() {
       ),
     );
 
+    // The vehicle insert is covered by unit tests. This proof stays on
+    // the fill-up row the stub's GET /changes assertion checks.
+    await db.customStatement(
+      'DELETE FROM outbox WHERE "table" = ?',
+      ['vehicles'],
+    );
     final pending = await outbox.pendingBatch();
     expect(pending, hasLength(1));
     final mutationId = pending.single.mutationId;
