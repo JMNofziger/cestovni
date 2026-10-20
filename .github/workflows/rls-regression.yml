@@ -1,7 +1,5 @@
 # RLS / authorization regression (Gate 4, ADR 001). Callable from promotion
 # workflows via workflow_call; also trigger on migration / RLS test changes.
-#
-# Steps remain TODO until the runner is wired; placeholders exit 0 today.
 
 name: rls-regression
 
@@ -10,9 +8,11 @@ on:
 
   pull_request:
     paths:
+      - 'db/**'
       - 'migrations/**'
       - 'tests/rls/**'
       - '.github/workflows/rls-regression.yml'
+      - 'ci/rls-regression.yml'
 
 jobs:
   rls-test:
@@ -26,14 +26,24 @@ jobs:
           POSTGRES_PASSWORD: testpass
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cestovni_test -d cestovni_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
-      - name: Apply migrations
-        run: 'echo "TODO: run migration tool against test DB"'
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Run RLS regression tests
-        run: 'echo "TODO: execute tests/rls/*.sql against test DB and assert results"'
+      - name: Apply migrations and run RLS tests
+        env:
+          DATABASE_URL: postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni_test
+        run: |
+          set -o pipefail
+          mkdir -p test-results
+          ./tests/rls/run.sh | tee test-results/rls.log
 
       - name: Upload test results
         if: always()
@@ -41,3 +51,4 @@ jobs:
         with:
           name: rls-regression-results
           path: test-results/
+          if-no-files-found: ignore
