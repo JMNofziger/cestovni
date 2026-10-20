@@ -34,7 +34,8 @@
 | Audience | Channel | Platform fee | Client surface |
 |----------|---------|--------------|----------------|
 | Android (~70%) | **Direct APK** (primary); Play Store optional ($25 once) | $0 recurring (APK); $25 one-time if Play | Flutter **native** (existing `client/android/`) |
-| iPhone (~30%) | **Installable PWA-lite** (Add to Home Screen) | $0 store | Vanilla HTML + IndexedDB — [`pwa-lite-v1.md`](../pwa-lite-v1.md) |
+| iPhone (~30%) | **Installable PWA-lite** (Add to Home Screen) | $0 store | Vanilla HTML + IndexedDB — [`pwa-lite-v1.md`](../pwa-lite-v1.md) — **PARKED** (CES-62/63) |
+| Non-Android (phone browser) | **Browser portal** (phone-first, online) | $0 (hosting) | New client per [ADR 006](006-browser-client.md); stack TBD; requires M3 |
 | Native iOS App Store | **Deferred** | $99/year when accepted | Native `client/ios/` compile may continue in PR CI only; **no weekly iOS CI** until re-scoped |
 
 **Flutter web PWA offline spike:** NO-GO (2026-05-21). iPhone engineering follows [005-addendum-pwa-lite-ios.md](005-addendum-pwa-lite-ios.md). Spike record: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
@@ -96,6 +97,7 @@ Product parked CES-62 / CES-63. PWA-lite code stays on `main`; do not delete it.
 ## Related
 
 - [ADR 003](003-mobile-stack.md) — Flutter + Drift (Android native).
+- [ADR 006](006-browser-client.md) — Browser client for non-Android (phone-first).
 - [005-addendum-pwa-lite-ios.md](005-addendum-pwa-lite-ios.md) — iPhone PWA-lite decision (post-spike).
 - [`../pwa-lite-v1.md`](../pwa-lite-v1.md) — implementation spec.
 - [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/) — spike record.

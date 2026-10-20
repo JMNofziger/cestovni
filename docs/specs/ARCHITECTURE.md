@@ -31,9 +31,9 @@
 | Browser client (non-Android) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | **Proposed** (2026-10-20) |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
-## Stage 1 client distribution (2026-05-17)
+## Client distribution (2026-10-20)
 
-Per [ADR 005](adr/005-distribution-channels.md):
+Per [ADR 005](adr/005-distribution-channels.md) + [ADR 006](adr/006-browser-client.md):
 
 ```text
 [Android]       Flutter native APK — primary client (M0–M2 on main)
