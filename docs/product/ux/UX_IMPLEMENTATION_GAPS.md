@@ -4,7 +4,7 @@
 
 **Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **CES-67 Done** (2026-08-15). **CES-40 Done** (receipt photos, 2026-08-15) — **M1 verticals all closed.** **CES-41** export and **CES-70** import shipped (M2 closed). Next client coding: **CES-71** cadence rename.
 
-**Last reviewed:** 2026-08-21 (CES-70 merged to `main`, PR #25)
+**Last reviewed:** 2026-10-20 (CES-62/63 parked; ADR 006 Proposed — no portal code)
 
 ---
 
