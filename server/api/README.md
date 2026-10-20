@@ -59,13 +59,24 @@ Postgres 15+ with [`0001_init.sql`](../../db/migrations/0001_init.sql) applied t
 ```bash
 cd server/api
 npm ci
-DATABASE_URL=postgresql://postgres@127.0.0.1:5432/cestovni \
+# TCP when the DSN user has a password (CI uses this shape).
+DATABASE_URL=postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni \
   JWT_SECRET=dev-secret \
   PORT=8080 \
   npm start
 ```
 
-`PORT` defaults to `8080`. `HOST` defaults to `0.0.0.0`.
+`node-pg` uses TCP when the URL has no host, and this repo's local cluster requires SCRAM on `127.0.0.1`. For peer auth over the Unix socket, run the process as the database OS user and set the host:
+
+```bash
+sudo -u postgres env \
+  DATABASE_URL='postgresql:///cestovni?host=/var/run/postgresql' \
+  JWT_SECRET=dev-secret \
+  PORT=8080 \
+  node src/server.js
+```
+
+`PORT` defaults to `8080`. `HOST` defaults to `0.0.0.0`. A remote Postgres is the same `DATABASE_URL`; the role still has to be able to `SET ROLE cestovni_app`.
 
 Contract suite (mints user A and user B JWTs from `JWT_SECRET`):
 
