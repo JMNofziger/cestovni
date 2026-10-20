@@ -4,7 +4,7 @@ Stubs and working gates for Cestovni. All `.yml` files are shaped for GitHub Act
 
 | File | Purpose | State | Spec / ADR |
 |------|---------|-------|------------|
-| [`rls-regression.yml`](rls-regression.yml) | RLS / authorization regression tests against a temporary Postgres | Stub (lands real in M3) | [ADR 001](../docs/specs/adr/001-backend-api-boundary.md), `tests/rls/` |
+| [`rls-regression.yml`](rls-regression.yml) | RLS / authorization regression tests against a temporary Postgres | **Live** — `tests/rls/run.sh` (CES-42). GitHub runs [`.github/workflows/rls-regression.yml`](../.github/workflows/rls-regression.yml) | [ADR 001](../docs/specs/adr/001-backend-api-boundary.md), `tests/rls/` |
 | [`promotion-gates.yml`](promotion-gates.yml) | Migration dry-run + RLS + contract + restore smoke on release | Stub (lands real in M3) | [ADR 001](../docs/specs/adr/001-backend-api-boundary.md) |
 | [`telemetry-gate.yml`](telemetry-gate.yml) | Enforces the telemetry allow-list YAML + client-source scan when client exists | **Live** — validates YAML + client today | [`telemetry-allowlist.md`](../docs/specs/telemetry-allowlist.md) §"CI gate" |
 | [`telemetry-gate.py`](telemetry-gate.py) | Validator script invoked by the telemetry-gate workflow | **Live** (client scanner active as of CES-36 / M0-01) | same |

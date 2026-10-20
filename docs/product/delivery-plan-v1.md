@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); **CES-65/CES-66 Done** (repo + Linear 2026-07-22); **CES-67 Done** (Maintenance tab + History Maint, 2026-08-15); **CES-40 Done** (receipt photo pipeline, 2026-08-15) — **M1 verticals all closed.** **PWA-lite Phase 1+2 on `main`** (PR #3 + #4); **CES-62 / CES-63 parked** (2026-10-20). **M3 gate slice on `main`** (dev stub + outbox); full **CES-42**–**CES-45** remain. **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); **CES-65/CES-66 Done** (repo + Linear 2026-07-22); **CES-67 Done** (Maintenance tab + History Maint, 2026-08-15); **CES-40 Done** (receipt photo pipeline, 2026-08-15) — **M1 verticals all closed.** **PWA-lite Phase 1+2 on `main`** (PR #3 + #4); **CES-62 / CES-63 parked** (2026-10-20). **M3 gate slice on `main`** (dev stub + outbox); **CES-42** server Postgres + RLS in repo; **CES-43**–**CES-45** remain. **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -12,21 +12,20 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 ## Current focus
 
-**Shipped:** **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71) cadence rename** merged to `main` ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **[ADR 006](../specs/adr/006-browser-client.md) Accepted** ([PR #28](https://github.com/JMNofziger/cestovni/pull/28), 2026-10-20) — phone-browser portal with locked capability matrix; stack TBD (**[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)**). **M2 (export + import) closed** (CES-41 + CES-70).
+**Shipped:** **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71) cadence rename** ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** settings CHECK ([PR #30](https://github.com/JMNofziger/cestovni/pull/30)). **[ADR 006](../specs/adr/006-browser-client.md) Accepted** with portal stack **Preact + TypeScript** ([CES-73](https://linear.app/personal-interests-llc/issue/CES-73), [PR #31](https://github.com/JMNofziger/cestovni/pull/31)). **M2 (export + import) closed** (CES-41 + CES-70).
 
-**In flight:** **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** enforce `settings.id = user_id` CHECK at DB level (M0 follow-up, blocks CES-42).
+**In flight:** **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** server Postgres + RLS (`db/migrations/0001_init.sql`, `tests/rls/run.sh`).
 
 **Parked:** **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** / **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** iPhone PWA-lite install-doc + T1. `client/web-lite/` stays on `main`.
 
-**Next:** **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)** portal stack selection spike (ADR 006 follow-up). **M3 (CES-42–45)** unblocked by ADR 006 Accept — start after CES-49 + CES-73 land. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
+**Next:** **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** server API + auth, after CES-42 merges. Do not start CES-43 in the same change. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
 
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
-| **A — M0 hygiene** | **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** | Blocks M3; low effort | `CHECK (user_id IS NULL OR id = user_id)` on `settings`; migration 0005 |
-| **B — portal stack** | **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)** | ADR 006 follow-up | Stack locked in ADR 006 amendment or ADR 007 |
-| **C — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
+| **A — M3 gateway** | **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** | Server schema + RLS; blocks CES-43 | `0001_init.sql`, RLS suite green, CI runs `tests/rls/run.sh` |
+| **B — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
 
-**Shipped this cycle:** **CES-71** (cadence rename), **ADR 006** (Accepted), **CES-70** (ZIP import), **CES-41** (Export ZIP). Earlier: **CES-67** (Maintenance) and **CES-40** (receipt photos).
+**Shipped this cycle:** **CES-49** (settings CHECK), **CES-73** (portal stack), **CES-71** (cadence rename), **ADR 006** (Accepted). Earlier: **CES-70** (ZIP import), **CES-41** (Export ZIP), **CES-67** (Maintenance), **CES-40** (receipt photos).
 
 **Prompts (executed):** [`prompts/ces-67-maintenance.md`](prompts/ces-67-maintenance.md) · [`prompts/ces-40-photo-pipeline.md`](prompts/ces-40-photo-pipeline.md) · [`prompts/ces-41-export.md`](prompts/ces-41-export.md) · [`prompts/ces-70-import.md`](prompts/ces-70-import.md)
 
@@ -98,12 +97,12 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
   - 🟩 **Merge / review closure (2026-04-22)** — code on `main` since 2026-04-18; CTO audit passed; `verify-full` green; both Linear issues in **Done**. *(Weekly native iOS CI paused 2026-05-17 — see M-dist.)*
   - 🟨 **M0 follow-ups (tracked, non-blocking):**
     - **CES-48** — tighten `client/test/db/indexes_test.dart` to strict-equality set + note `v*_v*_noop.sql` replay semantics in `tests/client-db/README.md`. *Blocks CES-47.*
-    - **CES-49** — enforce `settings.id = user_id` at DB level on client + server (adds first post-`0001_init` migration step). *Blocks CES-42.*
+    - 🟩 **CES-49** — `CHECK (user_id IS NULL OR id = user_id)` on client settings (migration 0005, PR #30) and server `db/migrations/0001_init.sql` (CES-42).
     - **CES-50** — remove `_keepMigratorVisible` scaffold from `client/lib/app/pages/debug_page.dart` when CES-47 lands rollback UI (or before, if CES-47 defers). *Blocks CES-47.*
 
 ### M1 — Local logging + math
 
-- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). **CES-41 export + CES-70 import shipped** (M2 closed). **CES-71 Done** (cadence rename, PR #29). Next client coding: **CES-49** (settings invariant).
+- 🟩 **M1 rollup (closed 2026-08-16)** — offline logging usable end-to-end without a server. Log / History / vehicles / settings / metrics / Maint / photos on `main` (`bb1d5d5`). **CES-41 export + CES-70 import shipped** (M2 closed). **CES-71 Done** (cadence rename, PR #29). **CES-49 Done** (settings CHECK, PR #30).
   - 🟩 **CES-38 — Consumption math + golden tests** — **Done in repo on `main`** (2026-05): `client/lib/consumption/`, auto-discovery runner over 20 `tests/math/fixtures/`, module-purity test, validation wired in Log/History save paths. Follow-ups: **CES-51** / **CES-52** (non-blocking).
   - 🟩 **CES-39 — Fill-up + vehicle UI (core)** — **Done** (repo 2026-05, Linear 2026-07-17): repos + vehicle CRUD + Log/History UI; 121+ tests. Out of scope → **CES-65** / **CES-66** / **CES-67** / **CES-40**.
   - 🟩 **CES-57 — Settings prefs + default vehicle** — **Done** (PR #9, Linear Done). Display wiring closed as **CES-65**.
@@ -121,8 +120,8 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M3 — Backup + restore
 
-  - 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests. *(Fill-up outbox gate slice + `server/dev-sync-stub/` already on `main`. Remaining: real Postgres/RLS, production API, vehicles/settings/maint enqueue, restore UX. **CES-70 gate cleared.** Start when product says; next client coding is CES-71.)*
-  - 🟥 **CES-42 — Server Postgres + RLS migrations** — `[tests/rls/](../../tests/rls/)`, `[ci/rls-regression.yml](../../ci/rls-regression.yml)`.
+  - 🟥 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests. *(Fill-up outbox gate slice + `server/dev-sync-stub/` on `main`. **CES-42** server Postgres + RLS is in repo. Remaining: production API (CES-43), vehicles/settings/maint enqueue (CES-44), restore UX (CES-45).)*
+  - 🟩 **CES-42 — Server Postgres + RLS migrations** — [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`tests/rls/run.sh`](../../tests/rls/run.sh), [`ci/rls-regression.yml`](../../ci/rls-regression.yml). Roles, `auth_user_id()` stub, five tables, forced RLS. API is CES-43.
   - 🟥 **CES-43 — Server API + auth** — contract tests `[tests/contract/](../../tests/contract/)` (managed + self-host). Dev stub on `main` is **not** this ticket.
   - 🟥 **CES-44 — Backup / outbox (client)** — fill-up enqueue/flush **gate slice on `main`**; vehicles/settings/maint still do not enqueue. Depends on CES-37 + real CES-43.
   - 🟥 **CES-45 — Restore + dead-letter UX** — depends on CES-44; integration `tests/backup/` (planned).
@@ -182,7 +181,7 @@ Epic: **[CES-35 Delivery v1](https://linear.app/personal-interests-llc/issue/CES
 | 5   | [CES-40](https://linear.app/personal-interests-llc/issue/CES-40) | Photo pipeline implementation            | M1        | `docs/specs/photo-pipeline.md`                                                                                                                                                      | CES-37         | medium | **Done** (2026-08-16, PR #18) — `client/lib/photos/` + Log attach UI; isolate decode; 47 tests in `client/test/photos/` + `log_page_photos_test.dart`. Manual device checklist: [`ces-40-manual-test.md`](ces-40-manual-test.md) (not yet run). |
 | 6   | [CES-41](https://linear.app/personal-interests-llc/issue/CES-41) | Export ZIP                               | M2        | `docs/specs/export-v1.md`                                                                                                                                                           | CES-37         | medium | **Done in repo** — `client/lib/export/`, Settings Export, `client/test/export/`. Prompt [`prompts/ces-41-export.md`](prompts/ces-41-export.md). |
 | 6b  | [CES-70](https://linear.app/personal-interests-llc/issue/CES-70) | ZIP import (replace)                     | M2        | `docs/specs/export-import.md`                                                                                                                                                       | CES-41         | medium | **Done on `main`** (PR #25) — `client/lib/import/` + Settings Import; 17 spec cases in `client/test/import/`. Prompt [`prompts/ces-70-import.md`](prompts/ces-70-import.md). |
-| 7   | [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) | Server Postgres + RLS migrations         | M3        | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md`                                                                                                           | —              | medium | —                                                                                                        |
+| 7   | [CES-42](https://linear.app/personal-interests-llc/issue/CES-42) | Server Postgres + RLS migrations         | M3        | `docs/specs/data-model.md` + `docs/specs/adr/001-backend-api-boundary.md`                                                                                                           | —              | medium | **In repo** — `db/migrations/0001_init.sql`, `tests/rls/` |
 | 8   | [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) | Server API + auth                        | M3        | `docs/specs/adr/001-backend-api-boundary.md` + `docs/specs/sync-protocol.md`                                                                                                        | CES-42         | high   | **Backlog** — `server/dev-sync-stub/` (fill-ups only) is **not** CES-43. |
 | 9   | [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) | Backup / outbox (client)                 | M3        | `docs/specs/adr/002-backup-sync-layer.md` + `docs/specs/sync-protocol.md`                                                                                                           | CES-37, CES-43 | high   | **Gate slice on `main`** (fill-up enqueue/flush). Remaining: vehicles/settings/maint + real API. |
 | 10  | [CES-45](https://linear.app/personal-interests-llc/issue/CES-45) | Restore + dead-letter UX                 | M3        | `docs/specs/sync-protocol.md`                                                                                                                                                       | CES-44         | medium | —                                                                                                        |
@@ -243,5 +242,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-10-20 — ADR 006 Accepted (PR #28); CES-71 Done (PR #29); CES-72 Done. CES-49 in flight; CES-73 next. CES-62/63 parked. M3 unblocked.*
+*Last updated: 2026-10-20 — CES-42 server Postgres + RLS (`db/migrations/0001_init.sql`, `tests/rls/run.sh`). CES-49 and CES-73 shipped. Next is CES-43. CES-62/63 parked.*
 
