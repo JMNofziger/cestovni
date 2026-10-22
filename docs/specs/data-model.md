@@ -189,6 +189,14 @@ In-progress fill-ups not yet promoted to `fill_ups`. Never outboxed; never expor
 
 Schema defined in [`photo-pipeline.md` — `photo_refs` table](photo-pipeline.md#photo_refs-table-client-only-never-outboxed). Client-only; referenced here so there is one place that lists every client-side table.
 
+### `sync_cursors`
+
+CES-45. One row per backed-up table. `table_name` is the primary key, `last_row_version` is the last `GET /changes` cursor committed with that page, `updated_at` is UTC ISO-8601. Never outboxed.
+
+### `backup_marks`
+
+CES-45. Written when the user discards a dead-letter `insert`. Primary key is (`table_name`, `row_id`). `created_at` is UTC ISO-8601. The domain row stays; Settings → Backup lists the mark as not backed up. Never outboxed.
+
 ## RLS (Postgres)
 
 Every backed-up table is `ENABLE ROW LEVEL SECURITY`. Policies are identical across tables except for table name; managed by a shared SQL macro in `db/migrations/`. The policy shape:
@@ -216,7 +224,7 @@ CREATE POLICY fill_ups_delete_own
   USING (user_id = auth_user_id());
 ```
 
-- `auth_user_id()` is a SECURITY-DEFINER function that reads the verified JWT claim, defined once in migrations. Self-host operators install the same function; the token source differs but the claim shape does not (see [ADR 001 identity model](adr/001-backend-api-boundary.md#security-model)). v1 init implements it as a stub over `current_setting('app.user_id')` until CES-43 wires the token.
+- `auth_user_id()` is a SECURITY-DEFINER function that reads the verified JWT claim, defined once in migrations. Self-host operators install the same function; the token source differs but the claim shape does not (see [ADR 001 identity model](adr/001-backend-api-boundary.md#security-model)). v1 `auth_user_id()` reads `current_setting('app.user_id', true)`. CES-43 sets that GUC from the verified JWT `sub` on each request. The function stays a GUC reader so CI and self-host can set the same session variable.
 - The v1 migration expresses the four command policies above as two policies: `<table>_select_own` (`FOR SELECT`) and `<table>_modify_own` (`FOR ALL` with `USING` and `WITH CHECK`). `cestovni_app` is not granted `DELETE`; soft-delete is an `UPDATE`.
 - The runtime role `cestovni_app` has only `SELECT, INSERT, UPDATE` on backed-up tables and **no BYPASSRLS**, per [ADR 001 role model](adr/001-backend-api-boundary.md#role-model).
 - The RLS regression suite in `tests/rls/` covers allow/deny for each table and cross-user checks (ADR 001 gate).
@@ -247,9 +255,11 @@ client/
 
 Numbers are aligned: every server migration `NNNN_*.sql` has a matching client Drift migration `NNNN_*.dart` (or equivalent in whichever client stack ships).
 
-**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4, `0005_settings_check_id_eq_user_id` = v4→v5). The illustrative `client/drift/migrations/` tree above is conceptual.
+**Current client layout (M0, Flutter + Drift):** schema and steps live under [`client/lib/db/`](../../client/lib/db/) (`schema_steps.dart` + `migration_runner.dart`; `0001_init` = v0→v1, `0003_settings_default_vehicle_id` = v2→v3, `0004_rename_cadence_km_to_cadence_m` = v3→v4, `0005_settings_check_id_eq_user_id` = v4→v5, `0006_sync_cursors` = v5→v6). The illustrative `client/drift/migrations/` tree above is conceptual.
 
-**Server layout (CES-42):** [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql) creates all five backed-up tables at the **current** shape (post-0005: `cadence_m`, settings `CHECK (user_id IS NULL OR id = user_id)`, RLS, roles, `cestovni_row_version_seq`, `auth_user_id()`). The server does not replay 0002–0005; there was no server database at the old column names. Later server changes add `0006_….sql` and a matching client step so the numbers stay aligned from here.
+**Client-only exception (CES-45):** `0006_sync_cursors` creates `sync_cursors` and `backup_marks`. Those tables are never backed up and have **no** server migration. The next shared client/server change uses `0007`, so backed-up numbers stay aligned after this local step.
+
+**Server layout (CES-42):** [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql) creates all five backed-up tables at the **current** backed-up shape (post-0005: `cadence_m`, settings `CHECK (user_id IS NULL OR id = user_id)`, RLS, roles, `cestovni_row_version_seq`, `auth_user_id()`). The server does not replay 0002–0005; there was no server database at the old column names. Client schema v6 does not change that shape.
 
 ### Rules
 
@@ -264,7 +274,7 @@ Numbers are aligned: every server migration `NNNN_*.sql` has a matching client D
 Client-side rollback (if a release corrupts the local DB) is handled by:
 
 - Drift's automatic migration execution (forward only);
-- a **hard reset + restore** fallback path — the user signs in again and the app rebuilds local SQLite from `GET /changes` (see [`sync-protocol.md`](sync-protocol.md)). Tooling to trigger this manually from Settings is **Stage 5** work.
+- a **hard reset + restore** fallback path — the user signs in again and the app rebuilds local SQLite from `GET /changes` (see [`sync-protocol.md`](sync-protocol.md)). Settings → Backup → **Restore from backup** (CES-45) runs that download. A separate wipe-and-rebuild control is still CES-47.
 
 ## Constraints summary (one place)
 

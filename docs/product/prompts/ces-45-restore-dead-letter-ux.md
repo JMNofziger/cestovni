@@ -1,10 +1,10 @@
 # Cursor execution prompt — CES-45 Restore + dead-letter UX
 
-> **Status: NOT STARTED.**
-> **Linear:** [CES-45](https://linear.app/personal-interests-llc/issue/CES-45) — Backlog.
-> **Blocked by:** CES-44 (Client outbox expansion must merge first).
-> **Blocks:** nothing directly. This closes M3.
-> This is the fourth and final M3 ticket.
+> **Status: EXECUTED** (2026-10-20) — draft [PR #36](https://github.com/JMNofziger/cestovni/pull/36), stacked on CES-44. Not on `main` until #35 and #36 merge.
+> Linear **[CES-45](https://linear.app/personal-interests-llc/issue/CES-45)** Done.
+> Next coding focus is **[CES-46](https://linear.app/personal-interests-llc/issue/CES-46)**. Do not start it from this prompt.
+>
+> Kept as an archive of the execution brief (do not re-run). Open limits are in [`../delivery-plan-v1.md`](../delivery-plan-v1.md) § M3 known gaps.
 
 **Branch:** cut from **`main`** (after CES-44 merges)
 **Spec (normative):** [`docs/specs/sync-protocol.md`](../../specs/sync-protocol.md) (§Restore flow, §Dead-letter handling)
@@ -171,22 +171,22 @@ Per the CES-45 Linear issue acceptance: `restore_start` / `restore_result` telem
 
 ## Acceptance
 
-- [ ] `GET /restore/manifest` fetched and per-table progress displayed.
-- [ ] Core tables (`vehicles` + `fill_ups`) restore to completion; UI unblocks.
-- [ ] Background tables (`maintenance_rules`, `maintenance_events`, `settings`) restore continues after UI unblock.
-- [ ] Per-table cursor persisted in one Drift transaction with the page rows.
-- [ ] Partial restore resumes from last cursor — no duplicate rows on re-run.
-- [ ] Local writes during restore do not conflict; new fill-ups go to outbox normally.
-- [ ] Dead-letter panel in Settings → Backup shows count + human-readable summaries.
-- [ ] Retry action resets attempts and re-queues the mutation.
-- [ ] Discard action hard-deletes the outbox row; local data row remains.
-- [ ] View details shows the error envelope.
-- [ ] Integration test in `tests/backup/` proves restore convergence (local DB = server state).
-- [ ] Restore handles network errors gracefully (retry button, not a crash).
-- [ ] `restore_start` / `restore_result` telemetry stubs in place (debugPrint, not SDK).
-- [ ] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green.
-- [ ] `delivery-plan-v1.md` CES-45 row → 🟩; M3 rollup → 🟩.
-- [ ] Linear CES-45 Done + closeout comment.
+- [x] `GET /restore/manifest` fetched and per-table progress displayed.
+- [x] Core tables (`vehicles` + `fill_ups`) restore to completion; UI unblocks.
+- [x] Background tables (`maintenance_rules`, `maintenance_events`, `settings`) restore continues after UI unblock.
+- [x] Per-table cursor persisted in one Drift transaction with the page rows.
+- [x] Partial restore resumes from last cursor — no duplicate rows on re-run.
+- [x] Local writes during restore do not conflict; new fill-ups go to outbox normally.
+- [x] Dead-letter panel in Settings → Backup shows count + human-readable summaries.
+- [x] Retry action resets attempts and re-queues the mutation.
+- [x] Discard action hard-deletes the outbox row; local data row remains.
+- [x] View details shows the error envelope.
+- [x] Integration test in `tests/backup/` proves restore convergence (local DB = server state).
+- [x] Restore handles network errors gracefully (retry button, not a crash).
+- [x] `restore_start` / `restore_result` telemetry stubs in place (debugPrint, not SDK).
+- [x] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green.
+- [x] `delivery-plan-v1.md` CES-45 row → 🟩; M3 rollup → 🟩.
+- [x] Linear CES-45 Done + closeout comment.
 
 ## Status report (required)
 

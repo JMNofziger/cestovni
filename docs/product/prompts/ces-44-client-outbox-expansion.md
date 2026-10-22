@@ -1,10 +1,8 @@
 # Cursor execution prompt — CES-44 Client outbox expansion (all backed-up tables)
 
-> **Status: NOT STARTED.**
-> **Linear:** [CES-44](https://linear.app/personal-interests-llc/issue/CES-44) — Backlog.
-> **Blocked by:** CES-43 (Server API + auth must merge first).
-> **Blocks:** CES-45 (Restore + dead-letter UX).
-> This is the third M3 ticket. Do not start CES-45 until this merges.
+> **Status: EXECUTED** (2026-10-20) — draft [PR #35](https://github.com/JMNofziger/cestovni/pull/35) (`pijesak/ces-44-client-outbox-05be`). Not on `main` yet.
+> Linear **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)** Done.
+> CES-45 followed on a branch stacked on this one. Do not re-run this prompt.
 
 **Branch:** cut from **`main`** (after CES-43 merges)
 **Spec (normative):** [`docs/specs/sync-protocol.md`](../../specs/sync-protocol.md) + [`docs/specs/adr/002-backup-sync-layer.md`](../../specs/adr/002-backup-sync-layer.md)
@@ -159,20 +157,20 @@ Add a periodic flush mechanism (e.g. a `Timer` in `OutboxFlushWorker`) that atte
 
 ## Acceptance
 
-- [ ] `VehiclesRepository.create`/`update`/`softDelete`/`archive`/`unarchive` all enqueue to outbox in the same Drift transaction.
-- [ ] `SettingsRepository.update` enqueues to outbox (insert if never-synced, update if synced). `_bootstrap()` does NOT enqueue.
-- [ ] `MaintenanceEventsRepository.create`/`softDelete` enqueue to outbox (`maintenance_events` table). `upsertReminderRule` enqueues insert or update to outbox (`maintenance_rules` table).
-- [ ] Outbox coalescing works for all tables: pending insert + update → payload rewritten; softDelete supersedes pending insert/update.
-- [ ] `SyncClient` has `getChanges()` and `getRestoreManifest()` methods (ready for CES-45).
-- [ ] `OutboxFlushWorker` implements exponential backoff `1s → 2s → 4s → 8s → 16s → 30s` with ±20% jitter.
-- [ ] 429 responses honor `Retry-After` header; do NOT dead-letter on 429.
-- [ ] Rows with ≥6 failed non-429 retries are marked as dead-lettered.
-- [ ] Periodic flush (30s foreground timer) works; manual "Sync now" still works.
-- [ ] Existing fill-up outbox tests still pass. New tests cover vehicles, settings, maintenance events, maintenance rules.
-- [ ] Transaction atomicity verified: outbox failure rolls back the local write.
-- [ ] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green.
-- [ ] `delivery-plan-v1.md` CES-44 row → 🟩.
-- [ ] Linear CES-44 Done + closeout comment.
+- [x] `VehiclesRepository.create`/`update`/`softDelete`/`archive`/`unarchive` all enqueue to outbox in the same Drift transaction.
+- [x] `SettingsRepository.update` enqueues to outbox (insert if never-synced, update if synced). `_bootstrap()` does NOT enqueue.
+- [x] `MaintenanceEventsRepository.create`/`softDelete` enqueue to outbox (`maintenance_events` table). `upsertReminderRule` enqueues insert or update to outbox (`maintenance_rules` table).
+- [x] Outbox coalescing works for all tables: pending insert + update → payload rewritten; softDelete supersedes pending insert/update.
+- [x] `SyncClient` has `getChanges()` and `getRestoreManifest()` methods (ready for CES-45).
+- [x] `OutboxFlushWorker` implements exponential backoff `1s → 2s → 4s → 8s → 16s → 30s` with ±20% jitter.
+- [x] 429 responses honor `Retry-After` header; do NOT dead-letter on 429.
+- [x] Rows with ≥6 failed non-429 retries are marked as dead-lettered.
+- [x] Periodic flush (30s foreground timer) works; manual "Sync now" still works.
+- [x] Existing fill-up outbox tests still pass. New tests cover vehicles, settings, maintenance events, maintenance rules.
+- [x] Transaction atomicity verified: outbox failure rolls back the local write.
+- [x] `flutter analyze` + `flutter test --no-pub` + `python3 ci/telemetry-gate.py` green.
+- [x] `delivery-plan-v1.md` CES-44 row → 🟩.
+- [x] Linear CES-44 Done + closeout comment.
 
 ## Status report (required)
 

@@ -268,7 +268,7 @@ A differing `user_key_hash` is the *normal* device-to-device case, so it cannot 
 
 Accepted for v1 because:
 
-- There is no account, no server, and no authentication in the product yet, so there is no boundary to violate. The only actor is the device owner acting on a file they chose.
+- The ZIP import screen still has no signed-in session. CES-42 and CES-43 are on `main`, and the Android client still has no sign-in screen, so the only actor on this screen is the device owner and a file they chose.
 - `user_key_hash` is a **stand-in** derived from a local UUID (CES-46 telemetry is not wired). Treating it as an identity claim would give a placeholder security meaning it cannot carry.
 - Replace makes the outcome legible rather than covert: the destination becomes the archive, so a user cannot end up with a silent blend of two people's records.
 - Disclosure is adequate — the confirm dialog shows both hashes side by side.
@@ -276,9 +276,9 @@ Accepted for v1 because:
 **Revisit when either becomes true:**
 
 1. **CES-46 lands a real telemetry user key**, so `user_key_hash` stops being a local placeholder and starts denoting a person.
-2. **M3 (CES-42 / CES-43) introduces server accounts and auth**, creating a genuine account boundary — at which point importing across accounts needs a considered position, and `user_id` reassignment on first sync needs to be explicit rather than incidental.
+2. **M3 server accounts.** **Fired (2026-10-20):** CES-42 and CES-43 are on `main`. The import screen still has no session, so a cross-archive ZIP stays a warning. Revisit a hard rejection when a sign-in screen exists. Restore (CES-45) is a different path: a matching id takes the server row, and an unsynced local settings row is replaced by the server settings row.
 
-Until then this is a recorded, deliberate acceptance rather than an oversight. Re-open this section when either trigger fires; do not treat the v1 position as settled beyond that point.
+The warning stays until that sign-in screen exists. CES-46 (a real telemetry user key) is still open. Do not treat the v1 ZIP position as settled past either of those.
 
 ---
 

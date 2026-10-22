@@ -301,5 +301,26 @@ List<MigrationStep> schemaSteps(Iterable<TableInfo> allTables) {
         );
       },
     ),
+    MigrationStep(
+      from: 5,
+      to: 6,
+      name: '0006_sync_cursors',
+      // CES-45 — local-only restore cursors and discarded-insert marks.
+      // Not a server migration: these tables are never backed up.
+      up: (m) async {
+        final cursors = allTables.firstWhere(
+          (t) => t.actualTableName == 'sync_cursors',
+        );
+        final marks = allTables.firstWhere(
+          (t) => t.actualTableName == 'backup_marks',
+        );
+        await m.createTable(cursors);
+        await m.createTable(marks);
+      },
+      down: (m) async {
+        await m.deleteTable('backup_marks');
+        await m.deleteTable('sync_cursors');
+      },
+    ),
   ];
 }

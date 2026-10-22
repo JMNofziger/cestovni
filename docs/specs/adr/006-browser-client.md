@@ -42,7 +42,7 @@ ADR 001's "no product-facing admin/dashboard" still holds. This is a **second cl
 | Stack | **Preact + TypeScript** (see [Stack selection](#stack-selection-ces-73) below). |
 | iPhone PWA-lite | **Parked.** Leave `client/web-lite/` and Pages CI as-is. |
 | App Store native iOS | Still deferred ($99/yr). |
-| M3 | **Prerequisite** for a useful online portal. CES-42 -> CES-43 before portal implementation. Dev stub is not CES-43. |
+| M3 | **Prerequisite** for a useful online portal. CES-42 and CES-43 are on `main` (PR #33, PR #34). Portal implementation has not started. Dev stub is not CES-43. |
 | Android | Unchanged primary client. |
 
 ### Locked capability matrix (v1)

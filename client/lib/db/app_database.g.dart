@@ -6044,6 +6044,563 @@ class PhotoRefsCompanion extends UpdateCompanion<PhotoRefRow> {
   }
 }
 
+class $SyncCursorsTable extends SyncCursors
+    with TableInfo<$SyncCursorsTable, SyncCursor> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncCursorsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _cursorTableMeta = const VerificationMeta(
+    'cursorTable',
+  );
+  @override
+  late final GeneratedColumn<String> cursorTable = GeneratedColumn<String>(
+    'table_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastRowVersionMeta = const VerificationMeta(
+    'lastRowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> lastRowVersion = GeneratedColumn<int>(
+    'last_row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    cursorTable,
+    lastRowVersion,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_cursors';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncCursor> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('table_name')) {
+      context.handle(
+        _cursorTableMeta,
+        cursorTable.isAcceptableOrUnknown(
+          data['table_name']!,
+          _cursorTableMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_cursorTableMeta);
+    }
+    if (data.containsKey('last_row_version')) {
+      context.handle(
+        _lastRowVersionMeta,
+        lastRowVersion.isAcceptableOrUnknown(
+          data['last_row_version']!,
+          _lastRowVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cursorTable};
+  @override
+  SyncCursor map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncCursor(
+      cursorTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}table_name'],
+      )!,
+      lastRowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_row_version'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncCursorsTable createAlias(String alias) {
+    return $SyncCursorsTable(attachedDatabase, alias);
+  }
+}
+
+class SyncCursor extends DataClass implements Insertable<SyncCursor> {
+  final String cursorTable;
+  final int lastRowVersion;
+  final String updatedAt;
+  const SyncCursor({
+    required this.cursorTable,
+    required this.lastRowVersion,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['table_name'] = Variable<String>(cursorTable);
+    map['last_row_version'] = Variable<int>(lastRowVersion);
+    map['updated_at'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  SyncCursorsCompanion toCompanion(bool nullToAbsent) {
+    return SyncCursorsCompanion(
+      cursorTable: Value(cursorTable),
+      lastRowVersion: Value(lastRowVersion),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SyncCursor.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncCursor(
+      cursorTable: serializer.fromJson<String>(json['cursorTable']),
+      lastRowVersion: serializer.fromJson<int>(json['lastRowVersion']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'cursorTable': serializer.toJson<String>(cursorTable),
+      'lastRowVersion': serializer.toJson<int>(lastRowVersion),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  SyncCursor copyWith({
+    String? cursorTable,
+    int? lastRowVersion,
+    String? updatedAt,
+  }) => SyncCursor(
+    cursorTable: cursorTable ?? this.cursorTable,
+    lastRowVersion: lastRowVersion ?? this.lastRowVersion,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SyncCursor copyWithCompanion(SyncCursorsCompanion data) {
+    return SyncCursor(
+      cursorTable: data.cursorTable.present
+          ? data.cursorTable.value
+          : this.cursorTable,
+      lastRowVersion: data.lastRowVersion.present
+          ? data.lastRowVersion.value
+          : this.lastRowVersion,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursor(')
+          ..write('cursorTable: $cursorTable, ')
+          ..write('lastRowVersion: $lastRowVersion, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(cursorTable, lastRowVersion, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncCursor &&
+          other.cursorTable == this.cursorTable &&
+          other.lastRowVersion == this.lastRowVersion &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SyncCursorsCompanion extends UpdateCompanion<SyncCursor> {
+  final Value<String> cursorTable;
+  final Value<int> lastRowVersion;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const SyncCursorsCompanion({
+    this.cursorTable = const Value.absent(),
+    this.lastRowVersion = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncCursorsCompanion.insert({
+    required String cursorTable,
+    this.lastRowVersion = const Value.absent(),
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  }) : cursorTable = Value(cursorTable),
+       updatedAt = Value(updatedAt);
+  static Insertable<SyncCursor> custom({
+    Expression<String>? cursorTable,
+    Expression<int>? lastRowVersion,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (cursorTable != null) 'table_name': cursorTable,
+      if (lastRowVersion != null) 'last_row_version': lastRowVersion,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncCursorsCompanion copyWith({
+    Value<String>? cursorTable,
+    Value<int>? lastRowVersion,
+    Value<String>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SyncCursorsCompanion(
+      cursorTable: cursorTable ?? this.cursorTable,
+      lastRowVersion: lastRowVersion ?? this.lastRowVersion,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (cursorTable.present) {
+      map['table_name'] = Variable<String>(cursorTable.value);
+    }
+    if (lastRowVersion.present) {
+      map['last_row_version'] = Variable<int>(lastRowVersion.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsCompanion(')
+          ..write('cursorTable: $cursorTable, ')
+          ..write('lastRowVersion: $lastRowVersion, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BackupMarksTable extends BackupMarks
+    with TableInfo<$BackupMarksTable, BackupMark> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BackupMarksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _markedTableMeta = const VerificationMeta(
+    'markedTable',
+  );
+  @override
+  late final GeneratedColumn<String> markedTable = GeneratedColumn<String>(
+    'table_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowIdMeta = const VerificationMeta('rowId');
+  @override
+  late final GeneratedColumn<String> rowId = GeneratedColumn<String>(
+    'row_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 36,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [markedTable, rowId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'backup_marks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BackupMark> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('table_name')) {
+      context.handle(
+        _markedTableMeta,
+        markedTable.isAcceptableOrUnknown(
+          data['table_name']!,
+          _markedTableMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_markedTableMeta);
+    }
+    if (data.containsKey('row_id')) {
+      context.handle(
+        _rowIdMeta,
+        rowId.isAcceptableOrUnknown(data['row_id']!, _rowIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {markedTable, rowId};
+  @override
+  BackupMark map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BackupMark(
+      markedTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}table_name'],
+      )!,
+      rowId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}row_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BackupMarksTable createAlias(String alias) {
+    return $BackupMarksTable(attachedDatabase, alias);
+  }
+}
+
+class BackupMark extends DataClass implements Insertable<BackupMark> {
+  final String markedTable;
+  final String rowId;
+  final String createdAt;
+  const BackupMark({
+    required this.markedTable,
+    required this.rowId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['table_name'] = Variable<String>(markedTable);
+    map['row_id'] = Variable<String>(rowId);
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  BackupMarksCompanion toCompanion(bool nullToAbsent) {
+    return BackupMarksCompanion(
+      markedTable: Value(markedTable),
+      rowId: Value(rowId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory BackupMark.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BackupMark(
+      markedTable: serializer.fromJson<String>(json['markedTable']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'markedTable': serializer.toJson<String>(markedTable),
+      'rowId': serializer.toJson<String>(rowId),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  BackupMark copyWith({
+    String? markedTable,
+    String? rowId,
+    String? createdAt,
+  }) => BackupMark(
+    markedTable: markedTable ?? this.markedTable,
+    rowId: rowId ?? this.rowId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  BackupMark copyWithCompanion(BackupMarksCompanion data) {
+    return BackupMark(
+      markedTable: data.markedTable.present
+          ? data.markedTable.value
+          : this.markedTable,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BackupMark(')
+          ..write('markedTable: $markedTable, ')
+          ..write('rowId: $rowId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(markedTable, rowId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BackupMark &&
+          other.markedTable == this.markedTable &&
+          other.rowId == this.rowId &&
+          other.createdAt == this.createdAt);
+}
+
+class BackupMarksCompanion extends UpdateCompanion<BackupMark> {
+  final Value<String> markedTable;
+  final Value<String> rowId;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const BackupMarksCompanion({
+    this.markedTable = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BackupMarksCompanion.insert({
+    required String markedTable,
+    required String rowId,
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  }) : markedTable = Value(markedTable),
+       rowId = Value(rowId),
+       createdAt = Value(createdAt);
+  static Insertable<BackupMark> custom({
+    Expression<String>? markedTable,
+    Expression<String>? rowId,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (markedTable != null) 'table_name': markedTable,
+      if (rowId != null) 'row_id': rowId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BackupMarksCompanion copyWith({
+    Value<String>? markedTable,
+    Value<String>? rowId,
+    Value<String>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return BackupMarksCompanion(
+      markedTable: markedTable ?? this.markedTable,
+      rowId: rowId ?? this.rowId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (markedTable.present) {
+      map['table_name'] = Variable<String>(markedTable.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<String>(rowId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BackupMarksCompanion(')
+          ..write('markedTable: $markedTable, ')
+          ..write('rowId: $rowId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6058,6 +6615,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DraftsTable drafts = $DraftsTable(this);
   late final $OutboxTable outbox = $OutboxTable(this);
   late final $PhotoRefsTable photoRefs = $PhotoRefsTable(this);
+  late final $SyncCursorsTable syncCursors = $SyncCursorsTable(this);
+  late final $BackupMarksTable backupMarks = $BackupMarksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6071,6 +6630,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     drafts,
     outbox,
     photoRefs,
+    syncCursors,
+    backupMarks,
   ];
 }
 
@@ -9893,6 +10454,336 @@ typedef $$PhotoRefsTableProcessedTableManager =
       PhotoRefRow,
       PrefetchHooks Function({bool draftId})
     >;
+typedef $$SyncCursorsTableCreateCompanionBuilder =
+    SyncCursorsCompanion Function({
+      required String cursorTable,
+      Value<int> lastRowVersion,
+      required String updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SyncCursorsTableUpdateCompanionBuilder =
+    SyncCursorsCompanion Function({
+      Value<String> cursorTable,
+      Value<int> lastRowVersion,
+      Value<String> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SyncCursorsTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get cursorTable => $composableBuilder(
+    column: $table.cursorTable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastRowVersion => $composableBuilder(
+    column: $table.lastRowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncCursorsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get cursorTable => $composableBuilder(
+    column: $table.cursorTable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastRowVersion => $composableBuilder(
+    column: $table.lastRowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncCursorsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get cursorTable => $composableBuilder(
+    column: $table.cursorTable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastRowVersion => $composableBuilder(
+    column: $table.lastRowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SyncCursorsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncCursorsTable,
+          SyncCursor,
+          $$SyncCursorsTableFilterComposer,
+          $$SyncCursorsTableOrderingComposer,
+          $$SyncCursorsTableAnnotationComposer,
+          $$SyncCursorsTableCreateCompanionBuilder,
+          $$SyncCursorsTableUpdateCompanionBuilder,
+          (
+            SyncCursor,
+            BaseReferences<_$AppDatabase, $SyncCursorsTable, SyncCursor>,
+          ),
+          SyncCursor,
+          PrefetchHooks Function()
+        > {
+  $$SyncCursorsTableTableManager(_$AppDatabase db, $SyncCursorsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncCursorsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncCursorsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncCursorsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> cursorTable = const Value.absent(),
+                Value<int> lastRowVersion = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsCompanion(
+                cursorTable: cursorTable,
+                lastRowVersion: lastRowVersion,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String cursorTable,
+                Value<int> lastRowVersion = const Value.absent(),
+                required String updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsCompanion.insert(
+                cursorTable: cursorTable,
+                lastRowVersion: lastRowVersion,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncCursorsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncCursorsTable,
+      SyncCursor,
+      $$SyncCursorsTableFilterComposer,
+      $$SyncCursorsTableOrderingComposer,
+      $$SyncCursorsTableAnnotationComposer,
+      $$SyncCursorsTableCreateCompanionBuilder,
+      $$SyncCursorsTableUpdateCompanionBuilder,
+      (
+        SyncCursor,
+        BaseReferences<_$AppDatabase, $SyncCursorsTable, SyncCursor>,
+      ),
+      SyncCursor,
+      PrefetchHooks Function()
+    >;
+typedef $$BackupMarksTableCreateCompanionBuilder =
+    BackupMarksCompanion Function({
+      required String markedTable,
+      required String rowId,
+      required String createdAt,
+      Value<int> rowid,
+    });
+typedef $$BackupMarksTableUpdateCompanionBuilder =
+    BackupMarksCompanion Function({
+      Value<String> markedTable,
+      Value<String> rowId,
+      Value<String> createdAt,
+      Value<int> rowid,
+    });
+
+class $$BackupMarksTableFilterComposer
+    extends Composer<_$AppDatabase, $BackupMarksTable> {
+  $$BackupMarksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get markedTable => $composableBuilder(
+    column: $table.markedTable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BackupMarksTableOrderingComposer
+    extends Composer<_$AppDatabase, $BackupMarksTable> {
+  $$BackupMarksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get markedTable => $composableBuilder(
+    column: $table.markedTable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BackupMarksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BackupMarksTable> {
+  $$BackupMarksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get markedTable => $composableBuilder(
+    column: $table.markedTable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$BackupMarksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BackupMarksTable,
+          BackupMark,
+          $$BackupMarksTableFilterComposer,
+          $$BackupMarksTableOrderingComposer,
+          $$BackupMarksTableAnnotationComposer,
+          $$BackupMarksTableCreateCompanionBuilder,
+          $$BackupMarksTableUpdateCompanionBuilder,
+          (
+            BackupMark,
+            BaseReferences<_$AppDatabase, $BackupMarksTable, BackupMark>,
+          ),
+          BackupMark,
+          PrefetchHooks Function()
+        > {
+  $$BackupMarksTableTableManager(_$AppDatabase db, $BackupMarksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BackupMarksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BackupMarksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BackupMarksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> markedTable = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BackupMarksCompanion(
+                markedTable: markedTable,
+                rowId: rowId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String markedTable,
+                required String rowId,
+                required String createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => BackupMarksCompanion.insert(
+                markedTable: markedTable,
+                rowId: rowId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BackupMarksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BackupMarksTable,
+      BackupMark,
+      $$BackupMarksTableFilterComposer,
+      $$BackupMarksTableOrderingComposer,
+      $$BackupMarksTableAnnotationComposer,
+      $$BackupMarksTableCreateCompanionBuilder,
+      $$BackupMarksTableUpdateCompanionBuilder,
+      (
+        BackupMark,
+        BaseReferences<_$AppDatabase, $BackupMarksTable, BackupMark>,
+      ),
+      BackupMark,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9913,4 +10804,8 @@ class $AppDatabaseManager {
       $$OutboxTableTableManager(_db, _db.outbox);
   $$PhotoRefsTableTableManager get photoRefs =>
       $$PhotoRefsTableTableManager(_db, _db.photoRefs);
+  $$SyncCursorsTableTableManager get syncCursors =>
+      $$SyncCursorsTableTableManager(_db, _db.syncCursors);
+  $$BackupMarksTableTableManager get backupMarks =>
+      $$BackupMarksTableTableManager(_db, _db.backupMarks);
 }

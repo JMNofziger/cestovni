@@ -229,7 +229,7 @@ Mirrors `client/lib/db/tables/outbox.dart` + `sync-protocol.md`:
 | `attempts` | integer | Increment on retry |
 | `last_error` | string \| null | |
 
-**Android status:** `FillUpsRepository.create` / `amend` / `softDelete` now write `fill_ups` **and** enqueue the outbox in a single Drift transaction (CES-44 gate slice, 2026-05-29). `OutboxRepository` coalesces pending updates per `sync-protocol.md` §"Fill-up lifecycle". `vehicles` / `settings` outbox wiring is deferred until after the gate (still no enqueue from `VehiclesRepository`).
+**Android status:** CES-44 enqueues `vehicles`, `fill_ups`, `maintenance_rules`, `maintenance_events`, and `settings` in the same Drift transaction as the local write. CES-45 shows dead-letter rows under Settings → Backup. PWA-lite Phase 1+2 still enqueues `fill_ups` inserts only.
 
 **Idempotency:** Protocol uses `mutation_id` in JSON body (`POST /mutations`), **not** an `Idempotency-Key` HTTP header. Server dedupes by `mutation_id`.
 
@@ -239,7 +239,7 @@ From `client/lib/db/tables/settings.dart`: `preferred_distance_unit`, `preferred
 
 ### Schema migrations
 
-Client at `schema_version` 2 (`client/lib/db/migrations/schema_steps.dart`). PWA-lite IndexedDB schema is **logical mirror** of v2 tables it uses (`vehicles`, `fill_ups`, `outbox`, `settings`, `sync_meta`) — no Drift/OPFS.
+Android Drift schema is v6 (`0006_sync_cursors` adds local-only `sync_cursors` and `backup_marks`). PWA-lite IndexedDB still mirrors the Phase 1+2 subset (`vehicles`, `fill_ups`, `outbox`, `settings`, `sync_meta`) and does not store those v6 tables.
 
 ---
 
@@ -398,18 +398,18 @@ Base URL is configurable. Android emulator → host: `http://10.0.2.2:<port>`. P
 
 ### Error codes / retry behavior
 
-Source: `client/lib/sync/sync_client.dart#_isStatusRetriable` + `outbox_flush_worker.dart`.
+Android (CES-44) parses an integer `Retry-After`, pauses automatic flush on 401, and marks non-retriable failures with the `dead-letter: ` prefix. Settings → Backup (CES-45) is that dead-letter UI. The table below is what PWA-lite Phase 1+2 implements. PWA-lite does not parse `Retry-After` and has no Backup screen.
 
-| HTTP status | Action                                          |
-|-------------|-------------------------------------------------|
-| 200         | Per-result `applied` / `duplicate` → delete outbox row; `rejected` → record `last_error`, retain row (dead-letter UX is CES-45) |
-| 401         | Retriable (token refresh path) — record `last_error`, retain row |
-| 4xx (others) | Non-retriable — retain row + record error; CES-45 surfaces dead-letter UI |
-| 429         | Retriable — record `last_error`, retain row (no `Retry-After` parsing in gate slice) |
-| 5xx         | Retriable — record `last_error`, retain row    |
-| transport error (no response) | Retriable                          |
+| HTTP status | PWA-lite Phase 1+2 action |
+|-------------|---------------------------|
+| 200         | Per-result `applied` / `duplicate` → delete outbox row; `rejected` → record `last_error` and keep the row out of the push batch |
+| 401         | Retriable — record `last_error`, retain row |
+| 4xx (others) | Non-retriable — retain row + record error |
+| 429         | Retriable — record `last_error`, retain row (no `Retry-After` parsing) |
+| 5xx         | Retriable — record `last_error`, retain row |
+| transport error (no response) | Retriable |
 
-PWA-lite must reproduce this matrix and persist `attempts` + `last_error` on each retry attempt.
+PWA-lite persists `attempts` + `last_error` on each retry attempt. Matching the Android prefix and the Backup screen is future work, not part of the parked Phase 1+2 client.
 
 ### Lifecycle coalescing
 

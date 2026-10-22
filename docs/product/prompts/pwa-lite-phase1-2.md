@@ -193,9 +193,10 @@ Deploy: `wrangler pages deploy client/web-lite --project-name cestovni-pwa --bra
 - Deviations: getToken() falls back to the dev bearer so a clean checkout
   flushes against the stub without manual token setup; real deployments set
   localStorage / ?token=. ERROR pill is minimal (dead-letter UX is CES-45).
-- Remaining for production (CES-43): real JWT/OIDC + per-user RLS, Postgres
-  persistence, 429 Retry-After parsing, dead-letter retry sheet (CES-45),
-  Cloudflare Pages deploy + CESTOVNI_API_BASE wiring to the real backend.
+- Remaining for this PWA-lite client: point it at `server/api` (CES-43 is on
+  `main`; the stub is still this client's target), parse `Retry-After`, and
+  add a dead-letter retry sheet. Android CES-45 has that sheet. This prompt
+  stays parked; do not re-run it to pick those up.
 ```
 
 ---
