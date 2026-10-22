@@ -1,10 +1,10 @@
 # Cursor execution prompt — CES-43 Server API + auth
 
-> **Status: NOT STARTED.**
-> **Linear:** [CES-43](https://linear.app/personal-interests-llc/issue/CES-43) — Backlog.
-> **Blocked by:** CES-42 (Server Postgres + RLS must merge first).
-> **Blocks:** CES-44 (Client outbox expansion), and transitively CES-45.
-> This is the second M3 ticket. Do not start CES-44 until this merges.
+> **Status: EXECUTED** (2026-10-20) — on `main` ([PR #34](https://github.com/JMNofziger/cestovni/pull/34)).
+> Linear **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** Done.
+> Next in this chain was **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)**.
+>
+> Kept as an archive of the execution brief (do not re-run).
 
 **Branch:** cut from **`main`** (after CES-42 merges)
 **Spec (normative):** [`docs/specs/sync-protocol.md`](../../specs/sync-protocol.md) + [`docs/specs/adr/001-backend-api-boundary.md`](../../specs/adr/001-backend-api-boundary.md)
@@ -161,17 +161,17 @@ The server connects AS `cestovni_app` role (the runtime role from CES-42), never
 
 ## Acceptance
 
-- [ ] API server starts and connects to CES-42 Postgres as `cestovni_app`.
-- [ ] `POST /api/v1/mutations`: insert → `applied` with server-assigned `row_version`; same `mutation_id` → `duplicate` with same `row_version`; bad table → `rejected`; batch > 100 → 413.
-- [ ] `GET /api/v1/changes`: returns rows `WHERE row_version > since`, user-scoped, limit-clamped to 500, soft-deleted included, `has_more` correct.
-- [ ] `GET /api/v1/restore/manifest`: per-table counts and max `row_version`, user-scoped.
-- [ ] Auth: missing token → 401, invalid token → 401, expired token → 401, valid token → proceeds.
-- [ ] Cross-user isolation: user A's data invisible to user B across all three endpoints.
-- [ ] Rate limiting: burst past threshold → 429 with `Retry-After`.
-- [ ] Contract tests in `tests/contract/` cover all of the above and pass in CI.
-- [ ] `server/api/README.md` documents env vars and local setup.
-- [ ] `delivery-plan-v1.md` CES-43 row → 🟩.
-- [ ] Linear CES-43 Done + closeout comment.
+- [x] API server starts and connects to CES-42 Postgres as `cestovni_app`.
+- [x] `POST /api/v1/mutations`: insert → `applied` with server-assigned `row_version`; same `mutation_id` → `duplicate` with same `row_version`; bad table → `rejected`; batch > 100 → 413.
+- [x] `GET /api/v1/changes`: returns rows `WHERE row_version > since`, user-scoped, limit-clamped to 500, soft-deleted included, `has_more` correct.
+- [x] `GET /api/v1/restore/manifest`: per-table counts and max `row_version`, user-scoped.
+- [x] Auth: missing token → 401, invalid token → 401, expired token → 401, valid token → proceeds.
+- [x] Cross-user isolation: user A's data invisible to user B across all three endpoints.
+- [x] Rate limiting: burst past threshold → 429 with `Retry-After`.
+- [x] Contract tests in `tests/contract/` cover all of the above and pass in CI.
+- [x] `server/api/README.md` documents env vars and local setup.
+- [x] `delivery-plan-v1.md` CES-43 row → 🟩.
+- [x] Linear CES-43 Done + closeout comment.
 
 ## Status report (required)
 

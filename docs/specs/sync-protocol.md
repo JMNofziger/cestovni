@@ -155,7 +155,7 @@ Response:
   - Server returns `429 Too Many Requests` with a `Retry-After` header (integer seconds) when the client exceeds rate/quota limits.
   - `Retry-After` is the minimum wait; clients MUST NOT retry before it elapses.
   - Clients treat 429 as `retriable: true` regardless of error body; the attempt counter increments, but the counter ceiling does NOT move 429s to dead-letter (429 is a server-side signal, not a client defect).
-  - On repeated 429s for the same mutation (> 10 consecutive), the client pauses outbox draining for the duration hinted by the last `Retry-After` and surfaces a non-blocking status indicator ("Backup paused by server — will retry").
+  - On repeated 429s for the same mutation (> 10 consecutive), the client pauses outbox draining for the duration hinted by the last `Retry-After` and surfaces a non-blocking status indicator ("Backup paused by server — will retry"). Android v1 pauses the flush worker and writes a debug log. That status string is not on screen yet.
 - **HTTP status map:**
   - `2xx` — normal success path.
   - `400` — non-retriable; dead-letter.
@@ -179,6 +179,8 @@ Multiple amendments queued before the first upload succeeds are **coalesced** cl
 
 Non-retriable failures (`400`, `403`, `409`, validation-class `4xx`) and exhausted-retry failures move the outbox row to a **local dead-letter list** — a view on `outbox` filtered by `attempts >= max_retries OR last_error.retriable = false`.
 
+The Android client encodes that list in `outbox.last_error` with the prefix `dead-letter: `. A row is on the list when the prefix is present. That covers an immediate non-retriable HTTP status (`attempts` may be 1) and the sixth non-429 failure. `attempts >= 6` alone is not the filter. Retry clears the prefix and resets `attempts` to 0, keeping `mutation_id`. Discard hard-deletes the outbox row. An `insert` also writes client-only `backup_marks` so Settings can show the domain row as not backed up. The domain row stays.
+
 ### Contract
 
 - Dead-letter rows **do not** block other outbox rows from uploading.
@@ -191,7 +193,7 @@ A Settings → Backup screen surfaces a non-intrusive indicator when `dead_lette
 
 - Shows the count and a human-readable summary of the most recent failing entry ("Fill-up on April 3 couldn't be backed up — server rejected it").
 - Offers three actions: **Retry now** (re-queues with a fresh attempt counter), **Discard** (hard-deletes the outbox row and, if it was an `insert`, leaves the local row in a clearly-marked "not backed up" state), and **View details** (shows the error envelope for support).
-- Emits `sync_backup_result` telemetry event with `outcome = non_retriable_error` and the `error_code` enum value (see [`telemetry-allowlist.md`](telemetry-allowlist.md)).
+- Emits `sync_backup_result` telemetry event with `outcome = non_retriable_error` and the `error_code` enum value (see [`telemetry-allowlist.md`](telemetry-allowlist.md)). CES-46 wires the SDK. CES-45 does not emit it. `restore_start` and `restore_result` are `debugPrint` stubs until that ticket.
 
 ### Server-side metrics
 
@@ -203,7 +205,7 @@ Dead-letter is a **signal** that something is wrong — either a client bug or a
 2. For each core table (`vehicles`, `fill_ups`), loop `GET /changes?table=…&since=0&limit=…` until `has_more=false`.
 3. Unblock the UI once `vehicles` + `fill_ups` cursors match the manifest's `max_row_version` (logging becomes usable).
 4. Continue `maintenance_rules`, `maintenance_events`, `settings` in the background.
-5. No snapshot checkpoints in v1; a partial restore resumes cleanly from the last committed cursor per table.
+5. No snapshot checkpoints in v1; a partial restore resumes cleanly from the last committed cursor per table. The Android client stores that cursor in client-only `sync_cursors` (`table_name`, `last_row_version`, `updated_at`), in the same transaction as the page. There is no server copy of the table.
 
 ## v1.x roadmap (pointer only — TBD in this pass)
 

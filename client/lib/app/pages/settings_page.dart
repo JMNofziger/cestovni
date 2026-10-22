@@ -9,6 +9,7 @@ import '../theme/cestovni_primitives.dart';
 import '../theme/cestovni_tokens.dart';
 import '../theme/cestovni_typography.dart';
 import 'debug_page.dart';
+import 'backup_section.dart';
 import 'import_data_section.dart';
 import 'vehicle_form_page.dart';
 
@@ -53,11 +54,7 @@ class SettingsPage extends StatelessWidget {
           _PreferencesSection(db: db),
           const HairlineDivider(),
           const _SectionLabel(text: 'Backup'),
-          const ListTile(
-            leading: Icon(Icons.cloud_off_outlined),
-            title: Text('Backup'),
-            subtitle: Text('Offline — sign in lands in M3.'),
-          ),
+          BackupSection(db: db),
           _ExportDataSection(db: db, onExport: onExport),
           ImportDataSection(db: db, service: importService),
           const HairlineDivider(),

@@ -189,7 +189,7 @@ class SyncClient {
       rows: [
         for (final item in raw) Map<String, dynamic>.from(item as Map),
       ],
-      nextSince: (json['next_since'] as num?)?.toInt() ?? since,
+      nextSince: _asInt(json['next_since'], fallback: since),
       hasMore: json['has_more'] == true,
       limitClamped: resp.headers['x-limit-clamped'] == 'true',
     );
@@ -216,8 +216,8 @@ class SyncClient {
   static RestoreTableCount _restoreTable(Map<String, dynamic> item) {
     return RestoreTableCount(
       table: item['table'] as String,
-      rowCount: (item['row_count'] as num).toInt(),
-      maxRowVersion: (item['max_row_version'] as num).toInt(),
+      rowCount: _asInt(item['row_count']),
+      maxRowVersion: _asInt(item['max_row_version']),
     );
   }
 
@@ -258,6 +258,14 @@ class SyncClient {
       if (row.payloadJson != null)
         'payload': jsonDecode(row.payloadJson!) as Map<String, dynamic>,
     };
+  }
+
+  /// JSON numbers, or decimal strings from a BIGINT codec.
+  static int _asInt(Object? value, {int fallback = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value.trim()) ?? fallback;
+    return fallback;
   }
 
   static int? _retryAfterSeconds(String? header) {

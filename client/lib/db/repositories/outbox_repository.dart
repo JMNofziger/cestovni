@@ -264,4 +264,77 @@ class OutboxRepository {
     if (match == null) return 0;
     return int.parse(match.group(1)!);
   }
+
+  /// CES-44 marks dead-letter with [outboxDeadLetterPrefix]. That covers
+  /// both the six-failure ceiling and an immediate non-retriable HTTP
+  /// status (`attempts` may be 1). `attempts >= 6` alone would hide the
+  /// 400/403/409 rows.
+  static bool isDeadLetter(OutboxRow row) {
+    final err = row.lastError;
+    return err != null && err.startsWith(outboxDeadLetterPrefix);
+  }
+
+  Future<int> deadLetterCount() async {
+    final count = countAll();
+    final row = await (_db.selectOnly(_db.outbox)
+          ..addColumns([count])
+          ..where(_db.outbox.lastError.like('$outboxDeadLetterPrefix%')))
+        .getSingle();
+    return row.read(count) ?? 0;
+  }
+
+  Stream<int> watchDeadLetterCount() {
+    final count = countAll();
+    final query = _db.selectOnly(_db.outbox)
+      ..addColumns([count])
+      ..where(_db.outbox.lastError.like('$outboxDeadLetterPrefix%'));
+    return query.watchSingle().map((row) => row.read(count) ?? 0);
+  }
+
+  /// Newest first, for the Settings → Backup list.
+  Future<List<OutboxRow>> deadLetterRows() {
+    final query = _db.select(_db.outbox)
+      ..where((o) => o.lastError.like('$outboxDeadLetterPrefix%'))
+      ..orderBy([(o) => OrderingTerm.desc(o.id)]);
+    return query.get();
+  }
+
+  Stream<List<OutboxRow>> watchDeadLetterRows() {
+    final query = _db.select(_db.outbox)
+      ..where((o) => o.lastError.like('$outboxDeadLetterPrefix%'))
+      ..orderBy([(o) => OrderingTerm.desc(o.id)]);
+    return query.watch();
+  }
+
+  /// Re-queue. Keeps `mutation_id`. Clears the dead-letter mark.
+  Future<void> retryDeadLetter(int id) async {
+    final row = await (_db.select(_db.outbox)..where((o) => o.id.equals(id)))
+        .getSingleOrNull();
+    if (row == null || !isDeadLetter(row)) return;
+    await (_db.update(_db.outbox)..where((o) => o.id.equals(id))).write(
+      const OutboxCompanion(
+        attempts: Value(0),
+        lastError: Value(null),
+      ),
+    );
+  }
+
+  /// Hard-delete the outbox row. An `insert` also records a local
+  /// "not backed up" mark. The domain row is left in place.
+  Future<void> discardDeadLetter(int id) async {
+    await _db.transaction(() async {
+      final row = await (_db.select(_db.outbox)..where((o) => o.id.equals(id)))
+          .getSingleOrNull();
+      if (row == null || !isDeadLetter(row)) return;
+      await deleteById(id);
+      if (row.op != OutboxOp.insert.wire) return;
+      await _db.customStatement(
+        'INSERT INTO backup_marks (table_name, row_id, created_at) '
+        'VALUES (?, ?, ?) '
+        'ON CONFLICT(table_name, row_id) DO UPDATE SET '
+        'created_at = excluded.created_at',
+        [row.table_, row.rowId, nowIsoUtc()],
+      );
+    });
+  }
 }

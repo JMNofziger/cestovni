@@ -5,7 +5,7 @@ import '_harness.dart';
 
 void main() {
   group('migration', () {
-    test('fresh onCreate lands on current schemaVersion with all 8 tables', () async {
+    test('fresh onCreate lands on current schemaVersion with all 10 tables', () async {
       final db = openInMemoryDb();
       addTearDown(db.close);
 
@@ -30,9 +30,11 @@ void main() {
         'outbox',
         'photo_refs',
         'settings',
+        'sync_cursors',
+        'backup_marks',
         'vehicles',
       });
-      expect(db.schemaVersion, 5);
+      expect(db.schemaVersion, 6);
     });
 
     test('onCreate settings has the v3 default_vehicle_id column', () async {
@@ -382,6 +384,38 @@ void main() {
         );
       },
     );
+
+    test('0006 creates sync_cursors and backup_marks, and down drops them',
+        () async {
+      final db = openInMemoryDb();
+      addTearDown(db.close);
+      await db.customSelect('SELECT 1').get();
+      final step = db.migrationRunner.steps.firstWhere(
+        (s) => s.name == '0006_sync_cursors',
+      );
+      await db.transaction(() async {
+        final migrator = Migrator(db);
+        await step.down(migrator);
+      });
+      final gone = await db.customSelect(
+        "SELECT name FROM sqlite_master WHERE type='table' "
+        "AND name IN ('sync_cursors', 'backup_marks')",
+      ).get();
+      expect(gone, isEmpty);
+
+      await db.transaction(() async {
+        final migrator = Migrator(db);
+        await step.up(migrator);
+      });
+      final back = await db.customSelect(
+        "SELECT name FROM sqlite_master WHERE type='table' "
+        "AND name IN ('sync_cursors', 'backup_marks') ORDER BY name",
+      ).get();
+      expect(
+        back.map((r) => r.read<String>('name')).toList(),
+        ['backup_marks', 'sync_cursors'],
+      );
+    });
 
     test('foreign keys are enforced (PRAGMA on)', () async {
       final db = openInMemoryDb();

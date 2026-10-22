@@ -5,8 +5,12 @@ import '../db/app_database.dart';
 import '../db/repositories/outbox_repository.dart';
 import '../db/repositories/settings_repository.dart';
 import '../sync/outbox_flush_worker.dart';
+import '../sync/restore_controller.dart';
+import '../sync/restore_service.dart';
 import '../sync/sync_client.dart';
 import '../sync/sync_config.dart';
+import 'pages/restore_progress_page.dart';
+import 'restore_scope.dart';
 import 'active_vehicle.dart';
 import 'pages/history_page.dart';
 import 'pages/log_page.dart';
@@ -47,6 +51,8 @@ class _CestovniShellState extends State<CestovniShell>
   late final Stream<List<VehicleRow>> _liveVehicles;
   SyncClient? _syncClient;
   OutboxFlushWorker? _flusher;
+  RestoreController? _restore;
+  var _offeredRestore = false;
   int _index = 0;
   ThemeMode _themeMode = ThemeMode.dark;
 
@@ -63,6 +69,67 @@ class _CestovniShellState extends State<CestovniShell>
     _liveVehicles = _vehicles.watchLive();
     _seedActiveVehicle();
     _onForeground();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = RestoreScope.maybeOf(context);
+    if (!identical(next, _restore)) {
+      _restore?.removeListener(_onRestore);
+      _restore = next;
+      _restore?.addListener(_onRestore);
+    }
+    if (!_offeredRestore && _restore != null) {
+      _offeredRestore = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeOfferRestore();
+      });
+    }
+  }
+
+  void _onRestore() {
+    if (mounted) setState(() {});
+  }
+
+  /// Empty vehicle table + a configured sync target: ask before restore.
+  /// Logging stays available if the user declines.
+  Future<void> _maybeOfferRestore() async {
+    if (!mounted) return;
+    const cfg = SyncConfig.fromEnvironment;
+    if (!cfg.isConfigured) return;
+    final row = await widget.db.customSelect(
+      'SELECT COUNT(*) AS c FROM vehicles',
+    ).getSingle();
+    if (!mounted || (row.read<int>('c') > 0)) return;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore from backup?'),
+        content: const Text(
+          'This device has no vehicles. Download the server backup, '
+          'or keep logging on this device only.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+    if (yes != true || !mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const RestoreProgressPage(
+          reason: RestoreReason.coldStart,
+        ),
+      ),
+    );
   }
 
   /// 30s drain while [SyncConfig] has a URL and a bearer (dev token or
@@ -120,6 +187,7 @@ class _CestovniShellState extends State<CestovniShell>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _restore?.removeListener(_onRestore);
     _onBackground();
     _syncClient?.close();
     _activeVehicle.dispose();
@@ -194,15 +262,49 @@ class _CestovniShellState extends State<CestovniShell>
                   ],
                 ),
               ),
-              bottomNavigationBar: _ShellBottomNav(
-                index: _index,
-                onChanged: (i) => setState(() => _index = i),
+              bottomNavigationBar: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ?_restoreBanner(),
+                  _ShellBottomNav(
+                    index: _index,
+                    onChanged: (i) => setState(() => _index = i),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget? _restoreBanner() {
+    final restore = _restore;
+    if (restore == null) return null;
+    final snap = restore.snapshot;
+    if (snap.backgroundRunning) {
+      return const Material(
+        child: ListTile(
+          dense: true,
+          leading: Icon(Icons.cloud_sync_outlined),
+          title: Text('Syncing maintenance data...'),
+        ),
+      );
+    }
+    if (snap.phase == RestoreRunPhase.failed && snap.coreReady) {
+      return Material(
+        child: ListTile(
+          dense: true,
+          title: const Text('Maintenance sync stopped'),
+          trailing: TextButton(
+            onPressed: () => restore.start(RestoreReason.userInitiated),
+            child: const Text('Retry'),
+          ),
+        ),
+      );
+    }
+    return null;
   }
 
   void _openSettings(BuildContext context) {

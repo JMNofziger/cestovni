@@ -30,7 +30,7 @@ Close out PWA-lite Phase 2b: finalize `docs/product/install-ios.md` with the rea
 - `client/web-lite/config.js`, `sync.js`, `index.html`, `sw.js` — owned by `feat/pwa-lite-api-config` (merged). Do not edit.
 - `.github/workflows/pwa-lite-pages-deploy.yml` — do not edit the trigger logic itself; the gap is a runbook note only (task #3).
 - Per-environment `config.js` override (pointing production `apiBase` at a real API) — a Cloudflare dashboard / ops action, not a Cursor change. Do not set up a permanent tunnel or staging backend.
-- Flipping `allowDevTokenFallback: false` — explicitly **not yet**: no production auth (CES-43) exists to fall back to. Do not change this.
+- Flipping `allowDevTokenFallback: false` — still out of this parked prompt. CES-43 is the app-owned API; PWA-lite stays on the dev stub until a later ticket points it at `server/api`.
 - Flutter / `client/lib/` changes. Receipt photos (Phase 3 per spec).
 
 ## Constraints
@@ -52,7 +52,7 @@ Close out PWA-lite Phase 2b: finalize `docs/product/install-ios.md` with the rea
 
 - Production URL: `https://cestovni-pwa.pages.dev` (Cloudflare Pages project `cestovni-pwa`).
 - Config contract: `window.CESTOVNI_CONFIG = { apiBase, allowDevTokenFallback }` from `client/web-lite/config.js`; `?api_base=`/`?token=` query bootstrap persists to `localStorage` (`cestovni_api_base`, `cestovni_token`).
-- Dev bearer: `dev-cestovni-token`, gated by `allowDevTokenFallback` (currently `true` in shipped `config.js` — intentional until CES-43).
+- Dev bearer: `dev-cestovni-token`, gated by `allowDevTokenFallback` (currently `true` in shipped `config.js`). CES-43 exists; this parked client is not switched over to it.
 - Reference gate IDs (already in `pwa-lite-gate.md`): `row_id=2ed68a63-2347-4813-9d6e-f903426fa705`, `mutation_id=3b7cea29-7e59-4d11-8842-fe563149b9bf`.
 
 ## Git / merge workflow

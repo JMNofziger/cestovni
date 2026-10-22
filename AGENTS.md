@@ -4,8 +4,11 @@
 
 This repo is **Cestovni**, an offline-first fuel/maintenance log. The runnable/testable
 surfaces in this repo are: the Flutter Android client (`client/`), the iPhone PWA-lite
-(`client/web-lite/`), and an in-memory Node dev sync stub (`server/dev-sync-stub/`).
-There is no production backend, Postgres, or Docker Compose in the repo yet (M3+ is spec-only).
+(`client/web-lite/`), the app-owned sync API (`server/api/` plus `db/migrations/`),
+and an in-memory Node dev sync stub (`server/dev-sync-stub/`). The stub is not the
+API. There is no Docker Compose file. Postgres is required for `tests/rls/` and
+`tests/contract/`; Flutter tests do not need it. The cloud snapshot does not
+include a Postgres server unless one is installed for that run.
 
 ### Toolchain (already provisioned in the VM snapshot)
 
@@ -37,6 +40,8 @@ There is no production backend, Postgres, or Docker Compose in the repo yet (M3+
 
 - Flutter client: `cd client && flutter analyze && flutter test --no-pub`
 - Telemetry gate (CI parity): `python3 ci/telemetry-gate.py`
-- Dev sync stub: `cd server/dev-sync-stub && node server.js` (contract test: `node contract.test.js`)
+- Dev sync stub: `cd server/dev-sync-stub && node server.js` (stub contract test: `node contract.test.js`)
+- App-owned API contract (needs Postgres): `./tests/contract/run.sh`
+- RLS regression (needs Postgres): `./tests/rls/run.sh`
 - Android APK build (`flutter build apk`) needs the Android SDK, which is **not** installed
   in the snapshot; it is only exercised in GitHub Actions `verify-full.yml`.

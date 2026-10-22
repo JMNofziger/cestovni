@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'migrations/migration_runner.dart';
 import 'migrations/schema_steps.dart';
+import 'tables/backup_marks.dart';
 import 'tables/drafts.dart';
 import 'tables/fill_ups.dart';
 import 'tables/maintenance_events.dart';
@@ -14,6 +15,7 @@ import 'tables/maintenance_rules.dart';
 import 'tables/outbox.dart';
 import 'tables/photo_refs.dart';
 import 'tables/settings.dart';
+import 'tables/sync_cursors.dart';
 import 'tables/vehicles.dart';
 
 part 'app_database.g.dart';
@@ -27,6 +29,8 @@ part 'app_database.g.dart';
   Drafts,
   Outbox,
   PhotoRefs,
+  SyncCursors,
+  BackupMarks,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openOnDevice());
@@ -35,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
