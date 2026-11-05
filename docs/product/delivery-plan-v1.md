@@ -1,6 +1,6 @@
 # Delivery plan — v1 (Stage 5)
 
-**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); **CES-65/CES-66 Done** (repo + Linear 2026-07-22); **CES-67 Done** (Maintenance tab + History Maint, 2026-08-15); **CES-40 Done** (receipt photo pipeline, 2026-08-15) — **M1 verticals all closed.** **PWA-lite Phase 1+2 on `main`** (PR #3 + #4); **CES-62 / CES-63 parked** (2026-10-20). **M3 gate slice on `main`** (dev stub + outbox); **CES-42** server Postgres + RLS, **CES-43** server API + auth, **CES-44** client outbox, and **CES-45** restore + dead-letter UX in repo (M3 code complete; merge still pending). **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
+**Status:** Active — **Stage 5 Step 11 (implementation).** **M0 closed 2026-04-22.** **M1 core closed 2026-07-17** — CES-38/39/57 **Done** (repo + Linear); **CES-65/CES-66 Done** (repo + Linear 2026-07-22); **CES-67 Done** (Maintenance tab + History Maint, 2026-08-15); **CES-40 Done** (receipt photo pipeline, 2026-08-15) — **M1 verticals all closed.** **PWA-lite Phase 1+2 on `main`** (PR #3 + #4), **retired 2026-11-05** (CES-62 / CES-63 Canceled). **M3 on `main`** (2026-10-22, [PR #46](https://github.com/JMNofziger/cestovni/pull/46)): **CES-42** Postgres + RLS, **CES-43** API + auth, **CES-44** client outbox, **CES-45** restore + dead-letter UX. The phone-browser portal ([ADR 006](../specs/adr/006-browser-client.md)) is Accepted and has no code. **Tooling:** `scripts/linear.mjs` on `main` (PR #12); board/doc sync (PR #13). **→ [Current focus](#current-focus)** · **Granular 🟩/🟨/🟥:** [§ Implementation checklist (RYG)](#implementation-checklist-ryg) + [§ Stage 5 exit criteria (tracking)](#stage-5-exit-criteria-tracking).
 
 **Workflow:** `[PRODUCT_DEV_WORKFLOW.md](PRODUCT_DEV_WORKFLOW.md)` (Stage 5 section).  
 **Baseline:** `[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)` (locked v1 scope).  
@@ -14,16 +14,17 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 **Shipped:** **[CES-45](https://linear.app/personal-interests-llc/issue/CES-45)** restore + dead-letter UX (`client/lib/sync/restore_service.dart`, Settings → Backup). **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)** client outbox for all five backed-up tables (`client/lib/db/repositories/`, `client/lib/sync/`). **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71) cadence rename** ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** settings CHECK ([PR #30](https://github.com/JMNofziger/cestovni/pull/30)). **[ADR 006](../specs/adr/006-browser-client.md) Accepted** with portal stack **Preact + TypeScript** ([CES-73](https://linear.app/personal-interests-llc/issue/CES-73), [PR #31](https://github.com/JMNofziger/cestovni/pull/31)). **M2 (export + import) closed** (CES-41 + CES-70). **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** server Postgres + RLS ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)). **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** server API + auth (`server/api/`, `tests/contract/`).
 
-**In flight:** none. Schema, RLS, API, auth, client enqueue, restore, and dead-letter UX are in repo. Telemetry wiring is not.
+**In flight:** **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** web client readiness (portal screens stay blocked). Child **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** is the consumption-math port.
 
-**Parked:** **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** / **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** iPhone PWA-lite install-doc + T1. `client/web-lite/` stays on `main`.
+**Retired:** iPhone PWA-lite. **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** and **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** are Canceled. `client/web-lite/` is frozen. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
 
-**Next:** **[CES-46](https://linear.app/personal-interests-llc/issue/CES-46)** telemetry client wiring. Do not start CES-46 in the same change. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** Android APK anytime for sideload demos.
+**Next milestone on the Android spine:** **[CES-46](https://linear.app/personal-interests-llc/issue/CES-46)** telemetry. **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** APK anytime. Portal screens wait on [Before the portal](#before-the-portal).
 
 | Track | Issue | Why now | Done when |
 | ----- | ----- | ------- | --------- |
 | **A — M4 telemetry** | **[CES-46](https://linear.app/personal-interests-llc/issue/CES-46)** | Restore and dead-letter UX are in repo; emits are still stubs | Client emits only allow-listed events |
 | **B — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
+| **C — portal gate** | **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** | Phone-browser client is Accepted and has no screens yet | Three product answers recorded, and [CES-75](https://linear.app/personal-interests-llc/issue/CES-75) math port Done |
 
 **Shipped this cycle:** **CES-45** (restore + dead-letter UX), **CES-44** (client outbox expansion), **CES-43** (server API + auth), **CES-42** (server Postgres + RLS), **CES-49** (settings CHECK), **CES-73** (portal stack), **CES-71** (cadence rename), **ADR 006** (Accepted). Earlier: **CES-70** (ZIP import), **CES-41** (Export ZIP), **CES-67** (Maintenance), **CES-40** (receipt photos).
 
@@ -32,6 +33,24 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 **Spec:** [`../specs/adr/006-browser-client.md`](../specs/adr/006-browser-client.md) — **Accepted** (2026-10-20). Import spec remains [`../specs/export-import.md`](../specs/export-import.md).
 
 **Manual checklist (CES-40):** [`ces-40-manual-test.md`](ces-40-manual-test.md) — needs a physical Android device with a camera; not runnable in CI or on the Cloud VM. CES-41/CES-70 device timing (10k rows / 30 s) rides along with **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)**.
+
+### Before the portal
+
+Normative gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md). Linear milestone **Web client readiness**. Parent **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** stays open until the list below is done. Portal screens are a later issue.
+
+`client/web-lite/` is the retired iPhone prototype, not the portal. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md). CES-62 and CES-63 are Canceled.
+
+M3 on `main` already provides `POST /api/v1/mutations`, `GET /api/v1/changes`, `GET /api/v1/restore/manifest`, HS256 checks, and RLS.
+
+Order:
+
+1. **Done.** Retire PWA-lite in the tree, the Pages workflow, and Linear.
+2. **Answer on CES-74.** Three small decisions, deliberately not their own tickets: mint-script token vs an account system ([issue #37](https://github.com/JMNofziger/cestovni/issues/37)); rewrite the Android settings row id to the JWT subject on first auth, or wait to create the row until a subject exists ([issue #38](https://github.com/JMNofziger/cestovni/issues/38)); local `server/api` vs a hosted staging URL before portal development.
+3. **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** blocks CES-74. TypeScript consumption math must match `tests/math/fixtures/` before any portal screen. That is the math-drift risk.
+
+Already locked, so they are not tickets: online-only portal (ADR 006), server-row wins on restore (ADR 002), no portal code inside `client/web-lite/`, and no metrics, maintenance, photos, or ZIP in portal v1.
+
+Not this gate: telemetry (CES-46, issue #45), 429 banner (#40), dead-letter edit (#39), live restore test (#41), promotion gates (#42), device timing (#44), APK (CES-68), migration rollback (CES-47). PWA parity ([issue #43](https://github.com/JMNofziger/cestovni/issues/43)) is retired with the prototype.
 
 ---
 
@@ -120,7 +139,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 ### M3 — Backup + restore
 
-  - 🟩 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests. *(**CES-42** through **CES-45** are in repo. Restore applies `GET /changes` after the manifest, and Settings → Backup shows dead-letter rows. Merge to `main` is still pending.)*
+  - 🟩 **M3 rollup** — ADR 002 + `sync-protocol` closed in running code + tests, on `main` since [PR #46](https://github.com/JMNofziger/cestovni/pull/46) (2026-10-22). Known holes are [M3 known gaps](#m3-known-gaps-2026-10-20).
   - 🟩 **CES-42 — Server Postgres + RLS migrations** — [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`tests/rls/run.sh`](../../tests/rls/run.sh), [`ci/rls-regression.yml`](../../ci/rls-regression.yml). Roles, `auth_user_id()` stub, five tables, forced RLS.
   - 🟩 **CES-43 — Server API + auth** — [`server/api/`](../../server/api/), [`tests/contract/run.sh`](../../tests/contract/run.sh), [`.github/workflows/contract-tests.yml`](../../.github/workflows/contract-tests.yml). JWT HS256, mutations, changes, restore manifest, in-process rate limits. `server/dev-sync-stub/` stays the zero-dep local tool.
   - 🟩 **CES-44 — Backup / outbox (client)** — every backed-up write enqueues in the same Drift transaction (`client/lib/db/repositories/`). `SyncClient` adds `getChanges` and `getRestoreManifest` and sends the compile-time bearer or a runtime JWT (`client/lib/sync/`). Flush backs off `1s → 2s → 4s → 8s → 16s → 30s`, honors `Retry-After`, and marks a row dead-letter after six non-429 failures. Tests: `client/test/db/repositories/backed_up_outbox_test.dart`, `client/test/sync/flush_policy_test.dart`, `client/test/sync/sync_client_test.dart`.
@@ -130,7 +149,7 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 
 CES-42..45 acceptance in the execution prompts is met. These holes are outside those checklists, or they are spec lines the code does not finish. They are not a reason to re-run the prompts.
 
-- **Merge.** CES-42 ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)) and CES-43 ([PR #34](https://github.com/JMNofziger/cestovni/pull/34)) are on `main`. CES-44 is draft [PR #35](https://github.com/JMNofziger/cestovni/pull/35). CES-45 is draft [PR #36](https://github.com/JMNofziger/cestovni/pull/36), stacked on #35. M3 is not on `main` until both merge. No extra issue: the PRs are the record.
+- **Landed.** CES-42 ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)), CES-43 ([PR #34](https://github.com/JMNofziger/cestovni/pull/34)), CES-44 ([PR #35](https://github.com/JMNofziger/cestovni/pull/35)), and CES-45 ([PR #46](https://github.com/JMNofziger/cestovni/pull/46), 2026-10-22) are on `main`. No open pull request. PR #36 merged into the CES-44 branch; #46 is what put that branch on `main`.
 - **No sign-in UI.** HTTP 401 pauses automatic flush. The protocol's re-auth flow has no screen. [Issue #37](https://github.com/JMNofziger/cestovni/issues/37).
 - **Settings id.** A fresh settings row uses a local UUID. The server CHECK requires `settings.id = user_id = JWT sub`, so the first settings insert is rejected until restore replaces that row. [Issue #38](https://github.com/JMNofziger/cestovni/issues/38).
 - **Dead-letter mark sticks across a later edit.** Rewriting the payload does not clear `dead-letter: `. The user retries or discards from Backup. [Issue #39](https://github.com/JMNofziger/cestovni/issues/39).
@@ -139,7 +158,7 @@ CES-42..45 acceptance in the execution prompts is met. These holes are outside t
 - **Restore tests hit an in-memory HTTP fixture**, not Postgres plus `server/api`. Contract tests cover the API. There is no client-to-live-API restore test. [Issue #41](https://github.com/JMNofziger/cestovni/issues/41).
 - **10k-row device timing** for export and restore. [CES-68](https://linear.app/personal-interests-llc/issue/CES-68) is the APK that makes a device pass possible and does not list the measurements. [Issue #44](https://github.com/JMNofziger/cestovni/issues/44).
 - **Staging Gate 6** ([`ci/promotion-gates.yml`](../../ci/promotion-gates.yml)) is still a stub and is not registered under `.github/workflows/`. Its steps exit 1 so a copied workflow cannot report success. [`tests/roles/`](../../tests/roles/) is a scaffold and is not invoked by CI. RLS coverage that does run is [`tests/rls/`](../../tests/rls/). [Issue #42](https://github.com/JMNofziger/cestovni/issues/42).
-- **PWA-lite** still targets the dev stub, enqueues fill-up inserts only, and has no Backup screen. Parked with CES-62 / CES-63. Parity work is [issue #43](https://github.com/JMNofziger/cestovni/issues/43).
+- **PWA-lite** is retired (2026-11-05), not a backup-parity project. CES-62 / CES-63 are Canceled. [Issue #43](https://github.com/JMNofziger/cestovni/issues/43) is the same leftover; this repo's GitHub token cannot close it. Treat it as not planned. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
 
 Bugs fixed while building the chain, so they are not open: Drift `Column` clashed with Flutter's `Column` (hide it on the drift import); tests hide matcher `isNull`; the settings table getter is `appSettings`; `flutter analyze` rewrites `client/analysis_options.yaml` and that rewrite stays reverted; restore uses INSERT or UPDATE because `INSERT OR REPLACE` on a parent drops children while foreign keys are on.
 
@@ -151,13 +170,13 @@ Bugs fixed while building the chain, so they are not open: Drift `Column` clashe
 
 ### M-dist — Distribution (parallel, non-blocking)
 
-Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **PWA-lite gate passed 2026-05-29** — Android E2E + Phase 1+2 on `main`. **CES-62 / CES-63 parked** (2026-10-20). Non-Android path: [ADR 006](../specs/adr/006-browser-client.md) **Accepted** (2026-10-20); stack selection in **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)**.
+Runs **alongside M1–M5** per [ADR 005](../specs/adr/005-distribution-channels.md). Does not gate feature milestones. **PWA-lite is retired** (2026-11-05); CES-62 / CES-63 Canceled. Non-Android path: [ADR 006](../specs/adr/006-browser-client.md), gated by [CES-74](https://linear.app/personal-interests-llc/issue/CES-74).
 
 #### PWA-lite gate
 
-PWA-lite gate passed 2026-05-29; **Phase 1+2 merged to `main`** (PR #3 + PR #4). Active execution: [`prompts/pwa-lite-phase3-deploy.md`](prompts/pwa-lite-phase3-deploy.md). Phase 1+2 prompt [`prompts/pwa-lite-phase1-2.md`](prompts/pwa-lite-phase1-2.md) is **complete** (do not re-run).
+PWA-lite gate passed 2026-05-29; **Phase 1+2 merged to `main`** (PR #3 + PR #4) and is now a **retired** prototype. Pages auto-deploy is off. CES-62 / CES-63 are Canceled. Do not re-run the phase prompts.
 
-- 🟨 **M-dist rollup** — Android-first; gate + PWA-lite Phase 1+2 done; **iPhone install-doc parked**; browser client [ADR 006](../specs/adr/006-browser-client.md) **Accepted** (2026-10-20); portal stack selection **[CES-73](https://linear.app/personal-interests-llc/issue/CES-73)**; portal implementation was gated on CES-45; that restore work is in repo.
+  - 🟨 **M-dist rollup** — Android APK still open (CES-68). iPhone PWA-lite **retired**. Portal screens blocked on [CES-74](https://linear.app/personal-interests-llc/issue/CES-74). See [Before the portal](#before-the-portal).
   - 🟩 **ADR 005 + brief + Glitchtip addendum** — accepted 2026-05-17.
   - 🟩 **Weekly native iOS CI paused** — [`ci/paused/verify-ios-weekly.yml`](../../ci/paused/verify-ios-weekly.yml) (no GitHub triggers until App Store re-scoped).
   - 🟩 **PWA offline spike** — NO-GO; archived [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
@@ -165,9 +184,9 @@ PWA-lite gate passed 2026-05-29; **Phase 1+2 merged to `main`** (PR #3 + PR #4).
   - 🟩 **Minimal M3 client slice** — fill-up enqueue + flush landed on `feat/m3-outbox-gate-slice` (2026-05-29). **CES-44** extends that slice to vehicles, settings, maintenance events, and maintenance rules, and points flush at the CES-43 API. Files: `client/lib/db/repositories/`, `client/lib/sync/`, Debug Sync-now button.
   - 🟩 **Minimal M3 server slice** — gate-slice `server/dev-sync-stub/` (`POST /api/v1/mutations` + `GET /api/v1/changes` for `fill_ups`, 2026-05-29). **Real API** is [CES-43](https://linear.app/personal-interests-llc/issue/CES-43): `server/api/` adds restore manifest, JWT auth, and all five tables. The stub stays for local client dev.
   - 🟩 **Android E2E proof** — offline fill-up → flush → row on server; recorded in [`pwa-lite-gate.md`](../specs/pwa-lite-gate.md) §"Recorded proof"; reproducible via `CESTOVNI_E2E=1 flutter test test/sync/e2e_against_stub_test.dart`.
-  - 🟩 **PWA-lite Phase 1+2 (iPhone)** — **Done in repo on `main`** (2026-05-29): `client/web-lite/` offline Log + History + sync (`sync.js`); PR #3 + #4; desktop E2E vs dev stub. Linear [CES-62](https://linear.app/personal-interests-llc/issue/CES-62) — **parked** (implementation complete; T1 deferred).
-  - 🟨 **iOS PWA-lite deploy + install doc** — **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** **parked**: CI deploy + `config.js` done; [`install-ios.md`](install-ios.md) + iPhone T1 not next.
-  - 🟩 **CI web-lite deploy job** — `.github/workflows/pwa-lite-pages-deploy.yml` on `main` (PR #6); preview URL in [`pwa-lite-deploy-runbook.md`](pwa-lite-deploy-runbook.md).
+  - 🟩 **PWA-lite Phase 1+2 (iPhone)** — shipped 2026-05-29, **retired** 2026-11-05. [CES-62](https://linear.app/personal-interests-llc/issue/CES-62) Canceled. Code frozen at `client/web-lite/`.
+  - 🟩 **iOS PWA-lite deploy + install doc** — **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** Canceled. Install doc stays a draft. Not the portal.
+  - 🟩 **CI web-lite deploy job** — workflow remains, **push and pull_request triggers removed** (2026-11-05). Manual dispatch only. Runbook: [`pwa-lite-deploy-runbook.md`](pwa-lite-deploy-runbook.md).
   - 🟥 **Android APK tag release + install doc** — **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)**; [`install-android.md`](install-android.md) draft.
   - 🟥 **Compliance / launch-copy** — direct-install + PWA disclosures (Stage 6 overlap OK for counsel).
 
@@ -237,7 +256,7 @@ Leading emoji tracks **exit** state (independent of per-vertical RYG above, but 
 - 🟩 Every vertical above has a Linear issue with a `Spec:` line. *(CES-35 epic + CES-36..CES-47; M0 follow-ups CES-48/49/50 created 2026-04-22, linked to their downstream verticals via `blocks`.)*
 - 🟩 M0 + M1 land: offline app runs, fill-up works end-to-end, golden math tests green. *(**M0 closed**. **M1 closed** — CES-38/39/57 + CES-65/66/67 + CES-40 all Done.)*
 - 🟩 M2 lands: ZIP export round-trips for a representative fixture, and replace-mode import restores it. *(CES-41 **Done**. CES-70 **Done on `main`**, PR #25.)*
-- 🟩 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green. *(CES-42..45 in repo. Restore fixtures: [`tests/backup/README.md`](../../tests/backup/README.md). Merge to `main` still pending.)*
+- 🟩 M3 lands: backup/restore passes `tests/contract/` + integration fixtures; RLS regression green. *(CES-42..45 on `main`, [PR #46](https://github.com/JMNofziger/cestovni/pull/46). Restore fixtures: [`tests/backup/README.md`](../../tests/backup/README.md). Gaps #37–#45 stay open.)*
 - 🟥 M4 lands: `ci/telemetry-gate.`* green; client emits only allow-listed events.
 - 🟥 M5 lands: migration rollback spec real (not stub); rollback tooling proven against fixture.
 
@@ -259,5 +278,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-10-20 — M3 gaps filed as GitHub issues #37–#45. Index: [M3 known gaps](#m3-known-gaps-2026-10-20). Next is CES-46. Do not start CES-46 in the same change. CES-62/63 parked.*
+*Last updated: 2026-11-05 — PWA-lite retired (CES-62/63 Canceled). Portal screens blocked on [CES-74](https://linear.app/personal-interests-llc/issue/CES-74), math port [CES-75](https://linear.app/personal-interests-llc/issue/CES-75). Gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md).*
 

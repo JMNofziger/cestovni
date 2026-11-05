@@ -1,6 +1,8 @@
 # PWA-lite gate — Android E2E before iPhone work
 
-**Status:** Active (2026-05-21, Option B — Android first)
+> **RETIRED** (2026-11-05). Historical gate record. iPhone PWA-lite will not be resumed. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
+
+**Status:** Retired (gate itself passed 2026-05-29; the iPhone client it unlocked is retired)
 **Spec:** [`pwa-lite-v1.md`](pwa-lite-v1.md)
 **Delivery plan:** [`../product/delivery-plan-v1.md`](../product/delivery-plan-v1.md) § M-dist
 
@@ -57,7 +59,7 @@ Reproducible via `CESTOVNI_E2E=1 flutter test test/sync/e2e_against_stub_test.da
 |-------|--------|-------|
 | Phase 1 — offline shell | **Done** | PR #3 (`d10c115`) |
 | Phase 2 — sync push/pull | **Done** | PR #4 (`8c1f1a8`) |
-| Phase 2b — Pages deploy + install doc | **Next** | [`pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) |
+| Phase 2b — Pages deploy + install doc | **Retired** with CES-63 (CI file remains; auto-deploy is off) | [`pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) |
 
 Desktop proof (2026-05-29): save → outbox → `POST /api/v1/mutations` → `row_version` hydrate → History pill `SYNCED`; transport retry + header-tap manual retry verified. iPhone T1 (airplane mode round-trip) — product validates separately.
 
@@ -65,5 +67,5 @@ Desktop proof (2026-05-29): save → outbox → `POST /api/v1/mutations` → `ro
 
 - [`pwa-lite-v1.md`](pwa-lite-v1.md) — spec + phases table
 - [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) — Phase 1+2 execution (**complete**)
-- [`../product/prompts/pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) — deploy execution (**active**)
+- [`../product/prompts/pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) — deploy prompt (**parked** with CES-63; Pages workflow already on `main`)
 - [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/) — Flutter web NO-GO (historical)

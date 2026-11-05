@@ -1,5 +1,7 @@
 # Cursor discovery prompt — PWA-lite for iPhone (Option H, Phase 0)
 
+> **RETIRED** (2026-11-05). Historical prompt. Do not run. Archive: [`../../archive/pwa-lite/README.md`](../../archive/pwa-lite/README.md).
+
 **Mode:** Read-only / Ask mode.
 **Goal:** gather everything needed for a tight Phase 1 execution prompt. **Do NOT modify files. Return a single structured Markdown report.**
 

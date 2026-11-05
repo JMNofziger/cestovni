@@ -1,24 +1,11 @@
-# Cloudflare Pages deploy for the build-step-free PWA-lite client.
-#
-# Minute discipline: scoped via `paths` to client/web-lite/** only — does not
-# run for any other change, and is fully independent of verify-fast.yml /
-# verify-full.yml (Flutter + telemetry gates are untouched and unblocked by
-# this workflow either passing or failing).
-#
-# Pushes to a feature branch (or a pull_request) get a Cloudflare-generated
-# preview URL; pushes to `main` deploy to the production alias for the
-# `cestovni-pwa` Pages project. See docs/product/pwa-lite-deploy-runbook.md
-# for the manual deploy path and required secrets.
+# RETIRED 2026-11-05. iPhone PWA-lite is not the web client.
+# Push and pull_request deploys are off so this prototype is not republished
+# by accident. workflow_dispatch remains only to publish a retirement banner
+# or to take the old Pages project down. See docs/archive/pwa-lite/README.md.
 
-name: 'PWA-lite Pages deploy'
+name: 'PWA-lite Pages deploy (retired)'
 
 on:
-  push:
-    paths:
-      - 'client/web-lite/**'
-  pull_request:
-    paths:
-      - 'client/web-lite/**'
   workflow_dispatch:
 
 concurrency:

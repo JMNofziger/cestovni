@@ -147,7 +147,7 @@ The server connects AS `cestovni_app` role (the runtime role from CES-42), never
 - **RLS migration changes** (CES-42 schema is complete)
 - **Telemetry / metrics emission** (CES-46)
 - **429 client-side handling** (already in `SyncClient`; CES-44 expands it)
-- **Portal / browser client** (gated on M3 + ADR 006)
+- **Portal / browser client** (separate track; ADR 006, not this ticket)
 
 ## Constraints
 

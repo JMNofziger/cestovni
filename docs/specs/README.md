@@ -8,14 +8,16 @@ Each Linear issue should include a **`Spec:`** line pointing to the relevant fil
 
 **Process:** Follow stage gates in [`../product/PRODUCT_DEV_WORKFLOW.md`](../product/PRODUCT_DEV_WORKFLOW.md) — architecture ADRs before finalizing stack-bound specs; optional timeboxed client POC only when needed.
 
-**Implementation (Stage 5):** The **Flutter + Drift** client and v1 **client SQLite schema** (per `data-model.md`) live under [`../../client/`](../../client/) on `main` — see [`../../client/README.md`](../../client/README.md). Server-side migrations remain future work (M3); alignment rule unchanged: every server `NNNN_*.sql` should have a matching client step when the server schema ships.
+**Implementation (Stage 5):** The **Flutter + Drift** client and v1 **client SQLite schema** (per `data-model.md`) live under [`../../client/`](../../client/) on `main` — see [`../../client/README.md`](../../client/README.md). Server Postgres schema is [`../../db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql) (CES-42, on `main`). The phone-browser portal in [ADR 006](adr/006-browser-client.md) is Accepted and has no package yet. Alignment rule unchanged: every later server `NNNN_*.sql` should have a matching client step when that schema change ships. Client-only steps (for example `0006_sync_cursors`) do not get a server file.
 
 ## Index (Phase 2)
 
 | Doc                                                  | Purpose                                    | Linear         | Status                                 |
 | ---------------------------------------------------- | ------------------------------------------ | -------------- | -------------------------------------- |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md)                 | System overview + links                    | CES-25         | Agreed for v1 kickoff                  |
-| [`adr/README.md`](adr/README.md)                     | ADR index                                  | CES-23, CES-24 | 001–005 Accepted; **006 Proposed**     |
+| [`adr/README.md`](adr/README.md)                     | ADR index                                  | CES-23, CES-24 | 001–006 Accepted; 005 iPhone addendum Retired |
+| [`portal-readiness.md`](portal-readiness.md)         | Gate before portal screens                 | CES-74         | Open                                   |
+| [`pwa-lite-v1.md`](pwa-lite-v1.md)                   | iPhone PWA-lite spec                       | CES-62         | **Retired** (2026-11-05)               |
 | [`consumption-math.md`](consumption-math.md)         | Math, segments, fill-up flags              | CES-26         | Complete (v1)                          |
 | [`si-units.md`](si-units.md)                         | Canonical INT storage + conversions        | CES-27         | Complete (v1)                          |
 | [`export-v1.md`](export-v1.md)                       | ZIP / CSV export contract                  | CES-28         | Complete (v1)                          |

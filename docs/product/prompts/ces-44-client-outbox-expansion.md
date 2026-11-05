@@ -145,7 +145,7 @@ Add a periodic flush mechanism (e.g. a `Timer` in `OutboxFlushWorker`) that atte
 - **Server code changes** (CES-43 API is complete)
 - **Schema migration** (no new tables or columns needed)
 - **Telemetry emission** (CES-46)
-- **Portal / browser client** (gated on M3 + ADR 006)
+- **Portal / browser client** (separate track; ADR 006, not this ticket)
 
 ## Constraints
 

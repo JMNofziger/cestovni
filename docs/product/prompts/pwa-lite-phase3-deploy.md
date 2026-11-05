@@ -1,5 +1,7 @@
 # Cursor execution prompt — PWA-lite Phase 2b (deploy + install)
 
+> **RETIRED** (2026-11-05). Do not run. CES-63 is Canceled. Archive: [`../../archive/pwa-lite/README.md`](../../archive/pwa-lite/README.md).
+
 > **Prerequisite:** Phase 1+2 merged to `main` (PR #3 `d10c115`, PR #4 `8c1f1a8`). Do **not** re-implement offline shell or sync client.
 
 **Branch:** cut `feat/pwa-lite-deploy` from `main`

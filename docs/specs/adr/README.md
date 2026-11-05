@@ -10,7 +10,7 @@ ADRs are the **decision**; detailed protocols live in domain specs (e.g. `sync-p
 | [003](003-mobile-stack.md) | Mobile client stack (Flutter + Drift) | Accepted | CES-21 |
 | [004](004-telemetry-crash-sdk.md) | Telemetry / crash SDK (`sentry_flutter`, self-host-capable) | Accepted | CES-29 |
 | [004 addendum](004-addendum-glitchtip-transport.md) | Glitchtip transport (Stage 1) | Accepted | CES-46 |
-| [005](005-distribution-channels.md) | Stage 1 distribution (Android APK + iOS PWA) | Accepted | CES-dist |
+| [005](005-distribution-channels.md) | Stage 1 distribution (Android APK; iPhone PWA retired) | Accepted | CES-dist |
 | [006](006-browser-client.md) | Browser client for non-Android (phone-first; Preact + TS) | Accepted | [CES-72](https://linear.app/personal-interests-llc/issue/CES-72), [CES-73](https://linear.app/personal-interests-llc/issue/CES-73) |
 
 **Process:** [`../../product/PRODUCT_DEV_WORKFLOW.md`](../../product/PRODUCT_DEV_WORKFLOW.md)

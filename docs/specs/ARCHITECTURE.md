@@ -36,15 +36,14 @@
 Per [ADR 005](adr/005-distribution-channels.md) + [ADR 006](adr/006-browser-client.md):
 
 ```text
-[Android]       Flutter native APK — primary client (M0–M2 on main)
-[Non-Android]   Browser portal — Preact + TS, phone browsers first (ADR 006 Accepted; gated on M3)
-[Parked]        iPhone PWA-lite (client/web-lite/ stays on main; CES-62/63)
+[Android]       Flutter native APK — primary client (M0–M3 on main)
+[Non-Android]   Browser portal — Preact + TS, phone browsers first (ADR 006 Accepted; no code yet)
+[Retired]       iPhone PWA-lite (client/web-lite/ frozen; CES-62/63 Canceled)
 [Deferred]      App Store native iOS ($99/yr)
 ```
 
-- Gate: [`pwa-lite-gate.md`](pwa-lite-gate.md) — historical; iPhone T1 parked.
-- Implementation spec: [`pwa-lite-v1.md`](pwa-lite-v1.md) (parked).
-- Browser portal: [`adr/006-browser-client.md`](adr/006-browser-client.md) (Accepted; Preact + TS; gated on M3).
+- PWA-lite archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md). Specs [`pwa-lite-gate.md`](pwa-lite-gate.md) and [`pwa-lite-v1.md`](pwa-lite-v1.md) are historical.
+- Browser portal: [`adr/006-browser-client.md`](adr/006-browser-client.md) (Accepted; Preact + TS). Screens blocked: [`portal-readiness.md`](portal-readiness.md).
 - Spike archive: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
 - Crash/telemetry backend: Glitchtip self-host ([addendum](adr/004-addendum-glitchtip-transport.md)); client SDK remains `sentry_flutter`.
 

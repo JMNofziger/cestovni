@@ -1,6 +1,8 @@
 # PWA-lite — iPhone offline fill-up capture (v1)
 
-**Status:** **Phase 1+2 complete on `main`** (2026-05-29) — PR #3 (`d10c115`) offline shell; PR #4 (`8c1f1a8`) sync push/pull vs `server/dev-sync-stub/`. **Next:** Cloudflare Pages preview deploy + iPhone install doc ([`pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md)); production API remains CES-43.
+> **RETIRED** (2026-11-05). Historical spec only. This is not the web client. Do not implement from this file. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md). Forward path: [`portal-readiness.md`](portal-readiness.md).
+
+**Status:** **Retired.** Phase 1+2 remains on `main` (2026-05-29, PR #3 `d10c115`, PR #4 `8c1f1a8`) as a frozen prototype. CES-62 / CES-63 are Canceled. Deploy and install-doc prompts will not be run.
 **ADR:** [005-addendum-pwa-lite-ios.md](adr/005-addendum-pwa-lite-ios.md)
 **Discovery prompt:** [`../product/prompts/pwa-lite-discovery.md`](../product/prompts/pwa-lite-discovery.md) (complete)
 **Execution prompt:** [`../product/prompts/pwa-lite-phase1-2.md`](../product/prompts/pwa-lite-phase1-2.md) (Phase 1+2 — **complete**); [`../product/prompts/pwa-lite-phase3-deploy.md`](../product/prompts/pwa-lite-phase3-deploy.md) (deploy — **active**)

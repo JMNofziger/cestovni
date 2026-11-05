@@ -1,5 +1,7 @@
 # Cursor execution prompt — PWA-lite Phase 2b (install doc + status close-out)
 
+> **RETIRED** (2026-11-05). Do not run. The install doc stays an unfinished draft. Archive: [`../../archive/pwa-lite/README.md`](../../archive/pwa-lite/README.md).
+
 > **Prerequisite:** Phase 1+2 on `main` (PR #3 `d10c115`, PR #4 `8c1f1a8`). Phase 2b runtime config (PR #5 `88e4571`) and Cloudflare Pages deploy workflow (PR #6 `3d17342`) **merged**; Cloudflare secrets/project status confirmed (PR #7 `4aa7e88`). **Production deploy is now actually live:** `https://cestovni-pwa.pages.dev` (manually triggered via `workflow_dispatch` on `main` 2026-06-30 22:5x — confirm it's still 200 before citing it; see "deploy-trigger gap" below).
 
 ## Goal
