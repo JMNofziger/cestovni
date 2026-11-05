@@ -24,7 +24,7 @@ Store listing skeleton, privacy policy outline, in-app Data & privacy bullets: `
 
 ## Delivery (Phase 3 / Stage 5)
 
-Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (RYG checklist is source of truth). Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**. **M0 closed** (**CES-36** / **CES-37**). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16). **M2 closed:** **CES-41** export + **CES-70** import. **CES-62 / CES-63 parked.** Next: **[ADR 006](../specs/adr/006-browser-client.md)** (phone-browser client, Proposed) — no portal code until Accepted. Prerequisites **CES-53**–**CES-56** **Done**. Linear MCP/API: [`../linear/mcp-setup.md`](../linear/mcp-setup.md).
+Active engineering breakdown, milestone spine, per-vertical backlog with `Spec:` paths, test strategy, and **repo progress**: `[delivery-plan-v1.md](delivery-plan-v1.md)` (RYG checklist is source of truth). Linear epic **[CES-35](https://linear.app/personal-interests-llc/issue/CES-35)**. **M0 closed** (**CES-36** / **CES-37**). **Android M1 closed** on `main` (`bb1d5d5`, 2026-08-16). **M2 closed:** **CES-41** export + **CES-70** import. **M3 on `main`** (PR #46, 2026-10-22). **CES-62 / CES-63 parked.** **[ADR 006](../specs/adr/006-browser-client.md)** is Accepted (Preact + TypeScript) and the portal package does not exist yet — open requirements are in the delivery plan § Before the portal. Next milestone: **CES-46**. Prerequisites **CES-53**–**CES-56** **Done**. Linear MCP/API: [`../linear/mcp-setup.md`](../linear/mcp-setup.md).
 
 ## Specs
 

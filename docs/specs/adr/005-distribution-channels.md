@@ -35,7 +35,7 @@
 |----------|---------|--------------|----------------|
 | Android (~70%) | **Direct APK** (primary); Play Store optional ($25 once) | $0 recurring (APK); $25 one-time if Play | Flutter **native** (existing `client/android/`) |
 | iPhone (~30%) | **Installable PWA-lite** (Add to Home Screen) | $0 store | Vanilla HTML + IndexedDB — [`pwa-lite-v1.md`](../pwa-lite-v1.md) — **PARKED** (CES-62/63) |
-| Non-Android (phone browser) | **Browser portal** (phone-first, online) | $0 (hosting) | New client per [ADR 006](006-browser-client.md); stack TBD; requires M3 |
+| Non-Android (phone browser) | **Browser portal** (phone-first, online) | $0 (hosting) | Preact + TypeScript per [ADR 006](006-browser-client.md). Accepted; no package yet. API it calls (M3) is on `main`. |
 | Native iOS App Store | **Deferred** | $99/year when accepted | Native `client/ios/` compile may continue in PR CI only; **no weekly iOS CI** until re-scoped |
 
 **Flutter web PWA offline spike:** NO-GO (2026-05-21). iPhone engineering follows [005-addendum-pwa-lite-ios.md](005-addendum-pwa-lite-ios.md). Spike record: [`../archive/spike-pwa-offline/`](../archive/spike-pwa-offline/).
@@ -72,7 +72,7 @@ Flutter web + Drift WASM/OPFS was explored and rejected for iPhone offline. PWA-
 
 - **Paused:** weekly native iOS workflow moved to [`ci/paused/verify-ios-weekly.yml`](../../../ci/paused/verify-ios-weekly.yml) — **no GitHub triggers** until native iOS distribution returns.
 - **PR / dispatch:** [`verify-full.yml`](../../../.github/workflows/verify-full.yml) may still build iOS on PRs for compile health; that is **not** a distribution channel.
-- **Future:** deploy job for `client/web-lite/` when PWA-lite ships.
+- **PWA-lite Pages deploy** is `.github/workflows/pwa-lite-pages-deploy.yml` (PR #6). Install-doc and iPhone T1 stay parked (CES-63).
 
 ## Consequences
 
@@ -90,9 +90,9 @@ Re-open this ADR when **any** of:
 
 On revisit: restore [`ci/paused/verify-ios-weekly.yml`](../../../ci/paused/verify-ios-weekly.yml) to `.github/workflows/`, update compliance store sections, and schedule App Store submission work under Stage 6.
 
-## 2026-10-20 — iPhone parked; browser client Proposed
+## 2026-10-20 — iPhone parked; browser client Accepted
 
-Product parked CES-62 / CES-63. PWA-lite code stays on `main`; do not delete it. Non-Android users are intended to use a **browser client** (phone browsers first) per [ADR 006](006-browser-client.md) (**Proposed**). Amend this table on 006 Accept — not before. Flutter web offline PWA on iOS Safari remains NO-GO.
+Product parked CES-62 / CES-63. PWA-lite code stays on `main`; do not delete it, and do not grow it into the portal. Non-Android users are intended to use a **browser client** (phone browsers first) per [ADR 006](006-browser-client.md) (**Accepted**, Preact + TypeScript, PR #28 and PR #31). The audience table above records that stack. Flutter web offline PWA on iOS Safari remains NO-GO. Portal code has not started; open requirements are in the delivery plan § Before the portal.
 
 ## Related
 

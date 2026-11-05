@@ -1,6 +1,6 @@
 # Installing Cestovni on iPhone (Stage 1 PWA-lite)
 
-**Status:** **Draft / PARKED** (2026-10-20) — CES-62 / CES-63 deferred. PWA-lite Phase 1+2 + Pages CI remain on `main`. Do not finalize this doc until product unparks the iPhone path. Non-Android option is [ADR 006](../specs/adr/006-browser-client.md) (phone-browser portal, Proposed).
+**Status:** **Draft / PARKED** (2026-10-20) — CES-62 / CES-63 deferred. PWA-lite Phase 1+2 + Pages CI remain on `main`. Do not finalize this doc until product unparks the iPhone path. The non-Android product path is [ADR 006](../specs/adr/006-browser-client.md) (phone-browser portal, Accepted, Preact + TypeScript, no package yet). This install doc is for the parked PWA, not that portal.
 
 iPhone users install Cestovni as a **web app** (Add to Home Screen), not from the App Store. See [ADR 005 addendum](../specs/adr/005-addendum-pwa-lite-ios.md) for capability limits vs Android native.
 
