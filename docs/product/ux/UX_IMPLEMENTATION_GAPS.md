@@ -4,7 +4,7 @@
 
 **Gate (closed):** Critical-gap rows **Done** (repo + Linear). **CES-39 Done** (2026-07-17). **CES-65 + CES-66 Done** (repo + Linear 2026-07-22). **CES-67 Done** (2026-08-15). **CES-40 Done** (receipt photos, 2026-08-15) — **M1 verticals all closed.** **CES-41** export and **CES-70** import shipped (M2 closed). **CES-71** cadence rename and **M3** (CES-42–45) are on `main`. Next milestone: **CES-46**. Portal (ADR 006) is Accepted and has no code.
 
-**Last reviewed:** 2026-11-05 (CES-62/63 parked; ADR 006 Accepted — no portal package)
+**Last reviewed:** 2026-11-05 (PWA-lite retired; portal screens blocked on CES-74)
 
 ---
 

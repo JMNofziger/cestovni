@@ -52,7 +52,7 @@ Why (short form):
 
 **Flutter web is not the iPhone distribution channel.** Stage 1 iPhone uses PWA-lite ([`pwa-lite-v1.md`](../pwa-lite-v1.md), [005 addendum](005-addendum-pwa-lite-ios.md)). Android remains the **primary native** target ([`005-distribution-channels.md`](005-distribution-channels.md)).
 
-**2026-10-20:** iPhone PWA-lite is **parked**. A second client (browser, phone-first, online) is **Accepted** in [ADR 006](006-browser-client.md). Stack: **Preact + TypeScript** (CES-73); Flutter web rejected on bundle size (1.5--3 MB vs < 25 KB). M3 (CES-42 through CES-45) is on `main` (PR #46, 2026-10-22). Portal code has not started.
+**2026-11-05:** iPhone PWA-lite is **retired** (CES-62 / CES-63 Canceled). A second client (browser, phone-first, online) is **Accepted** in [ADR 006](006-browser-client.md). Stack: **Preact + TypeScript** (CES-73). M3 is on `main`. Portal screens wait on [`../portal-readiness.md`](../portal-readiness.md).
 
 ## Revisit gates (when to re-open this ADR)
 

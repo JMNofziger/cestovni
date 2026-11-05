@@ -1,3 +1,4 @@
+// RETIRED 2026-11-05. iPhone PWA-lite is frozen. Not the web client.
 // PWA-lite runtime config — dev default, checked into repo.
 // Cloudflare Pages (or any host) may override this file per-environment
 // without a source change. Loaded before the module script in index.html.

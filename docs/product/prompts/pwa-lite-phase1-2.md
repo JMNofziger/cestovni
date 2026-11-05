@@ -1,4 +1,6 @@
-# Cursor execution prompt — PWA-lite Phase 1+2 (iPhone)
+# Cursor execution prompt — PWA-lite Phase 1+2
+
+> **RETIRED** (2026-11-05). Phase 1+2 already shipped and the client is frozen. Do not run again. Archive: [`../../archive/pwa-lite/README.md`](../../archive/pwa-lite/README.md).
 
 > **Gate passed 2026-05-29** (Android E2E proof landed on `feat/m3-outbox-gate-slice`). **Phase 1+2 complete on `main`** (PR #3 `d10c115`, PR #4 `8c1f1a8`). **Next execution prompt:** [`pwa-lite-phase3-deploy.md`](pwa-lite-phase3-deploy.md).
 

@@ -10,7 +10,7 @@
 ## Context
 
 - Android Flutter + Drift is the primary client ([ADR 003](003-mobile-stack.md)). M0--M2 are closed on `main`.
-- Stage 1 non-Android path was iPhone **PWA-lite** ([ADR 005](005-distribution-channels.md) + [addendum](005-addendum-pwa-lite-ios.md)). Product parked that path (CES-62 / CES-63). Code stays on `main` (`client/web-lite/`); it is not deleted and is not the portal.
+- Stage 1 non-Android path was iPhone **PWA-lite** ([ADR 005](005-distribution-channels.md) + [addendum](005-addendum-pwa-lite-ios.md)). That path is **retired** (2026-11-05). Code stays frozen at `client/web-lite/`. It is not the portal.
 - Flutter web as an **installed offline PWA on iOS Safari** is **NO-GO** (Safari 26.1 white-screen / storage fragility). That verdict stands.
 - Product wants a **web portal** so people without the Android app can still use Cestovni. **Most of those clients will open it in a phone browser**, not a laptop.
 
@@ -40,7 +40,7 @@ ADR 001's "no product-facing admin/dashboard" still holds. This is a **second cl
 | Kind | Second **product client**, not an admin dashboard. |
 | Online / offline | **Online-first.** Signed-in backup/restore per ADR 002. Offline fill-up on iPhone stays with parked PWA-lite; the portal does **not** claim zero-network logging in v1. |
 | Stack | **Preact + TypeScript** (see [Stack selection](#stack-selection-ces-73) below). |
-| iPhone PWA-lite | **Parked.** Leave `client/web-lite/` and Pages CI as-is. |
+| iPhone PWA-lite | **Retired** (2026-11-05). `client/web-lite/` is frozen. Pages auto-deploy is off. CES-62 / CES-63 Canceled. |
 | App Store native iOS | Still deferred ($99/yr). |
 | M3 | **On `main`** (CES-42–CES-45; PR #33, #34, #35, #46 on 2026-10-22). Portal implementation has not started. Dev stub is not CES-43. Sign-in and a hosted API are still open — delivery plan § Before the portal. |
 | Android | Unchanged primary client. |

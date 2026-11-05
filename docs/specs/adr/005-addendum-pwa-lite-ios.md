@@ -1,6 +1,6 @@
 # ADR 005 addendum: iPhone PWA-lite (post-spike)
 
-**Status:** Accepted
+**Status:** Retired (2026-11-05). Accepted 2026-05-21, then superseded as a distribution channel by [ADR 006](006-browser-client.md). The text below is the historical decision. Do not resume this client.
 **Date:** 2026-05-21
 **Parent:** [005-distribution-channels.md](005-distribution-channels.md)
 **Spec:** [`../pwa-lite-v1.md`](../pwa-lite-v1.md)
@@ -25,7 +25,7 @@ Android (~70%), hosting costs ($0), and App Store deferral are unchanged.
 
 PWA-lite iPhone work started **after** Android proved offline → online → server round-trip (gate passed 2026-05-29). **Phase 1+2 shipped on `main`** (PR #3 + #4): `client/web-lite/` offline Log + History + sync vs `server/dev-sync-stub/`.
 
-**2026-10-20:** CES-62 / CES-63 **parked**. Do not finalize [`install-ios.md`](../../product/install-ios.md) or run iPhone T1 until product unparks this path. Non-Android option is the phone-first browser client in [ADR 006](006-browser-client.md) (Accepted; Preact + TypeScript; no package yet). `client/web-lite/` stays on `main`.
+**2026-11-05:** CES-62 / CES-63 **Canceled**. PWA-lite is retired, not parked. `client/web-lite/` stays on `main` frozen. Non-Android work is the portal in [ADR 006](006-browser-client.md), gated by [`../portal-readiness.md`](../portal-readiness.md).
 
 ## iOS capability matrix (revised)
 

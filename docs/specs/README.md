@@ -15,7 +15,9 @@ Each Linear issue should include a **`Spec:`** line pointing to the relevant fil
 | Doc                                                  | Purpose                                    | Linear         | Status                                 |
 | ---------------------------------------------------- | ------------------------------------------ | -------------- | -------------------------------------- |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md)                 | System overview + links                    | CES-25         | Agreed for v1 kickoff                  |
-| [`adr/README.md`](adr/README.md)                     | ADR index                                  | CES-23, CES-24 | 001–006 Accepted                       |
+| [`adr/README.md`](adr/README.md)                     | ADR index                                  | CES-23, CES-24 | 001–006 Accepted; 005 iPhone addendum Retired |
+| [`portal-readiness.md`](portal-readiness.md)         | Gate before portal screens                 | CES-74         | Open                                   |
+| [`pwa-lite-v1.md`](pwa-lite-v1.md)                   | iPhone PWA-lite spec                       | CES-62         | **Retired** (2026-11-05)               |
 | [`consumption-math.md`](consumption-math.md)         | Math, segments, fill-up flags              | CES-26         | Complete (v1)                          |
 | [`si-units.md`](si-units.md)                         | Canonical INT storage + conversions        | CES-27         | Complete (v1)                          |
 | [`export-v1.md`](export-v1.md)                       | ZIP / CSV export contract                  | CES-28         | Complete (v1)                          |

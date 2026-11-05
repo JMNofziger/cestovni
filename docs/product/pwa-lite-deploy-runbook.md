@@ -1,5 +1,7 @@
 # PWA-lite deploy runbook (Cloudflare Pages)
 
+> **RETIRED** (2026-11-05). Do not deploy this client as the product. Automatic GitHub deploys are off. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
+
 > Covers manual/local deploys of `client/web-lite/` and how to point a
 > deployed preview at a reachable API. Automated CI deploy:
 > [`.github/workflows/pwa-lite-pages-deploy.yml`](../../.github/workflows/pwa-lite-pages-deploy.yml)
