@@ -14,7 +14,7 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 **Shipped:** **[CES-45](https://linear.app/personal-interests-llc/issue/CES-45)** restore + dead-letter UX (`client/lib/sync/restore_service.dart`, Settings → Backup). **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)** client outbox for all five backed-up tables (`client/lib/db/repositories/`, `client/lib/sync/`). **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71) cadence rename** ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** settings CHECK ([PR #30](https://github.com/JMNofziger/cestovni/pull/30)). **[ADR 006](../specs/adr/006-browser-client.md) Accepted** with portal stack **Preact + TypeScript** ([CES-73](https://linear.app/personal-interests-llc/issue/CES-73), [PR #31](https://github.com/JMNofziger/cestovni/pull/31)). **M2 (export + import) closed** (CES-41 + CES-70). **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** server Postgres + RLS ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)). **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** server API + auth (`server/api/`, `tests/contract/`).
 
-**In flight:** **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** web client readiness (portal screens stay blocked). Child **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** is the consumption-math port.
+**In flight:** portal gate **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)**, blocked in order by **[CES-76](https://linear.app/personal-interests-llc/issue/CES-76)** → **[CES-77](https://linear.app/personal-interests-llc/issue/CES-77)** → **[CES-78](https://linear.app/personal-interests-llc/issue/CES-78)** → **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)**.
 
 **Retired:** iPhone PWA-lite. **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** and **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** are Canceled. `client/web-lite/` is frozen. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
 
@@ -24,7 +24,7 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 | ----- | ----- | ------- | --------- |
 | **A — M4 telemetry** | **[CES-46](https://linear.app/personal-interests-llc/issue/CES-46)** | Restore and dead-letter UX are in repo; emits are still stubs | Client emits only allow-listed events |
 | **B — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
-| **C — portal gate** | **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** | Phone-browser client is Accepted and has no screens yet | Three product answers recorded, and [CES-75](https://linear.app/personal-interests-llc/issue/CES-75) math port Done |
+| **C — portal gate** | **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** | Phone-browser client is Accepted and has no screens yet | CES-76, CES-77, CES-78, and CES-75 Done, in that order |
 
 **Shipped this cycle:** **CES-45** (restore + dead-letter UX), **CES-44** (client outbox expansion), **CES-43** (server API + auth), **CES-42** (server Postgres + RLS), **CES-49** (settings CHECK), **CES-73** (portal stack), **CES-71** (cadence rename), **ADR 006** (Accepted). Earlier: **CES-70** (ZIP import), **CES-41** (Export ZIP), **CES-67** (Maintenance), **CES-40** (receipt photos).
 
@@ -36,21 +36,17 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 ### Before the portal
 
-Normative gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md). Linear milestone **Web client readiness**. Parent **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** stays open until the list below is done. Portal screens are a later issue.
+Normative list: [`../specs/portal-readiness.md`](../specs/portal-readiness.md). Milestone **Web client readiness**. Each issue blocks the next. Portal screens are a new issue after CES-74.
 
-`client/web-lite/` is the retired iPhone prototype, not the portal. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md). CES-62 and CES-63 are Canceled.
+`client/web-lite/` is retired. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
 
-M3 on `main` already provides `POST /api/v1/mutations`, `GET /api/v1/changes`, `GET /api/v1/restore/manifest`, HS256 checks, and RLS.
+1. **[CES-76](https://linear.app/personal-interests-llc/issue/CES-76)** — mint an HS256 bearer for a chosen user id.
+2. **[CES-77](https://linear.app/personal-interests-llc/issue/CES-77)** — settings upload uses that subject as the row id.
+3. **[CES-78](https://linear.app/personal-interests-llc/issue/CES-78)** — document local `server/api` as the portal dev target.
+4. **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** — TypeScript consumption math matches `tests/math/fixtures/`.
+5. **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** — gate. Screens start only after this is Done.
 
-Order:
-
-1. **Done.** Retire PWA-lite in the tree, the Pages workflow, and Linear.
-2. **Answer on CES-74.** Three small decisions, deliberately not their own tickets: mint-script token vs an account system ([issue #37](https://github.com/JMNofziger/cestovni/issues/37)); rewrite the Android settings row id to the JWT subject on first auth, or wait to create the row until a subject exists ([issue #38](https://github.com/JMNofziger/cestovni/issues/38)); local `server/api` vs a hosted staging URL before portal development.
-3. **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** blocks CES-74. TypeScript consumption math must match `tests/math/fixtures/` before any portal screen. That is the math-drift risk.
-
-Already locked, so they are not tickets: online-only portal (ADR 006), server-row wins on restore (ADR 002), no portal code inside `client/web-lite/`, and no metrics, maintenance, photos, or ZIP in portal v1.
-
-Not this gate: telemetry (CES-46, issue #45), 429 banner (#40), dead-letter edit (#39), live restore test (#41), promotion gates (#42), device timing (#44), APK (CES-68), migration rollback (CES-47). PWA parity ([issue #43](https://github.com/JMNofziger/cestovni/issues/43)) is retired with the prototype.
+Already locked, so they are not tickets: online-only portal (ADR 006), server-row wins (ADR 002), no portal code in `client/web-lite/`, no metrics, maintenance, photos, or ZIP in portal v1. Human sign-in ([issue #37](https://github.com/JMNofziger/cestovni/issues/37)) and a hosted API are later. Telemetry, the APK, and migration rollback do not block this list. PWA parity ([issue #43](https://github.com/JMNofziger/cestovni/issues/43)) is retired.
 
 ---
 
@@ -278,5 +274,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-11-05 — PWA-lite retired (CES-62/63 Canceled). Portal screens blocked on [CES-74](https://linear.app/personal-interests-llc/issue/CES-74), math port [CES-75](https://linear.app/personal-interests-llc/issue/CES-75). Gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md).*
+*Last updated: 2026-11-05 — Portal gate order is CES-76 → CES-77 → CES-78 → CES-75 → CES-74. See [`../specs/portal-readiness.md`](../specs/portal-readiness.md).*
 
