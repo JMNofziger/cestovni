@@ -28,7 +28,7 @@ Use this table for **App Store privacy labels**, **Play Data safety**, and **pri
 
 | Category | Examples | Where stored | In cloud backup? | In ZIP export? |
 | -------- | -------- | ------------ | ------------------ | -------------- |
-| **Account / identity** | Auth subject (`user_id`), session | Server + client token | Yes (server maps account to rows) | No (export uses `user_key_hash` fragment per [`export-v1.md`](export-v1.md), not raw id) |
+| **Account / identity** | Google subject (`google_sub`), email returned by Google, app `user_id`, session | Server `users` row + client refresh token | The account row lives on the server. It is not one of the five backed-up product tables | No (export uses `user_key_hash` fragment per [`export-v1.md`](export-v1.md), not the raw id or the Google subject) |
 | **Vehicle profile** | Name, make, model, year, optional **VIN**, fuel type, tank hint | Client + server when synced | Yes | Yes (`vehicles.csv`) |
 | **Fuel & maintenance** | Fill-ups (time, odometer, volume, price, currency, flags, notes), maintenance rules/events | Client + server | Yes | Yes (CSVs per [`export-v1.md`](export-v1.md)) |
 | **Preferences** | Units, default currency, timezone | Client + server | Yes | Yes (`settings.csv`) |
@@ -65,7 +65,7 @@ Reuse verbatim (or translate) in App Store description, in-app **Settings → Da
 ### 5.1 Structured data (client + server)
 
 - **Soft delete:** Backed-up rows use `deleted_at` per [`data-model.md`](data-model.md); sync protocol propagates tombstones ([`sync-protocol.md`](sync-protocol.md)).
-- **Account deletion (v1 posture):** When the user deletes their account (or requests erasure), the product **removes or irreversibly tombstones** all server-side rows for that `user_id` under RLS ([ADR 001](adr/001-backend-api-boundary.md)). Exact API surface and operator runbook steps ship with implementation; this doc locks the **user-facing promise**: no retained structured history after successful account deletion.
+- **Account deletion (v1 posture):** `DELETE /api/v1/account` with the current bearer and a fresh Google ID token hard-deletes every product row for that `user_id` and the identity rows, in one transaction ([`identity-provider.md`](identity-provider.md), [CES-85](https://linear.app/personal-interests-llc/issue/CES-85)). The user-facing promise: no retained structured history in the live database after successful account deletion. Host backups and the provider restore window keep those rows until that retention ends. An operator who receives an erasure request when the person cannot sign in runs `npm run purge-user` (UUID on stdin). Telemetry pepper deletion stays on [CES-46](https://linear.app/personal-interests-llc/issue/CES-46).
 - **Local wipe:** Uninstalling the app or OS “clear data” removes local SQLite and sandbox photos; remind users to **export first** if they need a copy.
 
 ### 5.2 Receipt photos
@@ -97,8 +97,9 @@ Aligned with [`PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md):
 ## 7. Third parties and SDKs
 
 - **Allowed:** Crash and diagnostics SDKs that respect the allow-list (no automatic enrichment with contacts, location, or ad IDs).
+- **Google sign-in:** the API calls Google's authorization, token, and certificate endpoints ([ADR 007](adr/007-identity-provider.md)). Clients open that flow through our API. Product code does not ship a Google Sign-In SDK. We store `google_sub` and the email Google returns. We do not store a Google refresh token.
 - **Not in v1:** Ad networks, attribution SDKs, social SDKs, behavioral analytics warehouses beyond the allow-list.
-- **Self-host:** Same client; operator runs Postgres + API. Privacy policy should mention continuity path per [`self-host-runbook.md`](self-host-runbook.md) when we ship public self-host packages.
+- **Self-host:** Same client; operator runs Postgres + API and registers their own Google OAuth client. Sign-in still uses Google. Privacy policy should mention that continuity path per [`self-host-runbook.md`](self-host-runbook.md) when we ship public self-host packages.
 
 ---
 
@@ -126,6 +127,7 @@ Map **§2 Data inventory** rows to Play categories:
 | Optional VIN | **Personal info** — user-provided identifier. |
 | Receipt photos | **Photos** — **not collected** by developer server (stored on device only); answer form accordingly (“collected” only if Google defines on-device as in scope — follow current Play Console definitions at submission). |
 | Telemetry allow-list | **App activity** (diagnostics/crash) per questionnaire; **not used for advertising**. |
+| Google account | **Personal info** (email) and account identifiers (`google_sub`). Collected for sign-in. Stored on the server `users` row. |
 
 **Process:** When YAML or manifest changes, update **both** Apple manifest and Play form in the **same release train**.
 

@@ -19,7 +19,9 @@ Errors use `{error: {code, message, retriable}}`.
 
 ## Auth and RLS
 
-`JWT_SECRET` verifies HS256 bearer tokens. `sub` must be the user UUID. Other algorithms are rejected.
+**Sign-in decision, not implemented here yet.** [ADR 007](../../docs/specs/adr/007-identity-provider.md) and [`docs/specs/identity-provider.md`](../../docs/specs/identity-provider.md): Google is the only sign-in door, and this API mints an HS256 access token whose `sub` is `users.id`. This process does not call Google and does not have a `users` table.
+
+`JWT_SECRET` verifies HS256 bearer tokens. `sub` must be the user UUID. Other algorithms are rejected. Contract tests still mint those tokens with `JWT_SECRET`.
 
 `cestovni_app` is `NOLOGIN`, so the DSN user cannot be that role. Every product transaction does:
 

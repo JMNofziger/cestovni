@@ -20,7 +20,7 @@
 ## Transport
 
 - HTTPS JSON over the app-owned API from ADR 001.
-- Authentication: bearer JWT using the identity claim model defined in ADR 001; `user_id` on every backed-up row is derived server-side from the token, never sent by the client.
+- Authentication: bearer JWT per [`identity-provider.md`](identity-provider.md). Sign-in is Google-only. The access token `sub` is `users.id`. `user_id` on every backed-up row is derived server-side from that token, never sent by the client. Google's subject is not that UUID.
 - Error model: standard HTTP status + `{error: {code, message, retriable}}` envelope.
 
 ## Server schema (per backed-up row)
@@ -159,7 +159,7 @@ Response:
 - **HTTP status map:**
   - `2xx` — normal success path.
   - `400` — non-retriable; dead-letter.
-  - `401` — token issue; pause outbox, trigger re-auth flow.
+  - `401` — access token missing, expired, or session no longer active. Refresh once via `POST /api/v1/auth/refresh`, then retry the sync call once. If refresh returns `refresh_invalid`, pause the outbox and send the person through Google sign-in again. A network failure on refresh stays retriable and does not clear the session. `401` from the sign-in routes is a failed sign-in, not an outbox pause. See [`identity-provider.md`](identity-provider.md).
   - `403` — non-retriable; dead-letter (indicates server-side RLS rejected; bug-class event).
   - `409` — non-retriable in v1 (we don't generate server-side conflicts under LWW-by-`row_version`); dead-letter and log.
   - `413` — non-retriable for the specific over-sized mutation; split batch client-side for the rest.

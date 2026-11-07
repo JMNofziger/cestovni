@@ -269,7 +269,7 @@ A differing `user_key_hash` is the *normal* device-to-device case, so it cannot 
 Accepted for v1 because:
 
 - The ZIP import screen still has no signed-in session. CES-42 and CES-43 are on `main`, and the Android client still has no sign-in screen, so the only actor on this screen is the device owner and a file they chose.
-- `user_key_hash` is a **stand-in** derived from a local UUID (CES-46 telemetry is not wired). Treating it as an identity claim would give a placeholder security meaning it cannot carry.
+- `user_key_hash` is a **stand-in** derived from `settings.id` (CES-46 telemetry is not wired). Treating it as an identity claim would give a placeholder security meaning it cannot carry. On first Google sign-in, Android rebinds that id to `users.id` ([CES-77](https://linear.app/personal-interests-llc/issue/CES-77)), so the hash changes once. It stays advisory.
 - Replace makes the outcome legible rather than covert: the destination becomes the archive, so a user cannot end up with a silent blend of two people's records.
 - Disclosure is adequate — the confirm dialog shows both hashes side by side.
 

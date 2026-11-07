@@ -107,7 +107,7 @@ portal/
 
 - **No shared Dart code.** Portal speaks the same REST API as the Flutter client.
 - **Consumption math** (L/100km, mpg) re-implemented in TypeScript -- ~50 lines, tested against the same golden fixtures in `tests/math/`.
-- **Auth:** bearer JWT from M3 (CES-43). Token stored in `sessionStorage` (not `localStorage` -- session scoped, no persistent offline token).
+- **Auth:** Google sign-in through the app-owned endpoints in [`../identity-provider.md`](../identity-provider.md). The portal stores the access token and the refresh token in `sessionStorage` (not `localStorage` -- session scoped, no persistent offline token). Closing the tab signs the browser out. The next visit starts at Google again. Android keeps the longer-lived refresh token and can sync later without another Google prompt.
 - **Deploy:** static assets to Cloudflare Pages (same pipeline as `client/web-lite/`).
 
 ### What this does NOT decide

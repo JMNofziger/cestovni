@@ -29,6 +29,7 @@
 | Telemetry transport (Stage 1) | [`adr/004-addendum-glitchtip-transport.md`](adr/004-addendum-glitchtip-transport.md) | Accepted |
 | Stage 1 distribution | [`adr/005-distribution-channels.md`](adr/005-distribution-channels.md) | Accepted |
 | Browser client (non-Android) | [`adr/006-browser-client.md`](adr/006-browser-client.md) | Accepted (2026-10-20; stack: Preact + TS) |
+| Sign-in and sessions | [`adr/007-identity-provider.md`](adr/007-identity-provider.md), [`identity-provider.md`](identity-provider.md) | Accepted (2026-11-07; Google sign-in, app-owned UUID bearer). Not implemented in `server/api` yet |
 | Product baseline | [`../product/PRODUCT_BRIEF.md`](../product/PRODUCT_BRIEF.md) | Locked + change log |
 
 ## Client distribution (2026-10-20)
@@ -50,7 +51,7 @@ Per [ADR 005](adr/005-distribution-channels.md) + [ADR 006](adr/006-browser-clie
 ## Deployment modes (continuity)
 
 - **Managed mode (v1 default):** hosted backend runtime for fastest delivery and lower ops.
-- **Self-host mode (continuity path):** technical users can run backend services themselves using the same schema and app contract.
+- **Self-host mode (continuity path):** technical users can run backend services themselves using the same schema and app contract. Sign-in is still Google ([ADR 007](adr/007-identity-provider.md)); the operator registers their own OAuth client.
 - **Scope for continuity v1:** backend services only (API, DB, auth boundary); no promise of additional admin tooling in this phase.
 - **Deployment matrix:** explicit capability/parity table in [`adr/001-backend-api-boundary.md` — Deployment matrix](adr/001-backend-api-boundary.md#deployment-matrix).
 - **Client contract rules:** allowed/forbidden client surfaces in [`adr/001-backend-api-boundary.md` — Client contract rules](adr/001-backend-api-boundary.md#client-contract-rules).
@@ -79,7 +80,7 @@ Parent **CES-22**; children **CES-26–CES-32** (see [`README.md`](README.md)). 
 
 ## Implementation status (Stage 5)
 
-- **M0 (2026-04-18):** Mobile shell + local Drift database on `main` — repository root [`client/`](../../client/). Matches **ADR 003** (Flutter + Drift) and **`data-model.md`** client tables (`schema_version` **3** as of 2026-06-30: `0001_init` + `0002_add_maintenance_events_category_shop` + `0003_settings_default_vehicle_id`; fresh `onCreate` uses `m.createAll()`). **CES-41 export** and **CES-70 import** are on `main` (`client/lib/export/`, `client/lib/import/`). Not yet: production server backup (M3), Sentry wiring (M4). CI: [`ci/client-build.yml`](../../ci/client-build.yml); telemetry allow-list gate includes a **Dart source scan** for literal `Telemetry.emit` event names ([`ci/telemetry-gate.py`](../../ci/telemetry-gate.py)).
+- **M0 (2026-04-18):** Mobile shell + local Drift database on `main` — repository root [`client/`](../../client/). Matches **ADR 003** (Flutter + Drift) and **`data-model.md`** client tables (`schema_version` **3** as of 2026-06-30: `0001_init` + `0002_add_maintenance_events_category_shop` + `0003_settings_default_vehicle_id`; fresh `onCreate` uses `m.createAll()`). **CES-41 export** and **CES-70 import** are on `main` (`client/lib/export/`, `client/lib/import/`). **M3** (Postgres, API, outbox, restore) is on `main` since 2026-10-22. Sign-in is specified in [ADR 007](adr/007-identity-provider.md) and is not implemented. Sentry wiring (M4) is still open. CI: [`ci/client-build.yml`](../../ci/client-build.yml); telemetry allow-list gate includes a **Dart source scan** for literal `Telemetry.emit` event names ([`ci/telemetry-gate.py`](../../ci/telemetry-gate.py)).
 
 ## Related compliance / ops
 

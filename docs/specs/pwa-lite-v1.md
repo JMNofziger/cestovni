@@ -279,7 +279,7 @@ Per-result: `{ mutation_id, row_id, row_version, server_updated_at, status: "app
 
 ### Auth
 
-ADR 001: JWT/OIDC, deny-by-default. **No client auth implementation exists yet.** PWA-lite must match whatever auth the backend expects once built.
+Historical note only. Sign-in for the forward path is Google-only ([ADR 007](adr/007-identity-provider.md)). Do not add auth to this frozen client.
 
 ### Pull endpoints (for vehicle/settings cache + cross-device history)
 

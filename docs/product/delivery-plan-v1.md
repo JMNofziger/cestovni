@@ -14,7 +14,7 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 
 **Shipped:** **[CES-45](https://linear.app/personal-interests-llc/issue/CES-45)** restore + dead-letter UX (`client/lib/sync/restore_service.dart`, Settings → Backup). **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)** client outbox for all five backed-up tables (`client/lib/db/repositories/`, `client/lib/sync/`). **[CES-71](https://linear.app/personal-interests-llc/issue/CES-71) cadence rename** ([PR #29](https://github.com/JMNofziger/cestovni/pull/29)). **[CES-49](https://linear.app/personal-interests-llc/issue/CES-49)** settings CHECK ([PR #30](https://github.com/JMNofziger/cestovni/pull/30)). **[ADR 006](../specs/adr/006-browser-client.md) Accepted** with portal stack **Preact + TypeScript** ([CES-73](https://linear.app/personal-interests-llc/issue/CES-73), [PR #31](https://github.com/JMNofziger/cestovni/pull/31)). **M2 (export + import) closed** (CES-41 + CES-70). **[CES-42](https://linear.app/personal-interests-llc/issue/CES-42)** server Postgres + RLS ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)). **[CES-43](https://linear.app/personal-interests-llc/issue/CES-43)** server API + auth (`server/api/`, `tests/contract/`).
 
-**In flight:** **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** web client readiness (portal screens stay blocked). Child **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** is the consumption-math port.
+**In flight:** **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** web client readiness (portal screens stay blocked). Sign-in is Google-only ([ADR 007](../specs/adr/007-identity-provider.md)). Child **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** is the consumption-math port. Identity work is [CES-79](https://linear.app/personal-interests-llc/issue/CES-79).
 
 **Retired:** iPhone PWA-lite. **[CES-62](https://linear.app/personal-interests-llc/issue/CES-62)** and **[CES-63](https://linear.app/personal-interests-llc/issue/CES-63)** are Canceled. `client/web-lite/` is frozen. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md).
 
@@ -24,7 +24,7 @@ Stage 5 exit (copied from workflow): **running build with test strategy tied to 
 | ----- | ----- | ------- | --------- |
 | **A — M4 telemetry** | **[CES-46](https://linear.app/personal-interests-llc/issue/CES-46)** | Restore and dead-letter UX are in repo; emits are still stubs | Client emits only allow-listed events |
 | **B — Android dist (ops)** | **[CES-68](https://linear.app/personal-interests-llc/issue/CES-68)** | Sideload demo when needed | Tagged APK + [`install-android.md`](install-android.md) finalized |
-| **C — portal gate** | **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** | Phone-browser client is Accepted and has no screens yet | Three product answers recorded, and [CES-75](https://linear.app/personal-interests-llc/issue/CES-75) math port Done |
+| **C — portal gate** | **[CES-74](https://linear.app/personal-interests-llc/issue/CES-74)** | Phone-browser client is Accepted and has no screens yet | [CES-76](https://linear.app/personal-interests-llc/issue/CES-76), [CES-84](https://linear.app/personal-interests-llc/issue/CES-84), [CES-78](https://linear.app/personal-interests-llc/issue/CES-78), and [CES-75](https://linear.app/personal-interests-llc/issue/CES-75) Done |
 
 **Shipped this cycle:** **CES-45** (restore + dead-letter UX), **CES-44** (client outbox expansion), **CES-43** (server API + auth), **CES-42** (server Postgres + RLS), **CES-49** (settings CHECK), **CES-73** (portal stack), **CES-71** (cadence rename), **ADR 006** (Accepted). Earlier: **CES-70** (ZIP import), **CES-41** (Export ZIP), **CES-67** (Maintenance), **CES-40** (receipt photos).
 
@@ -40,17 +40,18 @@ Normative gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md). 
 
 `client/web-lite/` is the retired iPhone prototype, not the portal. Archive: [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md). CES-62 and CES-63 are Canceled.
 
-M3 on `main` already provides `POST /api/v1/mutations`, `GET /api/v1/changes`, `GET /api/v1/restore/manifest`, HS256 checks, and RLS.
+M3 on `main` already provides `POST /api/v1/mutations`, `GET /api/v1/changes`, `GET /api/v1/restore/manifest`, HS256 checks, and RLS. It does not issue accounts. Sign-in is specified in [ADR 007](../specs/adr/007-identity-provider.md) and is not implemented yet.
 
 Order:
 
 1. **Done.** Retire PWA-lite in the tree, the Pages workflow, and Linear.
-2. **Answer on CES-74.** Three small decisions, deliberately not their own tickets: mint-script token vs an account system ([issue #37](https://github.com/JMNofziger/cestovni/issues/37)); rewrite the Android settings row id to the JWT subject on first auth, or wait to create the row until a subject exists ([issue #38](https://github.com/JMNofziger/cestovni/issues/38)); local `server/api` vs a hosted staging URL before portal development.
-3. **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** blocks CES-74. TypeScript consumption math must match `tests/math/fixtures/` before any portal screen. That is the math-drift risk.
+2. **Done (2026-11-07).** Google-only sign-in. The mint script is rejected. Android rebinds `settings.id` to `users.id` on first sign-in ([CES-77](https://linear.app/personal-interests-llc/issue/CES-77), [GitHub #38](https://github.com/JMNofziger/cestovni/issues/38)). Portal development uses local `server/api`. Passwords, invites, and the operator reset ([CES-82](https://linear.app/personal-interests-llc/issue/CES-82)) are Canceled. The external-issuer spike ([CES-88](https://linear.app/personal-interests-llc/issue/CES-88)) is Canceled.
+3. **Identity implementation.** [CES-80](https://linear.app/personal-interests-llc/issue/CES-80) → [CES-81](https://linear.app/personal-interests-llc/issue/CES-81) → [CES-83](https://linear.app/personal-interests-llc/issue/CES-83) → [CES-84](https://linear.app/personal-interests-llc/issue/CES-84), then [CES-78](https://linear.app/personal-interests-llc/issue/CES-78) documents the local loop.
+4. **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75)** blocks CES-74 and does not wait on identity. TypeScript consumption math must match `tests/math/fixtures/` before any portal screen.
 
 Already locked, so they are not tickets: online-only portal (ADR 006), server-row wins on restore (ADR 002), no portal code inside `client/web-lite/`, and no metrics, maintenance, photos, or ZIP in portal v1.
 
-Not this gate: telemetry (CES-46, issue #45), 429 banner (#40), dead-letter edit (#39), live restore test (#41), promotion gates (#42), device timing (#44), APK (CES-68), migration rollback (CES-47). PWA parity ([issue #43](https://github.com/JMNofziger/cestovni/issues/43)) is retired with the prototype.
+Not this gate: Android sign-in ([CES-89](https://linear.app/personal-interests-llc/issue/CES-89), [GitHub #37](https://github.com/JMNofziger/cestovni/issues/37)), settings rebind (CES-77), account deletion (CES-85), free-tier staging (CES-86), telemetry (CES-46, issue #45), 429 banner (#40), dead-letter edit (#39), live restore test (#41), promotion gates (#42), device timing (#44), APK (CES-68), migration rollback (CES-47). PWA parity ([issue #43](https://github.com/JMNofziger/cestovni/issues/43)) is retired with the prototype.
 
 ---
 
@@ -150,8 +151,8 @@ Rollup mirrors milestones **M0→M5** and verticals **CES-36..CES-47** ([epic CE
 CES-42..45 acceptance in the execution prompts is met. These holes are outside those checklists, or they are spec lines the code does not finish. They are not a reason to re-run the prompts.
 
 - **Landed.** CES-42 ([PR #33](https://github.com/JMNofziger/cestovni/pull/33)), CES-43 ([PR #34](https://github.com/JMNofziger/cestovni/pull/34)), CES-44 ([PR #35](https://github.com/JMNofziger/cestovni/pull/35)), and CES-45 ([PR #46](https://github.com/JMNofziger/cestovni/pull/46), 2026-10-22) are on `main`. No open pull request. PR #36 merged into the CES-44 branch; #46 is what put that branch on `main`.
-- **No sign-in UI.** HTTP 401 pauses automatic flush. The protocol's re-auth flow has no screen. [Issue #37](https://github.com/JMNofziger/cestovni/issues/37).
-- **Settings id.** A fresh settings row uses a local UUID. The server CHECK requires `settings.id = user_id = JWT sub`, so the first settings insert is rejected until restore replaces that row. [Issue #38](https://github.com/JMNofziger/cestovni/issues/38).
+- **No sign-in UI.** HTTP 401 pauses automatic flush. The screen is [CES-89](https://linear.app/personal-interests-llc/issue/CES-89): Google sign-in, then this API's refresh token. [Issue #37](https://github.com/JMNofziger/cestovni/issues/37).
+- **Settings id.** A fresh settings row uses a local UUID. The server CHECK requires `settings.id = user_id`. On first Google sign-in Android rebinds that id to `users.id` ([CES-77](https://linear.app/personal-interests-llc/issue/CES-77)). [Issue #38](https://github.com/JMNofziger/cestovni/issues/38).
 - **Dead-letter mark sticks across a later edit.** Rewriting the payload does not clear `dead-letter: `. The user retries or discards from Backup. [Issue #39](https://github.com/JMNofziger/cestovni/issues/39).
 - **429 pause indicator.** After more than 10 consecutive HTTP 429s the flush worker waits and writes a debug log. The protocol string "Backup paused by server — will retry" is not on screen. [Issue #40](https://github.com/JMNofziger/cestovni/issues/40).
 - **Telemetry.** `restore_start` / `restore_result` are `debugPrint` stubs. `sync_backup_result` is not emitted. SDK wiring stays [CES-46](https://linear.app/personal-interests-llc/issue/CES-46). The M3 call sites are [issue #45](https://github.com/JMNofziger/cestovni/issues/45).
@@ -278,5 +279,5 @@ When every exit bullet above is 🟩, Stage 5 exit is met — flip workflow perc
 - `[launch-copy-v1.md](launch-copy-v1.md)` — Stage 4 copy; feeds Stage 6.
 - `[../specs/platform-compliance-v1.md](../specs/platform-compliance-v1.md)` — compliance posture already signed off.
 
-*Last updated: 2026-11-05 — PWA-lite retired (CES-62/63 Canceled). Portal screens blocked on [CES-74](https://linear.app/personal-interests-llc/issue/CES-74), math port [CES-75](https://linear.app/personal-interests-llc/issue/CES-75). Gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md).*
+*Last updated: 2026-11-07 — Google-only sign-in ([ADR 007](../specs/adr/007-identity-provider.md)). CES-82 and CES-88 Canceled. Portal screens blocked on [CES-74](https://linear.app/personal-interests-llc/issue/CES-74). Gate: [`../specs/portal-readiness.md`](../specs/portal-readiness.md).*
 
