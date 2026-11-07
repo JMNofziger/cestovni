@@ -133,7 +133,7 @@ This reads `user_id` from a session variable (`SET LOCAL app.user_id = '...'`). 
 - **Contract tests** (CES-43)
 - **Client changes** (none needed)
 - **Docker Compose** or production deployment
-- **Real JWT / OIDC** (CES-43 wires this)
+- **Real JWT** (CES-43 wires HS256 verification). Sign-in is [ADR 007](../../specs/adr/007-identity-provider.md), not this prompt.
 - **Dev sync stub changes** (leave `server/dev-sync-stub/` untouched)
 
 ## Constraints

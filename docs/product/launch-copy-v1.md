@@ -20,7 +20,7 @@ Cestovni helps you track fuel fill-ups and maintenance across vehicles — **eve
 
 **Your data**
 
-- History syncs to your account as **structured backup** when you sign in.
+- History syncs to your **Google account** as **structured backup** when you sign in. Logging a fill-up still works with no network.
 - **Receipt photos** are optional aids on **this device only**. They are **not uploaded**, not included in backup, and **not in your ZIP export**.
 - Generate a **portable ZIP** (CSVs + manifest) anytime for spreadsheets or your own tools.
 
