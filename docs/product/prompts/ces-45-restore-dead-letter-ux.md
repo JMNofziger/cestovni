@@ -152,7 +152,7 @@ Per the CES-45 Linear issue acceptance: `restore_start` / `restore_result` telem
 
 ## Scope (out)
 
-- **Real sign-in UI / auth flow** (future ticket — restore is triggered manually or by detection heuristic)
+- **Google sign-in UI** ([ADR 007](../../specs/adr/007-identity-provider.md), [CES-89](https://linear.app/personal-interests-llc/issue/CES-89) — restore in this prompt is triggered manually or by a detection heuristic)
 - **Push channels / real-time sync** (v1.x per ADR 002)
 - **Snapshot checkpoints** (not needed for v1 per sync-protocol.md §Restore strategy)
 - **Telemetry SDK wiring** (CES-46 — stubs only here)

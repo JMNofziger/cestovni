@@ -130,7 +130,7 @@ CREATE INDEX maintenance_events_user_row_version_idx ON maintenance_events (user
 
 ### `settings`
 
-Exactly one row per user. The `id` column equals the `user_id` for simplicity; this is legal because `user_id` is already a UUID.
+Exactly one row per user. The `id` column equals the `user_id` for simplicity; this is legal because `user_id` is already a UUID. After sign-in that UUID is `users.id` ([`identity-provider.md`](identity-provider.md)). A fresh Android install may hold a random bootstrap id until [CES-77](https://linear.app/personal-interests-llc/issue/CES-77) rebinds it. The portal creates the row with `id` equal to the session `user_id`.
 
 | Column                   | Type           | Constraints                                                              | Notes                                     |
 | ------------------------ | -------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
@@ -224,7 +224,7 @@ CREATE POLICY fill_ups_delete_own
   USING (user_id = auth_user_id());
 ```
 
-- `auth_user_id()` is a SECURITY-DEFINER function that reads the verified JWT claim, defined once in migrations. Self-host operators install the same function; the token source differs but the claim shape does not (see [ADR 001 identity model](adr/001-backend-api-boundary.md#security-model)). v1 `auth_user_id()` reads `current_setting('app.user_id', true)`. CES-43 sets that GUC from the verified JWT `sub` on each request. The function stays a GUC reader so CI and self-host can set the same session variable.
+- `auth_user_id()` is a SECURITY-DEFINER function that reads the verified JWT claim, defined once in migrations. Self-host operators install the same function. The access-token `sub` is `users.id` in both modes ([ADR 007](adr/007-identity-provider.md)). v1 `auth_user_id()` reads `current_setting('app.user_id', true)`. CES-43 sets that GUC from the verified JWT `sub` on each request. The function stays a GUC reader so CI and self-host can set the same session variable. Identity tables (`users`, sessions, refresh tokens, OAuth state, login codes) are specified in [`identity-provider.md`](identity-provider.md). They are not backed-up product tables and they are not in `0001_init.sql`.
 - The v1 migration expresses the four command policies above as two policies: `<table>_select_own` (`FOR SELECT`) and `<table>_modify_own` (`FOR ALL` with `USING` and `WITH CHECK`). `cestovni_app` is not granted `DELETE`; soft-delete is an `UPDATE`.
 - The runtime role `cestovni_app` has only `SELECT, INSERT, UPDATE` on backed-up tables and **no BYPASSRLS**, per [ADR 001 role model](adr/001-backend-api-boundary.md#role-model).
 - The RLS regression suite in `tests/rls/` covers allow/deny for each table and cross-user checks (ADR 001 gate).

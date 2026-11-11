@@ -59,7 +59,7 @@
 | Capability                             | Managed mode                            | Self-host mode                  | Parity constraint                             |
 | -------------------------------------- | --------------------------------------- | ------------------------------- | --------------------------------------------- |
 | Postgres (schema + migrations)         | Provider-hosted                         | Operator-hosted (Postgres 15+)  | Same migration history; same schema           |
-| Auth (sign-up, sign-in, token refresh) | Provider auth service                   | Compatible OIDC/JWT provider    | Same claim model; same user identity mapping  |
+| Auth (sign-in, token refresh)          | Google sign-in, then app-owned sessions ([ADR 007](007-identity-provider.md)) | Same Google sign-in and the same app-owned issuer | Same claim model; access-token `sub` is `users.id` |
 | API contract layer                     | Provider runtime or edge functions      | App-owned server process        | Same endpoints, request/response models       |
 | RLS policy enforcement                 | Provider Postgres RLS                   | Operator Postgres RLS           | Same policy files applied via migrations      |
 | Backup/restore (structured data)       | Runs against managed DB                 | Runs against self-hosted DB     | Same protocol; restore smoke test covers both |
@@ -111,8 +111,10 @@
 
 | Role               | Purpose                  | Scope                         | Constraint                                              |
 | ------------------ | ------------------------ | ----------------------------- | ------------------------------------------------------- |
-| `cestovni_app`     | Runtime API operations   | DML on product tables via RLS | No DDL, no BYPASSRLS, no GRANT                          |
+| `cestovni_app`     | Runtime API operations   | DML on product tables via RLS | No DDL, no BYPASSRLS, no GRANT. No access to identity tables |
 | `cestovni_migrate` | Schema migrations        | DDL on all product tables     | Time-bound to migration window; not used at runtime     |
+| `cestovni_auth`    | Identity tables          | DML on `users` and session tables | No access to product tables. Created by the identity migration ([ADR 007](007-identity-provider.md)) |
+| `cestovni_purge`   | Account deletion         | `SELECT`, `DELETE` on product tables via RLS | No INSERT, no UPDATE. Created by the identity migration |
 | `cestovni_admin`   | Break-glass emergency    | Full access                   | Requires incident record; credentials rotated after use |
 | `anon`             | Unauthenticated requests | None                          | Deny all data access by default                         |
 
@@ -160,6 +162,10 @@
 - Better long-term survivability and lower re-platforming risk.
 - Need discipline: contract tests, migration tests, policy regression tests, and restore drills become mandatory engineering hygiene.
 
+## Amendments
+
+**2026-11-07 — [ADR 007](007-identity-provider.md).** The deployment-matrix auth row originally read: managed mode “Provider auth service”, self-host mode “Compatible OIDC/JWT provider”. Product confirmed Google-only sign-in. Both modes now use Google to prove the person and this API to mint the UUID bearer. The role table adds `cestovni_auth` and `cestovni_purge`. The follow-up “Select concrete auth provider mix” is closed.
+
 ## Acceptance evidence
 
 
@@ -172,4 +178,4 @@
 ## Follow-ups (tracked outside this ADR)
 
 - Finalize ADR 002 (backup/sync layer) and downstream stack-bound specs.
-- Select concrete auth provider mix for v1 implementation.
+- **Closed 2026-11-07.** Concrete auth mix is [ADR 007](007-identity-provider.md): Google is the only sign-in proof. This API mints the UUID bearer.

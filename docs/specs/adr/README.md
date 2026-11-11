@@ -12,5 +12,6 @@ ADRs are the **decision**; detailed protocols live in domain specs (e.g. `sync-p
 | [004 addendum](004-addendum-glitchtip-transport.md) | Glitchtip transport (Stage 1) | Accepted | CES-46 |
 | [005](005-distribution-channels.md) | Stage 1 distribution (Android APK; iPhone PWA retired) | Accepted | CES-dist |
 | [006](006-browser-client.md) | Browser client for non-Android (phone-first; Preact + TS) | Accepted | [CES-72](https://linear.app/personal-interests-llc/issue/CES-72), [CES-73](https://linear.app/personal-interests-llc/issue/CES-73) |
+| [007](007-identity-provider.md) | Google sign-in, app-owned sessions | Accepted | [CES-79](https://linear.app/personal-interests-llc/issue/CES-79) |
 
 **Process:** [`../../product/PRODUCT_DEV_WORKFLOW.md`](../../product/PRODUCT_DEV_WORKFLOW.md)

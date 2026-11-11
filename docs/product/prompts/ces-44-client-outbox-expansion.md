@@ -141,7 +141,7 @@ Add a periodic flush mechanism (e.g. a `Timer` in `OutboxFlushWorker`) that atte
 
 - **Restore flow** (CES-45 — this ticket only adds the `SyncClient` methods for it)
 - **Dead-letter UX** (CES-45 — this ticket only marks rows as dead-lettered)
-- **Real auth / sign-in UI** (future ticket — this keeps compile-time defines)
+- **Google sign-in UI** ([ADR 007](../../specs/adr/007-identity-provider.md), [CES-89](https://linear.app/personal-interests-llc/issue/CES-89) — this prompt keeps compile-time defines)
 - **Server code changes** (CES-43 API is complete)
 - **Schema migration** (no new tables or columns needed)
 - **Telemetry emission** (CES-46)

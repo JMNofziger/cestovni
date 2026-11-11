@@ -5,6 +5,8 @@
 > Next in this chain was **[CES-44](https://linear.app/personal-interests-llc/issue/CES-44)**.
 >
 > Kept as an archive of the execution brief (do not re-run).
+>
+> **Auth product decision (2026-11-07):** [ADR 007](../../specs/adr/007-identity-provider.md). This prompt records the HS256 verifier CES-43 shipped. It is not the sign-in design.
 
 **Branch:** cut from **`main`** (after CES-42 merges)
 **Spec (normative):** [`docs/specs/sync-protocol.md`](../../specs/sync-protocol.md) + [`docs/specs/adr/001-backend-api-boundary.md`](../../specs/adr/001-backend-api-boundary.md)
@@ -51,7 +53,7 @@ Use Node.js with the built-in `http` module (or a minimal routing layer like `ex
 
 ### 2. Auth: JWT with `app.user_id` session variable
 
-The server validates a bearer JWT, extracts the `sub` claim as the user UUID, and runs `SET LOCAL app.user_id = '<uuid>'` on every request's Postgres transaction. This flows through `auth_user_id()` into RLS policies (CES-42). For v1, the JWT signing key is configured via `JWT_SECRET` env var (symmetric HS256). Real OIDC / asymmetric keys are a future concern — the contract is: the token `sub` claim is the user identity.
+The server validates a bearer JWT, extracts the `sub` claim as the user UUID, and runs `SET LOCAL app.user_id = '<uuid>'` on every request's Postgres transaction. This flows through `auth_user_id()` into RLS policies (CES-42). For the code this prompt shipped, the JWT signing key is `JWT_SECRET` (symmetric HS256). The later sign-in decision is [ADR 007](../../specs/adr/007-identity-provider.md): Google proves the person, and this API still mints an HS256 token whose `sub` is the user UUID.
 
 Token validation:
 - Missing or malformed `Authorization: Bearer <token>` → HTTP 401, `{error: {code: "unauthenticated", message: "…", retriable: false}}`
@@ -142,7 +144,7 @@ The server connects AS `cestovni_app` role (the runtime role from CES-42), never
 
 - **Client code changes** (CES-44 wires client to real API)
 - **Dev sync stub changes** (leave `server/dev-sync-stub/` untouched)
-- **OIDC / asymmetric JWT** (future — symmetric HS256 is sufficient for v1)
+- **Google sign-in** — decided later in [ADR 007](../../specs/adr/007-identity-provider.md). This prompt shipped symmetric HS256 verification only.
 - **Docker Compose** for production (later infrastructure ticket)
 - **RLS migration changes** (CES-42 schema is complete)
 - **Telemetry / metrics emission** (CES-46)
@@ -181,7 +183,7 @@ The server connects AS `cestovni_app` role (the runtime role from CES-42), never
 4. Rate limiter design (window type, storage, configurability)
 5. Contract test coverage summary (categories × test cases)
 6. CI workflow integration (how the API server + Postgres spin up)
-7. Known limits (e.g. symmetric JWT only, single-process rate limiter, no OIDC)
+7. Known limits of this prompt (symmetric JWT verification only, single-process rate limiter, no Google sign-in — that is [ADR 007](../../specs/adr/007-identity-provider.md))
 8. PR URL + Linear CES-43 state
 
 Tag: `CES-43 — Server API + auth`.

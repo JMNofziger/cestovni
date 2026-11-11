@@ -24,7 +24,7 @@ Ship a **Cloudflare Pages preview** of `client/web-lite/` so iPhone users can Ad
 
 ## Scope (out)
 
-- Production CES-43 backend (Postgres, JWT/OIDC, RLS) — separate track
+- Production API sign-in ([ADR 007](../../specs/adr/007-identity-provider.md)) — separate track. Do not build it here.
 - CES-45 dead-letter UX beyond existing ERROR pill
 - Self-hosted woff2 fonts (still fallback stacks; see `client/web-lite/fonts/README.md`)
 - Receipt photos (Phase 3 per spec)
