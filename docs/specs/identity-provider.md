@@ -28,7 +28,7 @@ The client does not embed a Google SDK and does not call Google. The API perform
 1. The client opens `GET /api/v1/auth/google/start?client=android` or `client=portal` in a browser (Chrome custom tab on Android, a navigation in the portal).
 2. The API redirects to Google. Scope is `openid email`. The request sets `prompt=select_account` so a person with several Google accounts chooses one. It does not set `access_type=offline` and does not ask for a Google refresh token.
 3. Google redirects to `GET /api/v1/auth/google/callback`.
-4. The API exchanges the authorization code at `https://oauth2.googleapis.com/token` (`grant_type=authorization_code`, `code`, `client_id`, `client_secret`, `redirect_uri` = `{AUTH_ISSUER_URL}/api/v1/auth/google/callback`, `code_verifier`). It checks the returned ID token, finds or creates `users`, and redirects to an allowlisted app URL with a one-time login code.
+4. The API exchanges the authorization code at `https://oauth2.googleapis.com/token` (`grant_type=authorization_code`, `code`, `client_id`, `client_secret`, `redirect_uri` = `{AUTH_ISSUER_URL}/api/v1/auth/google/callback`, `code_verifier`). It checks the returned ID token and redirects to an allowlisted app URL with a one-time login code that holds the Google `sub` and email. `users` is found or created at step 5, so an abandoned sign-in creates no user.
 5. The client calls `POST /api/v1/auth/google/exchange` with that code and receives the session body below.
 
 `POST /api/v1/auth/google` with `{id_token}` mints the same session. The browser callback uses the same verifier internally. Contract tests call the route with a fake verifier injected by the test server (see [Test seam](#test-seam)). A production client uses the browser flow.
@@ -166,7 +166,7 @@ Android bootstraps a random `settings.id` before any account exists. On `signedI
 
 `DELETE /api/v1/account` requires the bearer and the body `{"confirm": true}`. v1 does not ask Google again: the client never holds a Google ID token, so a re-auth step needs its own browser round trip ([CES-92](https://linear.app/personal-interests-llc/issue/CES-92)). One transaction on one connection:
 
-1. `pg_advisory_xact_lock(hashtextextended(<user_id>::text, 0))`. The mutations handler takes the same lock at the start of its transaction, so a write in flight finishes first and no row is created after the purge.
+1. `pg_advisory_xact_lock(hashtextextended('user:' || <user_id>, 0))`. The mutations handler takes the same lock at the start of its transaction, so a write in flight finishes first and no row is created after the purge.
 2. `SET LOCAL ROLE cestovni_purge`, with `app.user_id` set: `DELETE` every row for that user, including soft-deleted rows, in this order: `maintenance_events`, `maintenance_rules`, `fill_ups`, `vehicles`, `settings` (child before parent; the foreign keys have no cascade).
 3. `RESET ROLE`, then `SET LOCAL ROLE cestovni_auth`: `DELETE FROM auth_login_transactions WHERE google_sub = <users.google_sub>`, then `DELETE` the `users` row. Sessions and refresh tokens cascade. Login transactions do not cascade because the table has no `user_id`.
 
