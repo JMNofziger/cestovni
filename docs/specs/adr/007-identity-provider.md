@@ -30,6 +30,8 @@ Google proves who the person is. This API proves what the database is allowed to
 
 Account deletion remains our endpoint. Google does not remove our rows.
 
+**Amended 2026-11-16.** MVP simplifications (no session cache, deletion by bearer plus confirm, injected test verifier instead of a test secret) are listed in [`identity-provider.md`](../identity-provider.md) § Decisions of 2026-11-16, with their debt issues under [CES-90](https://linear.app/personal-interests-llc/issue/CES-90). None of them changes the Decision above.
+
 ## Alternatives
 
 | Option | Verdict | Reason |
