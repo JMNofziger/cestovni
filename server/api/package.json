@@ -7,7 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "migrate": "node scripts/migrate.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",

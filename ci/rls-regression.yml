@@ -15,6 +15,10 @@ on:
       - 'db/**'
       - 'migrations/**'
       - 'tests/rls/**'
+      - 'tests/migrate/**'
+      - 'server/api/scripts/**'
+      - 'server/api/package.json'
+      - 'server/api/package-lock.json'
       - '.github/workflows/rls-regression.yml'
       - 'ci/rls-regression.yml'
 
@@ -38,8 +42,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/api/package-lock.json
+
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Install API dependencies
+        working-directory: server/api
+        run: npm ci
 
       - name: Apply migrations and run RLS tests
         env:
@@ -48,6 +62,13 @@ jobs:
           set -o pipefail
           mkdir -p test-results
           ./tests/rls/run.sh | tee test-results/rls.log
+
+      - name: Run migration runner tests
+        env:
+          DATABASE_URL: postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni_test
+        run: |
+          set -o pipefail
+          ./tests/migrate/run.sh | tee test-results/migrate.log
 
       - name: Upload test results
         if: always()

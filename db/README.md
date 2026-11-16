@@ -16,10 +16,17 @@ and `backup_marks`. Those tables are not on the server.
 | Object | Purpose |
 | --- | --- |
 | `cestovni_migrate` | Owns tables, sequence, and functions. DDL only. `NOLOGIN`. |
-| `cestovni_app` | Runtime. `SELECT`, `INSERT`, `UPDATE`. No `DELETE` (soft-delete is an `UPDATE` of `deleted_at`). No `BYPASSRLS`. |
+| `cestovni_app` | Runtime. `SELECT`, `INSERT`, `UPDATE` on product tables. No `DELETE` (soft-delete is an `UPDATE` of `deleted_at`). No `BYPASSRLS`. No identity-table grants. |
+| `cestovni_auth` | `SELECT`, `INSERT`, `UPDATE`, `DELETE` on the five identity tables. `NOLOGIN`. No product-table grants. |
+| `cestovni_purge` | `SELECT` and `DELETE` on the five product tables through existing RLS. `NOLOGIN`. No `INSERT`, `UPDATE`, or `TRUNCATE`. |
 | `anon` | No table privileges. |
 | `cestovni_row_version_seq` | Shared `BIGINT` sequence. `cestovni_touch_row()` assigns `row_version` and `updated_at` on insert and update. |
 | `auth_user_id()` | Stub. Reads `current_setting('app.user_id', true)`. CES-43 replaces the token source; callers still `SET LOCAL app.user_id`. |
+| `users` | API UUID `id`, unique `google_sub`, nullable `email`. No RLS. |
+| `auth_sessions` | Session row. `user_id` references `users` on delete cascade. |
+| `auth_refresh_tokens` | 32-byte `token_hash`, unique. Cascades from the session. |
+| `auth_oauth_states` | Hashed OAuth state, PKCE verifier, `client`, `nonce`. |
+| `auth_login_transactions` | Hashed login code, `google_sub`, nullable `email`. No `user_id` and no foreign key. |
 
 RLS is enabled and **forced** on every backed-up table:
 
@@ -29,14 +36,21 @@ RLS is enabled and **forced** on every backed-up table:
 `volume_uL` and `tank_capacity_uL` are quoted identifiers so the mixed case
 from the data model survives Postgres folding.
 
-Apply as a superuser on an **empty** database. Tables and policies are not
-idempotent (a second apply into the same database fails). Roles are
-cluster-wide and are created only when missing, so a new database on a
-cluster that already has the roles still applies.
+`0002_identity.sql` adds `cestovni_auth`, `cestovni_purge`, and the five
+identity tables. Those tables have no RLS. Product tables gain no foreign
+key to `users`.
+
+Apply with the migration runner as a superuser (or equivalent). It applies
+`0001_init.sql` then `0002_identity.sql` and records them. A second run
+changes nothing. Roles are cluster-wide and are created only when missing.
+
+`node-pg` does not accept a `psql`-style DSN with no host (`postgresql:///db`).
+Use a TCP URL, or `?host=/var/run/postgresql` for the local socket.
 
 ```bash
 createdb cestovni
-psql "postgresql:///cestovni" -v ON_ERROR_STOP=1 -f db/migrations/0001_init.sql
+cd server/api && npm ci
+DATABASE_URL='postgresql:///cestovni?host=/var/run/postgresql' npm run migrate
 ```
 
 There is no `docker-compose.yml` in this change. CI uses the Postgres 15
@@ -48,20 +62,21 @@ package install).
 
 ```bash
 createdb cestovni_rls
-DATABASE_URL=postgresql:///cestovni_rls ./tests/rls/run.sh
+(cd server/api && npm ci)
+DATABASE_URL='postgresql:///cestovni_rls?host=/var/run/postgresql' ./tests/rls/run.sh
 ```
 
-`run.sh` applies the migration, checks `auth_user_id()` against two simulated
-users, then runs `tests/rls/test_*_rls.sql`. The connection must be a
-superuser so the script can `SET ROLE`. Tests set `app.user_id` themselves;
-they do not use per-user database roles.
+`run.sh` applies migrations through `server/api/scripts/migrate.js`, checks
+`auth_user_id()` against two simulated users, then runs
+`tests/rls/test_*_rls.sql`. The connection must be a superuser so the script
+can `SET ROLE`. The same `DATABASE_URL` has to work for Node, so it needs a
+host (see above). Tests set `app.user_id` themselves; they do not use
+per-user database roles. The migration step is re-runnable.
 
 | Simulated user | `app.user_id` |
 | --- | --- |
 | A | `11111111-1111-4111-8111-111111111111` |
 | B | `22222222-2222-4222-8222-222222222222` |
-
-Drop `cestovni_rls` before running the script again.
 
 ## Index notes (ADR 001 guardrail)
 

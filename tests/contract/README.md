@@ -30,4 +30,4 @@ Exit 0 prints `Contract tests: PASS`. Exit 1 names the failing file.
 
 ## CI
 
-[`.github/workflows/contract-tests.yml`](../../.github/workflows/contract-tests.yml) starts Postgres 15, applies `db/migrations/0001_init.sql`, starts this API, and runs `run.sh`. Copy kept at [`ci/contract-tests.yml`](../../ci/contract-tests.yml).
+[`.github/workflows/contract-tests.yml`](../../.github/workflows/contract-tests.yml) starts Postgres 15, applies migrations with `npm run migrate --prefix server/api`, starts this API, and runs `run.sh`. Copy kept at [`ci/contract-tests.yml`](../../ci/contract-tests.yml).
