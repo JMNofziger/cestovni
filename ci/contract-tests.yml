@@ -64,7 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p test-results
-          psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f db/migrations/0001_init.sql
+          npm run migrate --prefix server/api
           node server/api/src/server.js > test-results/api.log 2>&1 &
           echo $! > test-results/api.pid
           ready=0

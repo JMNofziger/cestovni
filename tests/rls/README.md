@@ -27,16 +27,17 @@ For shared/reference tables, test read-only vs no-access behavior explicitly.
 
 - One file per table: `test_<table_name>_rls.sql` (or `.py`/`.ts` depending on chosen test runner).
 - Tests use two simulated users (`SET LOCAL app.user_id` to a UUID). They run as `cestovni_app`, not as per-user database roles. `auth_user_id()` reads that GUC (JWT wiring is CES-43).
-- Tests run against a clean DB with `db/migrations/0001_init.sql` applied. Each file rolls back its rows.
+- Tests run against a database migrated by `server/api/scripts/migrate.js` (`0001` then `0002`). Each file rolls back its rows.
 
 ## Running locally
 
 ```bash
 createdb cestovni_rls
-DATABASE_URL=postgresql:///cestovni_rls ./tests/rls/run.sh
+# npm ci in server/api first. Node needs a host in the DSN.
+DATABASE_URL='postgresql:///cestovni_rls?host=/var/run/postgresql' ./tests/rls/run.sh
 ```
 
-Postgres 15+ and `psql`. The DSN user must be able to `CREATE ROLE` (superuser on a fresh database). Drop the database before a second run. No Docker Compose file in this repo.
+Postgres 15+, `psql`, and Node. `npm ci` in `server/api` must have been run. The DSN user must be able to `CREATE ROLE` (superuser on a fresh database). `postgresql:///db` with no host does not work for the runner; use `?host=/var/run/postgresql` or a TCP URL. A second run applies no new migrations. No Docker Compose file in this repo.
 
 ## CI integration
 

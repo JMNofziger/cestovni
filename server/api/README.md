@@ -19,7 +19,7 @@ Errors use `{error: {code, message, retriable}}`.
 
 ## Auth and RLS
 
-**Sign-in decision, not implemented here yet.** [ADR 007](../../docs/specs/adr/007-identity-provider.md) and [`docs/specs/identity-provider.md`](../../docs/specs/identity-provider.md): Google is the only sign-in door, and this API mints an HS256 access token whose `sub` is `users.id`. This process does not call Google and does not have a `users` table.
+**Sign-in decision, not implemented here yet.** [ADR 007](../../docs/specs/adr/007-identity-provider.md) and [`docs/specs/identity-provider.md`](../../docs/specs/identity-provider.md): Google is the only sign-in door, and this API mints an HS256 access token whose `sub` is `users.id`. This process does not call Google. `users` is created by the identity migration and is not read here yet.
 
 `JWT_SECRET` verifies HS256 bearer tokens. `sub` must be the user UUID. Other algorithms are rejected. Contract tests still mint those tokens with `JWT_SECRET`.
 
@@ -56,21 +56,33 @@ The limiter is a fixed window in this process. A request that does not fit is HT
 
 ## Run locally
 
-Postgres 15+ with [`0001_init.sql`](../../db/migrations/0001_init.sql) applied to an empty database. Apply it once; it is not idempotent (roles are created only if missing, tables are not).
+Postgres 15+. From `server/api`, `npm run migrate` applies `db/migrations` with a superuser `DATABASE_URL`. A second run changes nothing. The API does not migrate on startup.
 
 ```bash
 cd server/api
 npm ci
 # TCP when the DSN user has a password (CI uses this shape).
 DATABASE_URL=postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni \
+  npm run migrate
+DATABASE_URL=postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni \
   JWT_SECRET=dev-secret \
   PORT=8080 \
   npm start
 ```
 
-`node-pg` uses TCP when the URL has no host, and this repo's local cluster requires SCRAM on `127.0.0.1`. For peer auth over the Unix socket, run the process as the database OS user and set the host:
+A database that already had `0001_init.sql` applied with `psql` (records `0001`, then applies what is pending):
 
 ```bash
+DATABASE_URL=postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni \
+  npm run migrate -- --baseline 0001
+```
+
+`node-pg` does not accept a `psql`-style DSN with no host (`postgresql:///db`). Use a TCP URL, or `?host=` for the local socket. This repo's local cluster requires SCRAM on `127.0.0.1`. For peer auth over the Unix socket, run the process as the database OS user and set the host:
+
+```bash
+sudo -u postgres env \
+  DATABASE_URL='postgresql:///cestovni?host=/var/run/postgresql' \
+  npm run migrate
 sudo -u postgres env \
   DATABASE_URL='postgresql:///cestovni?host=/var/run/postgresql' \
   JWT_SECRET=dev-secret \
