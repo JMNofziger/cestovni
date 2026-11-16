@@ -61,6 +61,7 @@ jobs:
           set -euo pipefail
           mkdir -p test-results
           npm run migrate --prefix server/api
+          npm test --prefix server/api
           node server/api/src/server.js > test-results/api.log 2>&1 &
           echo $! > test-results/api.pid
           ready=0
