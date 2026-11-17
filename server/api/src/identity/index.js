@@ -24,6 +24,7 @@ const {
   consumeLoginCode,
   sweepExpired,
 } = require('./codes');
+const { PURGE_ORDER, purgeUser } = require('./purge');
 
 module.exports = {
   RefreshInvalidError,
@@ -48,4 +49,6 @@ module.exports = {
   createLoginCode,
   consumeLoginCode,
   sweepExpired,
+  PURGE_ORDER,
+  purgeUser,
 };
