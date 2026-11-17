@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 
+import '../db/repositories/settings_repository.dart';
 import '../sync/sync_client.dart';
 import '../sync/sync_config.dart';
 import 'auth_session.dart';
@@ -34,6 +35,8 @@ bool syncTargetReady(SyncConfig cfg, AuthSession? session) {
 Future<String?> _bearer(AuthSession session) async {
   try {
     return await session.bearer();
+  } on AccountMismatch {
+    throw const SyncSkipped();
   } on AuthNetworkException catch (e) {
     throw SyncHttpError(statusCode: 0, message: e.message, retriable: true);
   }
@@ -42,6 +45,8 @@ Future<String?> _bearer(AuthSession session) async {
 Future<void> _refresh(AuthSession session) async {
   try {
     await session.refreshOnce();
+  } on AccountMismatch {
+    throw const SyncSkipped();
   } on AuthNetworkException catch (e) {
     throw SyncHttpError(statusCode: 0, message: e.message, retriable: true);
   }

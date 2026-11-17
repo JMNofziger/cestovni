@@ -7,8 +7,9 @@
 /// v1 contract: exactly one row per user. The `id` column equals the
 /// user_id (both UUIDv4); see `client/lib/db/tables/settings.dart`.
 /// On a fresh install we have no `user_id` yet, so [bootstrap]
-/// generates a local UUID and reuses it as the row id. The server-
-/// assigned `user_id` lands on first sync (M3).
+/// generates a local UUID and reuses it as the row id.
+/// [SettingsRepository.rebindToUser] runs on sign-in, before the first
+/// flush, and makes `settings.id` equal the server `user_id`.
 library;
 
 import 'package:drift/drift.dart';
@@ -34,6 +35,26 @@ const _defaultTimezone = 'UTC';
 /// verb-shaped method.
 const Object _unset = Object();
 
+/// Sign-in is refused because this device already synced settings for
+/// a different account. Local rows are left as they were.
+class AccountMismatch implements Exception {
+  const AccountMismatch();
+
+  @override
+  String toString() =>
+      'AccountMismatch: this device is already synced to a different account';
+}
+
+/// Server view used by [SettingsRepository.rebindToUser].
+///
+/// `settingsRowCount` is `settings.row_count` from
+/// `GET /api/v1/restore/manifest`. [restoreSettings] is the existing
+/// settings restore: the server row replaces an unsynced local row.
+abstract class SettingsServer {
+  Future<int> settingsRowCount();
+  Future<void> restoreSettings();
+}
+
 class SettingsRepository {
   SettingsRepository(
     AppDatabase db, {
@@ -41,17 +62,20 @@ class SettingsRepository {
     String Function()? now,
     OutboxRepository? outbox,
     bool enqueue = true,
+    SettingsServer? server,
   })  : _db = db,
         _newId = newId ?? newUuid,
         _now = now ?? nowIsoUtc,
         _outbox = enqueue
             ? (outbox ?? OutboxRepository(db, newId: newId, now: now))
-            : null;
+            : null,
+        _server = server;
 
   final AppDatabase _db;
   final String Function() _newId;
   final String Function() _now;
   final OutboxRepository? _outbox;
+  final SettingsServer? _server;
 
   static const String wireTable = 'settings';
 
@@ -160,6 +184,62 @@ class SettingsRepository {
       'deleted_at': row.deletedAt,
       'mutation_id': row.mutationId,
     };
+  }
+
+  /// Point the local settings row at [userId] before the first flush.
+  ///
+  /// ```text
+  /// local.id == userId                 -> no-op
+  /// synced to a different account      -> throw AccountMismatch
+  /// else (unsynced bootstrap):
+  ///   manifest row_count == 1          -> restore (server wins)
+  ///   else                             -> rewrite id, outbox, backup_marks
+  /// ```
+  ///
+  /// The rewrite keeps `outbox.mutation_id`. It clears `last_error` and
+  /// `attempts` so a dead-lettered random-id insert is queued again.
+  Future<void> rebindToUser(String userId) async {
+    final row = await getOrBootstrap();
+    if (row.id == userId) return;
+    if (row.rowVersion != null || row.userId != null) {
+      throw const AccountMismatch();
+    }
+    final server = _server;
+    if (server == null) {
+      throw StateError('rebindToUser requires a SettingsServer');
+    }
+    final count = await server.settingsRowCount();
+    if (count == 1) {
+      await server.restoreSettings();
+      final restored = await (_db.select(_db.appSettings)).getSingleOrNull();
+      if (restored == null || restored.id != userId) {
+        throw StateError('settings restore did not apply the server row');
+      }
+      return;
+    }
+    await _rewriteUnsynced(row.id, userId);
+  }
+
+  Future<void> _rewriteUnsynced(String oldId, String userId) async {
+    await _db.transaction(() async {
+      await _db.customStatement(
+        'UPDATE settings SET id = ? WHERE id = ?',
+        [userId, oldId],
+      );
+      await _db.customStatement(
+        'UPDATE outbox SET row_id = ?, '
+        "payload_json = CASE WHEN payload_json IS NULL THEN NULL "
+        "ELSE json_set(payload_json, '\$.id', ?) END, "
+        'last_error = NULL, attempts = 0 '
+        'WHERE "table" = ? AND row_id = ?',
+        [userId, userId, wireTable, oldId],
+      );
+      await _db.customStatement(
+        'UPDATE backup_marks SET row_id = ? '
+        'WHERE table_name = ? AND row_id = ?',
+        [userId, wireTable, oldId],
+      );
+    });
   }
 
   /// Runs in a transaction with a re-check so concurrent first-run
