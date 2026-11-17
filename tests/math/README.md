@@ -140,6 +140,8 @@ cd portal && npm ci && npm test
 
 `npm test` is `node --experimental-strip-types --test`. Node 22 runs the TypeScript directly, so the package has no test-runner dependency. It discovers every `.json` here and dispatches on `expected.kind`, the same way the Dart runner does. There is no UI in that package.
 
+No workflow runs the portal tests yet ([CES-109](https://linear.app/personal-interests-llc/issue/CES-109)). Run `npm test` in `portal/` after any change to `portal/src/consumption.ts` or to these fixtures. MPG tenths are not ported ([CES-110](https://linear.app/personal-interests-llc/issue/CES-110)). Trailing-12-month windows are not ported either. They belong to the portal Metrics screen, which ADR 006 defers out of portal v1.
+
 ## Adding a 21st fixture
 
 1. Drop a new `NN_short_name.json` in this directory. Pick `NN` to keep lexical

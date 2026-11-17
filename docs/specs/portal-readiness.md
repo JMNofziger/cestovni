@@ -1,9 +1,9 @@
 # Portal readiness
 
-**Status:** Open. Portal screens do not start until [CES-74](https://linear.app/personal-interests-llc/issue/CES-74) is Done.
+**Status:** Gate closed. [CES-74](https://linear.app/personal-interests-llc/issue/CES-74) is Done. Portal work is tracked under [CES-107](https://linear.app/personal-interests-llc/issue/CES-107). [CES-78](https://linear.app/personal-interests-llc/issue/CES-78) (local dev loop doc) is still open and blocks the first screen issue.
 **Milestone:** Web client readiness (Linear project Cestovni).
-**Decision:** [ADR 006](adr/006-browser-client.md) Accepted. Stack is Preact + TypeScript. Package will be `portal/`, which does not exist yet.
-**Sign-in:** [ADR 007](adr/007-identity-provider.md) Accepted. Google is the only sign-in door. The contract is [`identity-provider.md`](identity-provider.md). The running API does not implement it yet.
+**Decision:** [ADR 006](adr/006-browser-client.md) Accepted. Stack is Preact + TypeScript. Package is `portal/`. It holds the TypeScript consumption math and its tests only. There is no screen, build tooling, or CI job yet.
+**Sign-in:** [ADR 007](adr/007-identity-provider.md) Accepted. Google is the only sign-in door. The contract is [`identity-provider.md`](identity-provider.md). `server/api` implements it, including refresh, logout, and account deletion. No hosted API exists yet ([CES-101](https://linear.app/personal-interests-llc/issue/CES-101)).
 
 iPhone PWA-lite is retired. See [`../archive/pwa-lite/README.md`](../archive/pwa-lite/README.md). Do not extend `client/web-lite/`.
 
@@ -26,7 +26,7 @@ Passwords, invite codes, and an operator password reset are retired ([CES-82](ht
 3. **Identity implementation, in dependency order.** [CES-80](https://linear.app/personal-interests-llc/issue/CES-80) schema, [CES-81](https://linear.app/personal-interests-llc/issue/CES-81) session library, [CES-83](https://linear.app/personal-interests-llc/issue/CES-83) Google auth endpoints, [CES-84](https://linear.app/personal-interests-llc/issue/CES-84) verifier cutover.
 4. **[CES-78](https://linear.app/personal-interests-llc/issue/CES-78).** Document the local Google sign-in loop for portal development. Blocked by CES-84.
 5. **[CES-75](https://linear.app/personal-interests-llc/issue/CES-75).** TypeScript consumption math matches `tests/math/fixtures/`. Parallel with identity. This is the only `portal/` code allowed before CES-74 is Done. No screens in that change.
-6. **Then** open a portal implementation issue (Log, History, vehicles, settings, signed-in sync). Not before.
+6. **Opened 2026-11-17.** [CES-107](https://linear.app/personal-interests-llc/issue/CES-107) is the portal epic. First child: [CES-108](https://linear.app/personal-interests-llc/issue/CES-108) (scaffold, sign-in, settings bootstrap), blocked by CES-78. Also open: [CES-109](https://linear.app/personal-interests-llc/issue/CES-109) (portal CI) and [CES-110](https://linear.app/personal-interests-llc/issue/CES-110) (MPG tenths). Vehicles, Log, History, settings, and Sync now are cut after the scaffold lands.
 
 ## Locked already
 
@@ -50,4 +50,4 @@ These are accepted constraints. They are not open issues.
 
 Android settings rebind (CES-77), Android session and sign-in (CES-87, CES-89), account deletion (CES-85), and free-tier staging (CES-86). They gate Android backup and public launch.
 
-Telemetry (CES-46), Android APK (CES-68), migration rollback (CES-47), the 429 banner, the Android dead-letter edit bug, promotion gates, device timing, and a live Postgres restore test. They stay on their own issues. They do not block portal screens.
+Telemetry (CES-46), Android APK (CES-68), migration rollback (CES-47), the 429 banner, the Android dead-letter edit bug, promotion gates, device timing, and a live Postgres restore test. They stay on their own issues. They do not block portal screens. The 429 banner, the dead-letter edit bug, promotion gates, device timing, the live Postgres restore test, and restore telemetry are open as GitHub issues [39](https://github.com/JMNofziger/cestovni/issues/39), [40](https://github.com/JMNofziger/cestovni/issues/40), [41](https://github.com/JMNofziger/cestovni/issues/41), [42](https://github.com/JMNofziger/cestovni/issues/42), [44](https://github.com/JMNofziger/cestovni/issues/44), and [45](https://github.com/JMNofziger/cestovni/issues/45), and are not yet in Linear.

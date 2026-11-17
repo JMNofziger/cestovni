@@ -6,6 +6,8 @@
 **Runbook:** [`../self-host-runbook.md`](../self-host-runbook.md)
 **Linear:** [CES-69](https://linear.app/personal-interests-llc/issue/CES-69) (Done)
 
+**Amended 2026-11-17.** The `docker compose` stack named below does not exist and is not planned for v1. The runbook now runs the Node API against operator-managed Postgres 15+, with an unbuilt Dockerfile ([CES-102](https://linear.app/personal-interests-llc/issue/CES-102)). The hosting recommendation (Oracle Always Free, Hetzner fallback) is unchanged. No host has been deployed yet ([CES-101](https://linear.app/personal-interests-llc/issue/CES-101)).
+
 ## Context
 
 [ADR 001](001-backend-api-boundary.md) requires a realistic **backend-only self-host continuity path**, and [`self-host-runbook.md`](../self-host-runbook.md) already documents the mechanics (`docker compose up -d`, operator-hosted Postgres 15+). What was missing is a concrete answer to "**where do I actually run this, for free (or close to it)?**"

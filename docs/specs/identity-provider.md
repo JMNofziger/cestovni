@@ -172,11 +172,11 @@ Android bootstraps a random `settings.id` before any account exists. On `signedI
 
 The next sync request with the old access token fails because its session row is gone. The refresh token fails for the same reason.
 
-The delete order is `PURGE_ORDER` in `server/api/src/identity/purge.js`. A guard test fails unless `PURGE_ORDER` has exactly the same members as `TABLES` in `server/api/src/schema.js` and as the public tables that have a `user_id` column.
+The delete order is `PURGE_ORDER` in `server/api/src/identity/purge.js`. A guard test fails unless `PURGE_ORDER` has exactly the same members as `TABLES` in `server/api/src/schema.js` and as the public tables that have a `user_id` column, except `auth_sessions`. Its rows are removed by the `ON DELETE CASCADE` from `users`, and the test asserts that table is the only exception.
 
 Host backups and the provider’s restore window keep deleted rows until that retention ends. The compliance doc states that limit. There is no claim of instant erasure from backups.
 
-An operator at the machine can run the same purge for an erasure request when the person cannot sign in: `npm run purge-user` in `server/api/`, UUID read from stdin. That script is [CES-85](https://linear.app/personal-interests-llc/issue/CES-85). It is not a general admin CLI.
+An operator at the machine can run the same purge for an erasure request when the person cannot sign in: `npm run purge-user` in `server/api/`, UUID read from stdin. That script shipped with [CES-85](https://linear.app/personal-interests-llc/issue/CES-85). It prints per-table counts, never the id, and exits 0 (deleted), 1 (unknown user or failure), or 2 (not a UUID). It is not a general admin CLI.
 
 Telemetry pepper deletion stays on [CES-46](https://linear.app/personal-interests-llc/issue/CES-46). When that table exists, the purge function deletes it too.
 
@@ -235,6 +235,9 @@ Made to reach a stable MVP for one to five people on one API instance. Each shor
 | In-process rate limits, max instances = 1 | Shared limiter store | [CES-94](https://linear.app/personal-interests-llc/issue/CES-94) |
 | Minimal migration runner | Checksums, separate migration DSN, down migrations | [CES-95](https://linear.app/personal-interests-llc/issue/CES-95) |
 | Schema as listed: `auth_login_transactions` has no `user_id` | A foreign key and cascade | none (purge deletes by `google_sub`) |
+| Android refuses to sign in as a different Google account when local data is bound to another `user_id` (CES-77) | An in-app wipe-and-restore control | [CES-105](https://linear.app/personal-interests-llc/issue/CES-105) |
+| Android dev token fallback (`CESTOVNI_SYNC_TOKEN`) and git-pinned `flutter_secure_storage` packages stay until release | Hosted packages only, no dev token in release builds | [CES-104](https://linear.app/personal-interests-llc/issue/CES-104) |
+| Role switching (`cestovni_auth`, `cestovni_purge`) is proven on a superuser DSN only | A proof on a non-superuser hosted DSN | [CES-101](https://linear.app/personal-interests-llc/issue/CES-101) |
 
 ## Out of scope
 
