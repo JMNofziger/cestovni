@@ -36,7 +36,7 @@ Per [ADR 001 addendum — self-host hosting recommendation](adr/001-addendum-sel
 # Clone the repo and enter the backend directory
 git clone <repo-url> cestovni && cd cestovni
 
-# .env.example is not in the repo yet. Create .env from the table below.
+# .env.example exists at server/api/.env.example (names only). The image Dockerfile is at server/api/Dockerfile.
 # Edit .env — see "Environment contract" below for required variables
 
 # Start the backend stack
@@ -128,7 +128,7 @@ curl -H "Authorization: Bearer <test-token>" http://localhost:8080/api/v1/vehicl
 
 - No admin dashboard. Account erasure from the operator's machine is `npm run purge-user` (UUID on stdin) once [CES-85](https://linear.app/personal-interests-llc/issue/CES-85) lands. There is no password-reset CLI.
 - Sign-in depends on Google even when Postgres and this API run on the operator's host. The operator registers their own OAuth client. There is no bundled password issuer.
-- `docker compose` and `.env.example` are not in the repo yet. The bootstrap commands above describe the intended contract. [CES-86](https://linear.app/personal-interests-llc/issue/CES-86) is the first hosted deploy and does not add the compose file.
+- `docker compose` is not in the repo. `.env.example` is at `server/api/.env.example` and the image Dockerfile is at `server/api/Dockerfile`. The bootstrap commands above describe the intended contract. [CES-86](https://linear.app/personal-interests-llc/issue/CES-86) does not add the compose file.
 - Receipt photos are local-only on client devices; self-host backend has no photo storage.
 - Multi-device live sync (v1.x) is not supported in v1 self-host.
 
