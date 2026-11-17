@@ -203,7 +203,11 @@ async function applyOne(client, mutation) {
   return appliedLike(mutationId, row.id, row.row_version, row.updated_at, 'applied');
 }
 
-async function applyBatch(client, mutations) {
+async function applyBatch(client, mutations, userId) {
+  // Same key as purgeUser. User lock first, then the per-row locks in applyOne.
+  await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
+    `user:${userId}`,
+  ]);
   const results = [];
   for (let i = 0; i < mutations.length; i += 1) {
     const mutation = mutations[i];

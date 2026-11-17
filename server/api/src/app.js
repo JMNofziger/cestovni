@@ -2,9 +2,10 @@
 
 // Cestovni app-owned sync API (CES-43) plus auth routes (CES-83).
 //
-// POST /api/v1/mutations
-// GET  /api/v1/changes
-// GET  /api/v1/restore/manifest
+// POST   /api/v1/mutations
+// GET    /api/v1/changes
+// GET    /api/v1/restore/manifest
+// DELETE /api/v1/account
 // GET  /healthz
 // GET  /api/v1/auth/google/start
 // GET  /api/v1/auth/google/callback
@@ -19,7 +20,7 @@
 const http = require('http');
 
 const { userIdFromRequest, AuthError } = require('./auth');
-const { sessionIsActive } = require('./identity');
+const { purgeUser, sessionIsActive } = require('./identity');
 const { createAuthRoutes } = require('./auth-routes');
 const { withUser, checkReady } = require('./db');
 const { applyBatch } = require('./mutations');
@@ -28,6 +29,7 @@ const { mutationLimiter, changesLimiter } = require('./rate-limit');
 const { TABLES } = require('./schema');
 
 const MAX_BODY = 1024 * 1024;
+const ACCOUNT_MAX_BODY = 1024;
 const MAX_BATCH = 100;
 
 function corsOrigin(req) {
@@ -43,7 +45,7 @@ function setCors(req, res) {
   const origin = corsOrigin(req);
   if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
 }
@@ -159,8 +161,37 @@ async function handleMutations(req, res, userId) {
       'Retry-After': String(quota.retryAfter),
     });
   }
-  const results = await withUser(userId, (client) => applyBatch(client, mutations));
+  const results = await withUser(userId, (client) => applyBatch(client, mutations, userId));
   return sendJson(res, 200, { results });
+}
+
+async function handleAccount(req, res, userId) {
+  const declared = Number(req.headers['content-length'] || 0);
+  if (Number.isFinite(declared) && declared > ACCOUNT_MAX_BODY) {
+    req.resume();
+    return sendError(res, 413, 'payload_too_large', 'body exceeds 1 KiB', false);
+  }
+  let raw;
+  try {
+    raw = await readBody(req, ACCOUNT_MAX_BODY);
+  } catch (err) {
+    if (err.status === 413) {
+      return sendError(res, 413, 'payload_too_large', 'body exceeds 1 KiB', false);
+    }
+    throw err;
+  }
+  let body;
+  try {
+    body = JSON.parse(raw.toString('utf8'));
+  } catch (_) {
+    return sendError(res, 400, 'bad_request', 'invalid JSON body', false);
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body) || body.confirm !== true) {
+    return sendError(res, 400, 'bad_request', 'confirm must be true', false);
+  }
+  await purgeUser(userId);
+  res.writeHead(204, { 'Cache-Control': 'no-store' });
+  res.end();
 }
 
 async function handleChanges(req, res, userId, url) {
@@ -259,6 +290,9 @@ function createServer({ verifyIdToken, exchangeAuthCode, trustProxyHops } = {}) 
       }
       if (req.method === 'GET' && url.pathname === '/api/v1/restore/manifest') {
         return await handleManifest(req, res, userId);
+      }
+      if (req.method === 'DELETE' && url.pathname === '/api/v1/account') {
+        return await handleAccount(req, res, userId);
       }
       return sendError(res, 404, 'not_found', `${req.method} ${url.pathname}`, false);
     } catch (err) {
