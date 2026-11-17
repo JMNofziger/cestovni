@@ -15,21 +15,22 @@ Validates [`docs/specs/sync-protocol.md`](../../docs/specs/sync-protocol.md) aga
 | `test_rate_limit_contract.js` | A batch larger than the per-minute mutation budget is 429 with `Retry-After` and writes nothing. A later single insert still applies. Manifest requests past the changes budget return 429. |
 | `test_identity_contract.js` | Fake Google sign-in, browser code exchange, refresh, logout, auth body limits, and the per-IP sign-in limit. |
 
-Changes, restore, and rate-limit files mint fresh `sub` values so they do not share RLS visibility or rate-limit windows with user A/B.
+`run.sh` signs in `contract-user-a` and `contract-user-b` through `POST /auth/google` and exports `USER_A`, `USER_B`, `TOKEN_A`, and `TOKEN_B`. Changes, restore, and rate-limit files sign in their own Google subjects the same way, each with its own `X-Forwarded-For`, so they do not share RLS visibility or the sign-in rate limit with user A/B.
 
 ## Running
 
-Start `server/api/test-support/contract-server.js` first ([`server/api/README.md`](../../server/api/README.md)). `JWT_SECRET` must match the server and be at least 32 characters. The contract server also needs `DATABASE_URL`, `AUTH_ISSUER_URL`, and `GOOGLE_CLIENT_ID`. It does not need `GOOGLE_CLIENT_SECRET`. `npm start` is not the contract target. `npm ci` in `server/api/` must have been run; `run.sh` signs tokens with that `jsonwebtoken` install.
+Start `server/api/test-support/contract-server.js` first ([`server/api/README.md`](../../server/api/README.md)). `JWT_SECRET` must match the server and be at least 32 characters. `AUTH_ISSUER_URL` must match the server. `AUTH_AUDIENCE` defaults to `cestovni` when unset; set the same value on the server and on `run.sh`. The contract server also needs `DATABASE_URL` and `GOOGLE_CLIENT_ID`. It does not need `GOOGLE_CLIENT_SECRET`. `npm start` is not the contract target. `npm ci` in `server/api/` must have been run. Negative auth cases sign with that `jsonwebtoken` install. Successful tokens come from sign-in.
 
 ```bash
 API_BASE_URL=http://127.0.0.1:8080 \
   JWT_SECRET=test-secret-ces-43-contract-suite-0123 \
   AUTH_ISSUER_URL=http://127.0.0.1:8080 \
+  AUTH_AUDIENCE=cestovni \
   GOOGLE_CLIENT_ID=contract-test-client \
   ./tests/contract/run.sh
 ```
 
-Optional: `USER_A` and `USER_B` (UUID defaults are the RLS fixture users). `RATE_LIMIT_MUTATIONS_PER_MIN` and `RATE_LIMIT_CHANGES_PER_MIN` must match the server process. The mutation burst test requires the mutation limit to be at most 99.
+`RATE_LIMIT_MUTATIONS_PER_MIN` and `RATE_LIMIT_CHANGES_PER_MIN` must match the server process. The mutation burst test requires the mutation limit to be at most 99.
 
 Exit 0 prints `Contract tests: PASS`. Exit 1 names the failing file.
 

@@ -19,6 +19,7 @@
 const http = require('http');
 
 const { userIdFromRequest, AuthError } = require('./auth');
+const { sessionIsActive } = require('./identity');
 const { createAuthRoutes } = require('./auth-routes');
 const { withUser, checkReady } = require('./db');
 const { applyBatch } = require('./mutations');
@@ -208,6 +209,8 @@ function createServer({ verifyIdToken, exchangeAuthCode, trustProxyHops } = {}) 
   }
   const hops = readTrustProxyHops(trustProxyHops);
   const jwtSecret = process.env.JWT_SECRET;
+  const issuer = process.env.AUTH_ISSUER_URL;
+  const audience = process.env.AUTH_AUDIENCE || 'cestovni';
   const handleAuth = createAuthRoutes({
     verifyIdToken,
     exchangeAuthCode,
@@ -235,7 +238,12 @@ function createServer({ verifyIdToken, exchangeAuthCode, trustProxyHops } = {}) 
 
       let userId;
       try {
-        userId = userIdFromRequest(req, jwtSecret);
+        userId = await userIdFromRequest(req, {
+          secret: jwtSecret,
+          issuer,
+          audience,
+          sessionIsActive,
+        });
       } catch (err) {
         if (err instanceof AuthError) {
           return sendError(res, 401, err.code, err.message, false);

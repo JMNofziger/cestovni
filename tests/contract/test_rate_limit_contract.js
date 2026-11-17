@@ -14,7 +14,7 @@ async function main() {
     Number.isInteger(changesLimit) && changesLimit >= 1,
     'RATE_LIMIT_CHANGES_PER_MIN must be a positive integer',
   );
-  const token = signUser(randomUUID());
+  const token = (await signUser('rate-mutations-' + randomUUID())).token;
 
   const burst = await request('POST', '/api/v1/mutations', {
     token,
@@ -54,7 +54,7 @@ async function main() {
   });
   assert(one.status === 200 && one.json.results[0].status === 'applied', JSON.stringify(one.json));
 
-  const reader = signUser(randomUUID());
+  const reader = (await signUser('rate-changes-' + randomUUID())).token;
   let limited = null;
   for (let i = 0; i < changesLimit + 1; i += 1) {
     const res = await request('GET', '/api/v1/restore/manifest', { token: reader });

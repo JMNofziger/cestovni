@@ -3,6 +3,8 @@
 #
 #   API_BASE_URL=http://127.0.0.1:8080 \
 #   JWT_SECRET=test-secret-ces-43-contract-suite-0123 \
+#   AUTH_ISSUER_URL=http://127.0.0.1:8080 \
+#   AUTH_AUDIENCE=cestovni \
 #   ./tests/contract/run.sh
 #
 # Start server/api/test-support/contract-server.js, not src/server.js.
@@ -10,7 +12,9 @@
 # It does not need GOOGLE_CLIENT_SECRET. JWT_SECRET must be at least 32 characters.
 # npm start is not used here.
 #
-# Provisions two simulated users (JWT sub claims) and exports TOKEN_A / TOKEN_B.
+# Signs in contract-user-a and contract-user-b through POST /auth/google and
+# exports USER_A, USER_B, TOKEN_A, and TOKEN_B. AUTH_ISSUER_URL must match the
+# server. AUTH_AUDIENCE defaults to cestovni when unset.
 # The suite expects the server's default rate limits unless
 # RATE_LIMIT_MUTATIONS_PER_MIN and RATE_LIMIT_CHANGES_PER_MIN are set in
 # both the server process and this script.
@@ -27,22 +31,25 @@ if [[ -z "${JWT_SECRET:-}" ]]; then
   echo "FAIL: JWT_SECRET is required" >&2
   exit 2
 fi
+if [[ -z "${AUTH_ISSUER_URL:-}" ]]; then
+  echo "FAIL: AUTH_ISSUER_URL is required" >&2
+  exit 2
+fi
 
-USER_A="${USER_A:-11111111-1111-4111-8111-111111111111}"
-USER_B="${USER_B:-22222222-2222-4222-8222-222222222222}"
-export USER_A USER_B API_BASE_URL JWT_SECRET
+export API_BASE_URL JWT_SECRET AUTH_ISSUER_URL
+if [[ -n "${AUTH_AUDIENCE:-}" ]]; then
+  export AUTH_AUDIENCE
+fi
 
-TOKEN_A="$(
-  node -e 'const jwt=require(process.argv[1]); process.stdout.write(jwt.sign({sub:process.argv[2]}, process.argv[3], {algorithm:"HS256", expiresIn:"1h"}));' \
-    "$ROOT/server/api/node_modules/jsonwebtoken" "$USER_A" "$JWT_SECRET"
-)"
-TOKEN_B="$(
-  node -e 'const jwt=require(process.argv[1]); process.stdout.write(jwt.sign({sub:process.argv[2]}, process.argv[3], {algorithm:"HS256", expiresIn:"1h"}));' \
-    "$ROOT/server/api/node_modules/jsonwebtoken" "$USER_B" "$JWT_SECRET"
-)"
-export TOKEN_A TOKEN_B
+bootstrap="$(mktemp)"
+trap 'rm -f "$bootstrap"' EXIT
+node "$ROOT/tests/contract/bootstrap-users.js" > "$bootstrap"
+set -a
+# shellcheck disable=SC1090
+source "$bootstrap"
+set +a
 
-echo "Test users (JWT sub):"
+echo "Test users (from POST /auth/google):"
 echo "  user A  $USER_A"
 echo "  user B  $USER_B"
 

@@ -27,7 +27,7 @@ Errors use `{error: {code, message, retriable}}`.
 
 [ADR 007](../../docs/specs/adr/007-identity-provider.md) and [`docs/specs/identity-provider.md`](../../docs/specs/identity-provider.md): Google is the only sign-in door. `npm start` exchanges the authorization code and checks the ID token. The access token is HS256. `sub` is `users.id`, which this API allocates. `google_sub` is stored and is never that id.
 
-`JWT_SECRET` must be at least 32 characters. It signs access tokens and verifies bearer tokens on sync routes. `sub` must be the user UUID. Other algorithms are rejected. Until [CES-84](https://linear.app/personal-interests-llc/issue/CES-84), a hand-signed token with only `sub` still works. Contract tests mint those tokens with `JWT_SECRET`.
+`JWT_SECRET` must be at least 32 characters. It signs access tokens and verifies bearer tokens on sync routes. A sync token must be HS256 with this API's `iss` and `aud`, a UUID `sub`, a UUID `sid`, and an active session. Other algorithms are rejected. `GET /healthz` and `/api/v1/auth/*` stay public. Logout takes effect on the next sync call. Contract tests sign in through `POST /auth/google` on the contract server. `JWT_SECRET` is used only for the negative token cases.
 
 `npm start` refuses to boot unless `JWT_SECRET` is at least 32 characters and `AUTH_ISSUER_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `DATABASE_URL` are set. `AUTH_PORTAL_REDIRECT`, when set, must be an absolute http(s) URL. The contract suite does not use `npm start`. It starts `test-support/contract-server.js`, which injects a fake verifier and does not need `GOOGLE_CLIENT_SECRET`.
 
@@ -110,7 +110,7 @@ sudo -u postgres env \
 
 `PORT` defaults to `8080`. `HOST` defaults to `0.0.0.0`. A remote Postgres is the same `DATABASE_URL`; the role still has to be able to `SET ROLE cestovni_app`.
 
-Contract suite (mints user A and user B JWTs from `JWT_SECRET`). Start the contract server, not `npm start`:
+Contract suite. `run.sh` signs in two users through `POST /auth/google`. Start the contract server, not `npm start`:
 
 ```bash
 DATABASE_URL=postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni \
@@ -122,6 +122,7 @@ DATABASE_URL=postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni \
 API_BASE_URL=http://127.0.0.1:8080 \
   JWT_SECRET=test-secret-ces-43-contract-suite-0123 \
   AUTH_ISSUER_URL=http://127.0.0.1:8080 \
+  AUTH_AUDIENCE=cestovni \
   GOOGLE_CLIENT_ID=contract-test-client \
   ./tests/contract/run.sh
 ```
