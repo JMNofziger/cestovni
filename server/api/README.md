@@ -20,6 +20,7 @@ The in-memory dev stub at [`server/dev-sync-stub/`](../dev-sync-stub/) is a sepa
 | `POST` | `/api/v1/auth/google/exchange` | none — `{code}` → session |
 | `POST` | `/api/v1/auth/refresh` | none — `{refresh_token}` → session |
 | `POST` | `/api/v1/auth/logout` | none — `{refresh_token}` → 204 |
+| `DELETE` | `/api/v1/account` | bearer JWT — `{confirm: true}` → 204 |
 
 Errors use `{error: {code, message, retriable}}`.
 
@@ -65,6 +66,22 @@ Mutations in one request share one transaction. Each mutation has a savepoint, s
 The limiter is a fixed window in this process. A request that does not fit is HTTP 429 with `Retry-After` (seconds) and does not consume quota. It is not shared across processes. Auth limits use the socket address, or, when `TRUST_PROXY_HOPS` is greater than 0, the `X-Forwarded-For` entry that many places from the right. The default is 0. Deploy with one instance ([CES-94](https://linear.app/personal-interests-llc/issue/CES-94)).
 
 `CORS_ORIGINS` defaults to `*`. Set a comma-separated allow-list to pin origins.
+
+## Account deletion
+
+`DELETE /api/v1/account` with the bearer and `{"confirm": true}` deletes the user's product rows, login transactions, sessions, and the `users` row in one transaction ([`identity-provider.md`](../../docs/specs/identity-provider.md) § Account deletion). `POST /api/v1/mutations` takes the same per-user advisory lock, so a write in flight finishes first. The body is capped at 1 KiB.
+
+An operator can run the same purge for a person who cannot sign in. The DSN role must be able to `SET ROLE cestovni_auth` and `cestovni_purge`:
+
+```bash
+echo <user-uuid> | DATABASE_URL=... npm run purge-user
+```
+
+Exit 0 means deleted, 1 means unknown user or failure, 2 means the input was not a UUID. It prints per-table counts and never the id. The delete order is `PURGE_ORDER` in `src/identity/purge.js`, and a guard test fails when it drifts from `src/schema.js`.
+
+## Docker image
+
+`Dockerfile` exists and has never been built or run. Do not rely on it until [CES-102](https://linear.app/personal-interests-llc/issue/CES-102) lands. Two known gaps: `scripts/migrate.js` resolves `db/migrations` outside the image (set `MIGRATIONS_DIR` or migrate from a checkout), and the image copies `test-support/`, which holds a fake Google verifier. `CMD` never starts it. Hosted deploy status: [CES-101](https://linear.app/personal-interests-llc/issue/CES-101).
 
 ## Run locally
 
