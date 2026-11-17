@@ -5,6 +5,7 @@ import '../auth/auth_session.dart';
 import '../auth/sync_wiring.dart';
 import '../db/app_database.dart';
 import '../sync/restore_controller.dart';
+import '../sync/settings_rebind.dart';
 import '../sync/sync_config.dart';
 import 'restore_scope.dart';
 import 'shell.dart';
@@ -27,7 +28,17 @@ class _CestovniAppState extends State<CestovniApp> {
   void initState() {
     super.initState();
     const cfg = SyncConfig.fromEnvironment;
-    _auth = AuthSession(baseUrl: cfg.baseUrl);
+    _auth = AuthSession(
+      baseUrl: cfg.baseUrl,
+      beforeSignedIn: (userId, accessToken) {
+        return rebindSettingsOnSignIn(
+          db: widget.db,
+          baseUrl: cfg.baseUrl,
+          accessToken: accessToken,
+          userId: userId,
+        );
+      },
+    );
     _restore = RestoreController(
       db: widget.db,
       openClient: () {

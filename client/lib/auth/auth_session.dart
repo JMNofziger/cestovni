@@ -8,6 +8,11 @@
 /// The refresh token and `user_id` live in [TokenStore] (Android
 /// Keystore via [FlutterSecureTokenStore]). The access token lives in
 /// memory and is gone when the process dies.
+///
+/// [beforeSignedIn] runs before `signedIn` is reported. CES-77 uses it
+/// to rebind `settings.id` to `user_id` before the flush worker can
+/// send. The access token argument is the token just issued. It is
+/// not read from this session, so the hook does not call [bearer].
 library;
 
 import 'dart:async';
@@ -16,6 +21,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../db/repositories/settings_repository.dart';
 import 'token_store.dart';
 
 const refreshTokenKey = 'cestovni.refresh_token';
@@ -79,12 +85,17 @@ class _SessionBody {
   final int expiresIn;
 }
 
+/// `(userId, accessToken) -> rebind`. Awaited before [SignedIn].
+typedef BeforeSignedIn =
+    Future<void> Function(String userId, String accessToken);
+
 class AuthSession {
   AuthSession({
     required String baseUrl,
     TokenStore? store,
     http.Client? httpClient,
     DateTime Function()? clock,
+    this.beforeSignedIn,
   }) : _baseUrl = _trimSlash(baseUrl),
        _store = store ?? FlutterSecureTokenStore(),
        _http = httpClient ?? http.Client(),
@@ -92,6 +103,12 @@ class AuthSession {
        _clock = clock ?? DateTime.now {
     ready = _restore();
   }
+
+  /// Runs after tokens for this sign-in are stored and before [SignedIn]
+  /// is emitted. [AccountMismatch] clears the session and is rethrown.
+  /// Any other error leaves the tokens in place and skips [SignedIn]
+  /// until a later [bearer] call succeeds.
+  final BeforeSignedIn? beforeSignedIn;
 
   final String _baseUrl;
   final TokenStore _store;
@@ -112,6 +129,8 @@ class AuthSession {
   String? _refreshToken;
   String? _userId;
   String? _email;
+  String? _reboundFor;
+  Future<void>? _rebindFlight;
 
   AuthState get state => _state;
 
@@ -164,7 +183,17 @@ class AuthSession {
         !exp.isAfter(_clock().add(_refreshSkew));
     if (stale) {
       await refreshOnce();
+    } else {
+      final userId = _userId;
+      final access = _accessToken;
+      if (userId != null && access != null) {
+        await _rebindIfNeeded(userId, access);
+        if (_reboundFor == userId && state is! SignedIn) {
+          await _emit(SignedIn(userId, _email));
+        }
+      }
     }
+    if (_refreshToken == null || _refreshToken!.isEmpty) return null;
     return _accessToken;
   }
 
@@ -231,7 +260,13 @@ class AuthSession {
       }
       _refreshToken = refresh;
       _userId = userId;
-      await _emit(SignedIn(userId, null));
+      // A stored session has no access token yet. signedIn waits until
+      // refresh produces one and [beforeSignedIn] finishes, which
+      // [bearer] does before it returns that token. With no hook the
+      // CES-87 path still reports the stored user immediately.
+      if (beforeSignedIn == null) {
+        await _emit(SignedIn(userId, null));
+      }
     } catch (_) {
       debugPrint('AuthSession: secure storage unavailable');
       await _emit(const SignedOut());
@@ -251,7 +286,44 @@ class AuthSession {
     _refreshToken = session.refreshToken;
     _userId = session.userId;
     _email = session.email;
+    await _rebindIfNeeded(session.userId, session.accessToken);
+    if (epoch != _epoch || _refreshToken == null) return;
     await _emit(SignedIn(session.userId, session.email));
+  }
+
+  /// One rebind at a time. A second caller awaits the same flight.
+  ///
+  /// [AccountMismatch] drops the session that was just stored.
+  /// The local database is unchanged because the hook throws first.
+  Future<void> _rebindIfNeeded(String userId, String accessToken) async {
+    if (beforeSignedIn == null || _reboundFor == userId) return;
+    final existing = _rebindFlight;
+    if (existing != null) {
+      await existing;
+      return;
+    }
+    final epoch = _epoch;
+    final run = _runRebind(userId, accessToken, epoch);
+    _rebindFlight = run;
+    try {
+      await run;
+    } finally {
+      if (identical(_rebindFlight, run)) _rebindFlight = null;
+    }
+  }
+
+  Future<void> _runRebind(String userId, String accessToken, int epoch) async {
+    try {
+      await beforeSignedIn!(userId, accessToken);
+    } on AccountMismatch {
+      if (epoch == _epoch) {
+        _epoch++;
+        await _clear(emit: true);
+      }
+      rethrow;
+    }
+    if (epoch != _epoch) return;
+    _reboundFor = userId;
   }
 
   Future<void> _clear({required bool emit}) async {
@@ -260,6 +332,7 @@ class AuthSession {
     _refreshToken = null;
     _userId = null;
     _email = null;
+    _reboundFor = null;
     try {
       await _store.delete(refreshTokenKey);
     } catch (_) {}
@@ -274,9 +347,15 @@ class AuthSession {
     final refresh = _refreshToken;
     if (userId == null || refresh == null || refresh.isEmpty) {
       await _emit(const SignedOut());
-    } else {
-      await _emit(SignedIn(userId, _email));
+      return;
     }
+    if (beforeSignedIn == null || _reboundFor == userId) {
+      await _emit(SignedIn(userId, _email));
+      return;
+    }
+    // Refresh failed before rebind. Keep the tokens and do not tell
+    // the flush worker that a session is ready.
+    await _emit(const SignedOut());
   }
 
   /// Delivers [next] before returning, so a caller that awaits a

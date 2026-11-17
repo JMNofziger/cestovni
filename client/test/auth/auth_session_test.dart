@@ -6,6 +6,7 @@ import 'package:cestovni/auth/sync_wiring.dart';
 import 'package:cestovni/auth/token_store.dart';
 import 'package:cestovni/db/app_database.dart';
 import 'package:cestovni/db/repositories/outbox_repository.dart';
+import 'package:cestovni/db/repositories/settings_repository.dart';
 import 'package:cestovni/db/repositories/vehicles_repository.dart';
 import 'package:cestovni/sync/outbox_flush_worker.dart';
 import 'package:cestovni/sync/sync_config.dart';
@@ -334,6 +335,77 @@ void main() {
 
       expect(session.state, isA<SignedOut>());
       expect(states.whereType<SignedOut>(), isNotEmpty);
+      expect(store.map, isEmpty);
+      expect(await session.bearer(), isNull);
+    },
+  );
+
+  test('signedIn is reported only after beforeSignedIn finishes', () async {
+    final store = MemoryTokenStore();
+    final started = Completer<void>();
+    final release = Completer<void>();
+    final states = <AuthState>[];
+    late AuthSession session;
+    final mock = MockClient((req) async {
+      return _sessionResponse(access: 'access-1', refresh: 'refresh-1');
+    });
+    session = AuthSession(
+      baseUrl: _base,
+      store: store,
+      httpClient: mock,
+      clock: () => DateTime.utc(2026, 11, 17, 12),
+      beforeSignedIn: (userId, accessToken) async {
+        expect(userId, _userId);
+        expect(accessToken, 'access-1');
+        expect(session.state, isA<SignedOut>());
+        started.complete();
+        await release.future;
+      },
+    );
+    addTearDown(session.close);
+    final sub = session.stateStream.listen(states.add);
+    addTearDown(sub.cancel);
+
+    final pending = session.exchange('login-code');
+    await started.future;
+    expect(session.state, isA<SignedOut>());
+    expect(states.whereType<SignedIn>(), isEmpty);
+    release.complete();
+    expect(await pending, _userId);
+
+    expect(session.state, isA<SignedIn>());
+    expect(states.whereType<SignedIn>(), isNotEmpty);
+    expect(await session.bearer(), 'access-1');
+  });
+
+  test(
+    'AccountMismatch clears the new session and reports signedOut',
+    () async {
+      final store = MemoryTokenStore();
+      final states = <AuthState>[];
+      final mock = MockClient((req) async {
+        return _sessionResponse(access: 'access-1', refresh: 'refresh-1');
+      });
+      final session = AuthSession(
+        baseUrl: _base,
+        store: store,
+        httpClient: mock,
+        clock: () => DateTime.utc(2026, 11, 17, 12),
+        beforeSignedIn: (userId, accessToken) async {
+          throw const AccountMismatch();
+        },
+      );
+      addTearDown(session.close);
+      final sub = session.stateStream.listen(states.add);
+      addTearDown(sub.cancel);
+
+      await expectLater(
+        session.exchange('login-code'),
+        throwsA(isA<AccountMismatch>()),
+      );
+
+      expect(session.state, isA<SignedOut>());
+      expect(states.whereType<SignedIn>(), isEmpty);
       expect(store.map, isEmpty);
       expect(await session.bearer(), isNull);
     },

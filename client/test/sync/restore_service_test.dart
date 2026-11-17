@@ -122,6 +122,29 @@ void main() {
     expect(pending.map((r) => r.rowId), [other]);
   });
 
+  test('server settings row replaces an unsynced bootstrap and drops its insert',
+      () async {
+    final db = openInMemoryDb();
+    addTearDown(db.close);
+    final repo = SettingsRepository(db);
+    await repo.update(timezone: 'America/New_York');
+    expect(await db.select(db.outbox).get(), hasLength(1));
+
+    final server = _Server(_fixture());
+    final client = _client(server);
+    addTearDown(client.close);
+    final done = await RestoreService(db: db, client: client)
+        .run(reason: RestoreReason.userInitiated)
+        .last;
+
+    expect(done.phase, RestoreRunPhase.complete);
+    final settings = await db.select(db.appSettings).get();
+    expect(settings, hasLength(1));
+    expect(settings.single.id, _user);
+    expect(settings.single.timezone, 'Europe/Prague');
+    expect(await db.select(db.outbox).get(), isEmpty);
+  });
+
   test('cancel stops before writing and keeps the device usable', () async {
     final db = openInMemoryDb();
     addTearDown(db.close);
