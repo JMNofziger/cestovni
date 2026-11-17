@@ -58,7 +58,9 @@ jobs:
       - name: Apply schema, start API, run contract tests
         env:
           DATABASE_URL: postgresql://cestovni_test:testpass@127.0.0.1:5432/cestovni_test
-          JWT_SECRET: test-secret-ces-43
+          JWT_SECRET: test-secret-ces-43-contract-suite-0123
+          AUTH_ISSUER_URL: http://127.0.0.1:8080
+          GOOGLE_CLIENT_ID: contract-test-client
           API_BASE_URL: http://127.0.0.1:8080
           PORT: '8080'
         run: |
@@ -66,7 +68,7 @@ jobs:
           mkdir -p test-results
           npm run migrate --prefix server/api
           npm test --prefix server/api
-          node server/api/src/server.js > test-results/api.log 2>&1 &
+          node server/api/test-support/contract-server.js > test-results/api.log 2>&1 &
           echo $! > test-results/api.pid
           ready=0
           for _ in $(seq 1 30); do
