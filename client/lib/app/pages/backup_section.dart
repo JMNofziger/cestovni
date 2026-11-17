@@ -1,12 +1,13 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../auth/auth_scope.dart';
+import '../../auth/sync_wiring.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/outbox_repository.dart';
 import '../../sync/dead_letter_summary.dart';
 import '../../sync/outbox_flush_worker.dart';
 import '../../sync/restore_service.dart';
-import '../../sync/sync_client.dart';
 import '../../sync/sync_config.dart';
 import '../restore_scope.dart';
 import '../theme/cestovni_tokens.dart';
@@ -72,7 +73,8 @@ class _BackupSectionState extends State<BackupSection> {
   Future<void> _confirmRestore(BuildContext context) async {
     const cfg = SyncConfig.fromEnvironment;
     final controller = RestoreScope.maybeOf(context);
-    if (!cfg.isConfigured && controller == null) {
+    if (!syncTargetReady(cfg, AuthScope.maybeOf(context)) &&
+        controller == null) {
       await showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
@@ -206,14 +208,12 @@ class _DeadLetterTile extends StatelessWidget {
   }
 
   Future<void> _retry(BuildContext context) async {
+    final session = AuthScope.maybeOf(context);
     final outbox = OutboxRepository(db);
     await outbox.retryDeadLetter(row.id);
     const cfg = SyncConfig.fromEnvironment;
-    if (!cfg.isConfigured) return;
-    final client = SyncClient(
-      baseUrl: cfg.baseUrl,
-      bearerToken: cfg.bearerToken,
-    );
+    if (!syncTargetReady(cfg, session)) return;
+    final client = syncClientFor(cfg, session: session);
     try {
       await OutboxFlushWorker(outbox: outbox, client: client).flushOnce();
     } catch (_) {

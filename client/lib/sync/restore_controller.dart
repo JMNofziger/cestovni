@@ -10,11 +10,11 @@ import 'sync_config.dart';
 class RestoreController extends ChangeNotifier {
   RestoreController({
     required this.db,
-    SyncClient Function()? openClient,
+    SyncClient? Function()? openClient,
   }) : _openClient = openClient;
 
   final AppDatabase db;
-  final SyncClient Function()? _openClient;
+  final SyncClient? Function()? _openClient;
 
   RestoreSnapshot snapshot = const RestoreSnapshot.idle();
   RestoreService? _service;

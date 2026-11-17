@@ -6,7 +6,10 @@
 /// `Retry-After` and does not count toward the dead-letter ceiling.
 /// Six non-429 failures, or one non-retriable status (400/403/409),
 /// mark the row with [outboxDeadLetterPrefix]. HTTP 401 pauses
-/// automatic flushes until a manual attempt succeeds.
+/// automatic flushes until [clearAuthPause] (a new session) or a
+/// manual attempt. The sync client refreshes once and retries once
+/// before that 401 is visible here. A pass with no bearer throws
+/// [SyncSkipped] and leaves the outbox untouched.
 ///
 /// [startPeriodicFlush] drains every 30s while the app is in the
 /// foreground. [flushOnce] with `manual: true` (the default) always
@@ -114,6 +117,11 @@ class OutboxFlushWorker {
 
   bool get authPaused => _authPaused;
 
+  /// A new session can flush again. Does not send by itself.
+  void clearAuthPause() {
+    _authPaused = false;
+  }
+
   /// Foreground drain. Does not flush immediately; the shell calls
   /// [flushOnce] on resume as well. Cancel with [stopPeriodicFlush]
   /// when the app backgrounds.
@@ -183,6 +191,15 @@ class OutboxFlushWorker {
     try {
       final response = await client.postMutations(batch);
       return await _applyResults(batch, response);
+    } on SyncSkipped {
+      return const FlushReport(
+        sent: 0,
+        accepted: 0,
+        duplicates: 0,
+        rejected: 0,
+        retriable: 0,
+        lastError: 'no session',
+      );
     } on SyncHttpError catch (e) {
       return _onHttpError(batch, e);
     } finally {

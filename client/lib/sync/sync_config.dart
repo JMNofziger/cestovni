@@ -1,9 +1,9 @@
 /// Sync configuration for the outbox flush worker.
 ///
-/// The compile-time defines stay the dev path. A real sign-in flow
-/// (later than CES-44) injects a JWT with [copyWithToken] or
-/// [SyncClient.tokenProvider]. Both values are sent as
-/// `Authorization: Bearer`. This client does not decode the token.
+/// The compile-time defines stay the dev path. [bearerToken] is the
+/// dev sync stub token. A signed-in session supplies the access token
+/// through [SyncClient.tokenProvider] and uses [bearerToken] only when
+/// that returns null. This client does not decode the token.
 ///
 /// ```sh
 /// flutter run \
@@ -22,8 +22,8 @@ class SyncConfig {
   /// API origin, no trailing slash. Empty means sync is off.
   final String baseUrl;
 
-  /// Static bearer. For dev this is the stub token. For the CES-43 API
-  /// it is an HS256 JWT whose `sub` is the user UUID.
+  /// Dev-stub fallback (`CESTOVNI_SYNC_TOKEN`). Used only when
+  /// [SyncClient.tokenProvider] returns null. Empty in a normal build.
   final String bearerToken;
 
   bool get isConfigured => baseUrl.isNotEmpty && bearerToken.isNotEmpty;

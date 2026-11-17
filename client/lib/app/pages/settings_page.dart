@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../auth/auth_scope.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/settings_repository.dart';
 import '../../export/export_service.dart';
@@ -544,6 +545,7 @@ class _ExportDataSectionState extends State<_ExportDataSection> {
 
   Future<void> _run() async {
     if (_busy) return;
+    final session = AuthScope.maybeOf(context);
     setState(() {
       _busy = true;
       _error = null;
@@ -553,7 +555,13 @@ class _ExportDataSectionState extends State<_ExportDataSection> {
       if (hook != null) {
         await hook();
       } else {
-        await ExportService(db: widget.db).exportAndShare();
+        await ExportService(
+          db: widget.db,
+          flusher: ExportService.defaultFlusher(
+            widget.db,
+            session: session,
+          ),
+        ).exportAndShare();
       }
     } catch (_) {
       if (mounted) {
