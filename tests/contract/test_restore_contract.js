@@ -18,10 +18,11 @@ async function manifest(token) {
 }
 
 async function main() {
-  const userE = randomUUID();
-  const userF = randomUUID();
-  const tokenE = signUser(userE);
-  const tokenF = signUser(userF);
+  const signedE = await signUser('restore-e-' + randomUUID());
+  const signedF = await signUser('restore-f-' + randomUUID());
+  const tokenE = signedE.token;
+  const tokenF = signedF.token;
+  const userE = signedE.userId;
 
   const before = await manifest(tokenE);
   assert(before.tables.length === 5, 'five tables');

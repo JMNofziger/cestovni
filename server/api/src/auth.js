@@ -14,7 +14,7 @@ class AuthError extends Error {
   }
 }
 
-function userIdFromRequest(req, secret) {
+async function userIdFromRequest(req, { secret, issuer, audience, sessionIsActive }) {
   const header = req.headers.authorization || '';
   if (!header.toLowerCase().startsWith('bearer ')) {
     throw new AuthError('unauthenticated', 'missing bearer token');
@@ -25,7 +25,11 @@ function userIdFromRequest(req, secret) {
   }
   let payload;
   try {
-    payload = jwt.verify(token, secret, { algorithms: ['HS256'] });
+    payload = jwt.verify(token, secret, {
+      algorithms: ['HS256'],
+      issuer,
+      audience,
+    });
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       throw new AuthError('token_expired', 'token expired');
@@ -33,8 +37,17 @@ function userIdFromRequest(req, secret) {
     throw new AuthError('unauthenticated', 'invalid bearer token');
   }
   const sub = payload && payload.sub;
+  const sid = payload && payload.sid;
   if (typeof sub !== 'string' || !UUID_RE.test(sub)) {
     throw new AuthError('unauthenticated', 'token sub is not a user uuid');
+  }
+  if (typeof sid !== 'string' || !UUID_RE.test(sid)) {
+    throw new AuthError('unauthenticated', 'token sid is not a session uuid');
+  }
+  // Own connection. Do not call this while a withUser client is checked out.
+  const active = await sessionIsActive({ sessionId: sid, userId: sub });
+  if (!active) {
+    throw new AuthError('unauthenticated', 'session is not active');
   }
   return sub;
 }

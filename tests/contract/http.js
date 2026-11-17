@@ -1,7 +1,7 @@
 'use strict';
 
-const path = require('path');
-const jwt = require(path.join(__dirname, '../../server/api/node_modules/jsonwebtoken'));
+const crypto = require('crypto');
+const { fakeIdToken } = require('./fake-google');
 
 function assert(cond, msg) {
   if (!cond) {
@@ -9,8 +9,13 @@ function assert(cond, msg) {
   }
 }
 
-async function request(method, urlPath, { token, body, rawBody } = {}) {
-  const headers = {};
+function forwardedFor() {
+  const octet = () => crypto.randomInt(1, 255);
+  return `10.${octet()}.${octet()}.${octet()}`;
+}
+
+async function request(method, urlPath, { token, body, rawBody, headers: extra } = {}) {
+  const headers = { ...(extra || {}) };
   if (token != null) headers.Authorization = `Bearer ${token}`;
   let payload;
   if (rawBody !== undefined) {
@@ -37,11 +42,24 @@ async function request(method, urlPath, { token, body, rawBody } = {}) {
   return { status: res.status, headers: res.headers, json, text };
 }
 
-function signUser(sub, extra = {}) {
-  return jwt.sign({ sub, ...extra }, process.env.JWT_SECRET, {
-    algorithm: 'HS256',
-    expiresIn: extra.exp ? undefined : '1h',
+async function signUser(googleSub) {
+  const res = await request('POST', '/api/v1/auth/google', {
+    headers: { 'X-Forwarded-For': forwardedFor() },
+    body: {
+      id_token: fakeIdToken({
+        sub: googleSub,
+        email: `${googleSub}@example.test`,
+      }),
+    },
   });
+  if (res.status !== 200 || !res.json || typeof res.json.access_token !== 'string') {
+    throw new Error(`sign-in failed: ${res.status}`);
+  }
+  return {
+    token: res.json.access_token,
+    userId: res.json.user_id,
+    refreshToken: res.json.refresh_token,
+  };
 }
 
 module.exports = { assert, request, signUser };

@@ -10,10 +10,8 @@ async function mutate(token, mutations) {
 }
 
 async function main() {
-  const userC = randomUUID();
-  const userD = randomUUID();
-  const tokenC = signUser(userC);
-  const tokenD = signUser(userD);
+  const tokenC = (await signUser('changes-c-' + randomUUID())).token;
+  const tokenD = (await signUser('changes-d-' + randomUUID())).token;
 
   const vehicles = [0, 1, 2].map((n) => {
     const rowId = randomUUID();

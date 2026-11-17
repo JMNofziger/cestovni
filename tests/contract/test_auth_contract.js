@@ -1,12 +1,27 @@
 'use strict';
 
+const { randomUUID } = require('crypto');
 const jwt = require('../../server/api/node_modules/jsonwebtoken');
-const { assert, request } = require('./http');
+const { assert, request, signUser } = require('./http');
+
+function signAccess(claims, options = {}) {
+  const { secret, issuer, audience, ...rest } = options;
+  return jwt.sign(claims, secret, {
+    algorithm: 'HS256',
+    issuer,
+    audience,
+    expiresIn: 900,
+    ...rest,
+  });
+}
 
 async function main() {
   const secret = process.env.JWT_SECRET;
   const userA = process.env.USER_A;
-  assert(secret && userA && process.env.TOKEN_A, 'TOKEN_A, USER_A, JWT_SECRET required');
+  const issuer = process.env.AUTH_ISSUER_URL;
+  const audience = process.env.AUTH_AUDIENCE || 'cestovni';
+  assert(secret && userA && process.env.TOKEN_A && issuer, 'TOKEN_A, USER_A, JWT_SECRET, AUTH_ISSUER_URL required');
+  const live = jwt.decode(process.env.TOKEN_A);
 
   const missing = await request('GET', '/api/v1/restore/manifest');
   assert(missing.status === 401, `missing token status ${missing.status}`);
@@ -38,18 +53,59 @@ async function main() {
   assert(expiredRes.status === 401, `expired status ${expiredRes.status}`);
   assert(expiredRes.json.error.code === 'token_expired', `expired code ${expiredRes.json.error.code}`);
 
-  const notUuid = jwt.sign({ sub: 'alice' }, secret, {
-    algorithm: 'HS256',
-    expiresIn: '1h',
-  });
+  const notUuid = signAccess(
+    { sub: 'alice', sid: randomUUID() },
+    { secret, issuer, audience }
+  );
   const badSub = await request('GET', '/api/v1/restore/manifest', { token: notUuid });
   assert(badSub.status === 401, `non-uuid sub status ${badSub.status}`);
+  assert(badSub.json.error.code === 'unauthenticated', 'non-uuid sub code');
 
   const ok = await request('GET', '/api/v1/restore/manifest', {
     token: process.env.TOKEN_A,
   });
   assert(ok.status === 200, `valid token status ${ok.status}`);
   assert(ok.json.tables.length === 5, 'manifest has 5 tables');
+
+  const noSid = signAccess({ sub: userA }, { secret, issuer, audience });
+  const missingSid = await request('GET', '/api/v1/restore/manifest', { token: noSid });
+  assert(missingSid.status === 401, `missing sid status ${missingSid.status}`);
+  assert(missingSid.json.error.code === 'unauthenticated', 'missing sid code');
+
+  const unknownSid = signAccess(
+    { sub: userA, sid: randomUUID() },
+    { secret, issuer, audience }
+  );
+  const inactive = await request('GET', '/api/v1/restore/manifest', { token: unknownSid });
+  assert(inactive.status === 401, `unknown sid status ${inactive.status}`);
+  assert(inactive.json.error.code === 'unauthenticated', 'unknown sid code');
+
+  const badIss = signAccess(
+    { sub: live.sub, sid: live.sid },
+    { secret, issuer: 'https://evil.example', audience }
+  );
+  const wrongIss = await request('GET', '/api/v1/restore/manifest', { token: badIss });
+  assert(wrongIss.status === 401, `wrong iss status ${wrongIss.status}`);
+  assert(wrongIss.json.error.code === 'unauthenticated', 'wrong iss code');
+
+  const badAud = signAccess(
+    { sub: live.sub, sid: live.sid },
+    { secret, issuer, audience: 'not-cestovni' }
+  );
+  const wrongAud = await request('GET', '/api/v1/restore/manifest', { token: badAud });
+  assert(wrongAud.status === 401, `wrong aud status ${wrongAud.status}`);
+  assert(wrongAud.json.error.code === 'unauthenticated', 'wrong aud code');
+
+  const fresh = await signUser('auth-revoke-' + randomUUID());
+  const beforeLogout = await request('GET', '/api/v1/restore/manifest', { token: fresh.token });
+  assert(beforeLogout.status === 200, `before logout status ${beforeLogout.status}`);
+  const loggedOut = await request('POST', '/api/v1/auth/logout', {
+    body: { refresh_token: fresh.refreshToken },
+  });
+  assert(loggedOut.status === 204, `logout status ${loggedOut.status}`);
+  const afterLogout = await request('GET', '/api/v1/restore/manifest', { token: fresh.token });
+  assert(afterLogout.status === 401, `after logout status ${afterLogout.status}`);
+  assert(afterLogout.json.error.code === 'unauthenticated', 'after logout code');
 
   const health = await request('GET', '/healthz');
   assert(health.status === 200 && health.json.ok === true, 'healthz without a token');
