@@ -41,6 +41,43 @@ dependencies:
   image: ^4.9.1
   crypto: ^3.0.7
   image_picker: ^1.2.3
+  # Android Keystore-backed store for the refresh token (CES-87).
+  # The access token stays in memory. 9.2.4 keeps the secret key in
+  # the Android Keystore. The override pins the same v9.2.4 tag: that
+  # tag's web package is 2.0.0-beta.2 and does not satisfy ^1.2.1.
+  flutter_secure_storage: ^9.2.4
+
+dependency_overrides:
+  flutter_secure_storage:
+    git:
+      url: https://github.com/juliansteenbakker/flutter_secure_storage.git
+      ref: v9.2.4
+      path: flutter_secure_storage
+  flutter_secure_storage_linux:
+    git:
+      url: https://github.com/juliansteenbakker/flutter_secure_storage.git
+      ref: v9.2.4
+      path: flutter_secure_storage_linux
+  flutter_secure_storage_macos:
+    git:
+      url: https://github.com/juliansteenbakker/flutter_secure_storage.git
+      ref: v9.2.4
+      path: flutter_secure_storage_macos
+  flutter_secure_storage_platform_interface:
+    git:
+      url: https://github.com/juliansteenbakker/flutter_secure_storage.git
+      ref: v9.2.4
+      path: flutter_secure_storage_platform_interface
+  flutter_secure_storage_web:
+    git:
+      url: https://github.com/juliansteenbakker/flutter_secure_storage.git
+      ref: v9.2.4
+      path: flutter_secure_storage_web
+  flutter_secure_storage_windows:
+    git:
+      url: https://github.com/juliansteenbakker/flutter_secure_storage.git
+      ref: v9.2.4
+      path: flutter_secure_storage_windows
 
 dev_dependencies:
   flutter_test:

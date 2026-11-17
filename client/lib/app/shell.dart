@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../auth/auth_scope.dart';
+import '../auth/auth_session.dart';
+import '../auth/sync_wiring.dart';
 import '../db/app_database.dart';
 import '../db/repositories/outbox_repository.dart';
 import '../db/repositories/settings_repository.dart';
@@ -51,6 +56,8 @@ class _CestovniShellState extends State<CestovniShell>
   late final Stream<List<VehicleRow>> _liveVehicles;
   SyncClient? _syncClient;
   OutboxFlushWorker? _flusher;
+  AuthSession? _session;
+  StreamSubscription<AuthState>? _authSub;
   RestoreController? _restore;
   var _offeredRestore = false;
   int _index = 0;
@@ -68,12 +75,12 @@ class _CestovniShellState extends State<CestovniShell>
     // rebuild (which would loop with the active-vehicle notifier).
     _liveVehicles = _vehicles.watchLive();
     _seedActiveVehicle();
-    _onForeground();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _session ??= AuthScope.maybeOf(context);
     final next = RestoreScope.maybeOf(context);
     if (!identical(next, _restore)) {
       _restore?.removeListener(_onRestore);
@@ -86,6 +93,7 @@ class _CestovniShellState extends State<CestovniShell>
         _maybeOfferRestore();
       });
     }
+    if (_flusher == null) _onForeground();
   }
 
   void _onRestore() {
@@ -97,7 +105,7 @@ class _CestovniShellState extends State<CestovniShell>
   Future<void> _maybeOfferRestore() async {
     if (!mounted) return;
     const cfg = SyncConfig.fromEnvironment;
-    if (!cfg.isConfigured) return;
+    if (!syncTargetReady(cfg, _session)) return;
     final row = await widget.db.customSelect(
       'SELECT COUNT(*) AS c FROM vehicles',
     ).getSingle();
@@ -132,21 +140,27 @@ class _CestovniShellState extends State<CestovniShell>
     );
   }
 
-  /// 30s drain while [SyncConfig] has a URL and a bearer (dev token or
-  /// JWT). Unconfigured launches stay fully offline.
+  /// 30s drain while a sync URL is set and either the dev token or a
+  /// session can authorize. Unconfigured launches stay fully offline.
   void _onForeground() {
     const cfg = SyncConfig.fromEnvironment;
-    if (!cfg.isConfigured) return;
-    _syncClient ??= SyncClient(
-      baseUrl: cfg.baseUrl,
-      bearerToken: cfg.bearerToken,
-    );
+    if (cfg.baseUrl.isEmpty) return;
+    if (_session == null && cfg.bearerToken.isEmpty) return;
+    _syncClient ??= syncClientFor(cfg, session: _session);
     _flusher ??= OutboxFlushWorker(
       outbox: OutboxRepository(widget.db),
       client: _syncClient!,
     );
+    _bindAuthPause();
     _flusher!.startPeriodicFlush();
     _flusher!.flushOnce();
+  }
+
+  void _bindAuthPause() {
+    if (_authSub != null || _session == null) return;
+    _authSub = _session!.stateStream.listen((state) {
+      if (state is SignedIn) _flusher?.clearAuthPause();
+    });
   }
 
   void _onBackground() {
@@ -188,6 +202,7 @@ class _CestovniShellState extends State<CestovniShell>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _restore?.removeListener(_onRestore);
+    _authSub?.cancel();
     _onBackground();
     _syncClient?.close();
     _activeVehicle.dispose();

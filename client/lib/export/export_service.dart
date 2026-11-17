@@ -10,10 +10,11 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../auth/auth_session.dart';
+import '../auth/sync_wiring.dart';
 import '../db/app_database.dart';
 import '../db/repositories/outbox_repository.dart';
 import '../sync/outbox_flush_worker.dart';
-import '../sync/sync_client.dart';
 import '../sync/sync_config.dart';
 import 'app_version.dart';
 import 'snapshot.dart';
@@ -48,13 +49,20 @@ class ExportService {
   final DateTime Function() _clock;
 
   /// Default flusher against [SyncConfig.fromEnvironment], or null when
-  /// the stub URL is not configured (export still works offline).
-  static OutboxFlushWorker? defaultFlusher(AppDatabase db) {
+  /// there is no URL and no way to authorize (export still works offline).
+  ///
+  /// [session] supplies the access token. The compile-time token remains
+  /// the dev-stub fallback when the session has no refresh token.
+  static OutboxFlushWorker? defaultFlusher(
+    AppDatabase db, {
+    AuthSession? session,
+  }) {
     const cfg = SyncConfig.fromEnvironment;
-    if (!cfg.isConfigured) return null;
+    if (cfg.baseUrl.isEmpty) return null;
+    if (session == null && cfg.bearerToken.isEmpty) return null;
     return OutboxFlushWorker(
       outbox: OutboxRepository(db),
-      client: SyncClient(baseUrl: cfg.baseUrl, bearerToken: cfg.bearerToken),
+      client: syncClientFor(cfg, session: session),
     );
   }
 

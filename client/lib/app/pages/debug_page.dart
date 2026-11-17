@@ -2,10 +2,11 @@ import 'package:drift/drift.dart' show Migrator;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../auth/auth_scope.dart';
+import '../../auth/sync_wiring.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/outbox_repository.dart';
 import '../../sync/outbox_flush_worker.dart';
-import '../../sync/sync_client.dart';
 import '../../sync/sync_config.dart';
 
 /// Debug tab — exposes schema version, migration step names, an
@@ -69,7 +70,7 @@ class _DebugPageState extends State<DebugPage> {
         Text('Sync (M3 gate slice)',
             style: Theme.of(context).textTheme.titleMedium),
         Text(
-          cfg.isConfigured
+          cfg.baseUrl.isNotEmpty
               ? 'Target: ${cfg.baseUrl}'
               : 'Not configured — pass '
                   '--dart-define=CESTOVNI_SYNC_URL=… and '
@@ -85,8 +86,10 @@ class _DebugPageState extends State<DebugPage> {
         Row(
           children: [
             FilledButton(
-              onPressed:
-                  cfg.isConfigured && !_syncing ? _flushOutbox : null,
+              onPressed: syncTargetReady(cfg, AuthScope.maybeOf(context)) &&
+                      !_syncing
+                  ? _flushOutbox
+                  : null,
               child: Text(_syncing ? 'Syncing…' : 'Sync now'),
             ),
             const SizedBox(width: 12),
@@ -120,15 +123,13 @@ class _DebugPageState extends State<DebugPage> {
 
   Future<void> _flushOutbox() async {
     const cfg = SyncConfig.fromEnvironment;
-    if (!cfg.isConfigured) return;
+    final session = AuthScope.maybeOf(context);
+    if (!syncTargetReady(cfg, session)) return;
     setState(() {
       _syncing = true;
       _syncStatus = '…';
     });
-    final client = SyncClient(
-      baseUrl: cfg.baseUrl,
-      bearerToken: cfg.bearerToken,
-    );
+    final client = syncClientFor(cfg, session: session);
     final worker = OutboxFlushWorker(outbox: _outbox, client: client);
     try {
       final report = await worker.flushOnce();

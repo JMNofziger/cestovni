@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../auth/auth_scope.dart';
 import '../../db/app_database.dart';
 import '../../db/repositories/settings_repository.dart';
 import '../../export/export_service.dart';
@@ -188,12 +189,19 @@ class _ImportConfirmDialogState extends State<_ImportConfirmDialog> {
 
   Future<void> _exportFirst() async {
     if (_exporting) return;
+    final session = AuthScope.maybeOf(context);
     setState(() {
       _exporting = true;
       _exportNote = null;
     });
     try {
-      await ExportService(db: widget.db).exportAndShare();
+      await ExportService(
+        db: widget.db,
+        flusher: ExportService.defaultFlusher(
+          widget.db,
+          session: session,
+        ),
+      ).exportAndShare();
       if (mounted) setState(() => _exportNote = 'Current data exported.');
     } catch (_) {
       if (mounted) {

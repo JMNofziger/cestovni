@@ -1,11 +1,17 @@
 /// HTTP client for the M3 outbox and for the CES-45 restore reads.
 ///
 /// Contract: `docs/specs/sync-protocol.md`. Batches are ≤100 mutations.
-/// Auth is `Authorization: Bearer`. The bearer is either the
-/// compile-time token or whatever [tokenProvider] returns (a JWT, once
-/// sign-in exists). This file does not parse the token.
+/// Auth is `Authorization: Bearer`. The bearer is whatever
+/// [tokenProvider] returns, then the compile-time token when that is
+/// null. This file does not parse the token.
+///
+/// On HTTP 401, [refreshOnUnauthorized] runs once and the request is
+/// retried once. A second 401 is returned to the caller, which pauses
+/// the outbox. A refresh that throws [SyncHttpError] (network) is not
+/// retried and does not pause.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -120,30 +126,47 @@ class SyncHttpError implements Exception {
       'SyncHttpError($statusCode, retriable=$retriable): $message';
 }
 
+/// No bearer and no dev-stub token. The caller skips the request.
+/// Logging stays local.
+class SyncSkipped implements Exception {
+  const SyncSkipped();
+
+  @override
+  String toString() => 'Sign in before syncing';
+}
+
 class SyncClient {
   SyncClient({
     required this.baseUrl,
     required this.bearerToken,
     this.tokenProvider,
+    this.refreshOnUnauthorized,
     http.Client? httpClient,
   }) : _http = httpClient ?? http.Client();
 
   /// e.g. `http://127.0.0.1:8080` or the dev stub on `:8787`.
   final String baseUrl;
 
-  /// Fallback bearer when [tokenProvider] returns null or empty.
+  /// Dev-stub fallback when [tokenProvider] returns null or empty.
+  /// Empty when the build has no `CESTOVNI_SYNC_TOKEN`.
   final String bearerToken;
 
-  /// Runtime JWT (or any bearer). Checked on every request so a refresh
-  /// does not require a new client.
-  final String? Function()? tokenProvider;
+  /// Runtime access token. Checked on every request so a refresh does
+  /// not require a new client. May be async.
+  final FutureOr<String?> Function()? tokenProvider;
+
+  /// Called once after a sync HTTP 401, before a single retry.
+  /// Throw [SyncHttpError] when the refresh could not reach the server.
+  final Future<void> Function()? refreshOnUnauthorized;
 
   final http.Client _http;
 
-  String get _authorization {
-    final runtime = tokenProvider?.call();
+  Future<String?> _authorization() async {
+    final provider = tokenProvider;
+    final runtime = provider == null ? null : await provider();
     if (runtime != null && runtime.isNotEmpty) return runtime;
-    return bearerToken;
+    if (bearerToken.isNotEmpty) return bearerToken;
+    return null;
   }
 
   Future<MutationResponse> postMutations(List<OutboxRow> batch) async {
@@ -221,9 +244,25 @@ class SyncClient {
     );
   }
 
-  Future<http.Response> _send(String method, Uri uri, {String? body}) async {
+  Future<http.Response> _send(
+    String method,
+    Uri uri, {
+    String? body,
+    bool allowRefresh = true,
+  }) async {
+    final bearer = await _authorization();
+    if (bearer == null) {
+      if (!allowRefresh) {
+        throw const SyncHttpError(
+          statusCode: 401,
+          message: 'no session',
+          retriable: true,
+        );
+      }
+      throw const SyncSkipped();
+    }
     final headers = <String, String>{
-      'Authorization': 'Bearer $_authorization',
+      'Authorization': 'Bearer $bearer',
       if (body != null) 'Content-Type': 'application/json',
     };
     http.Response resp;
@@ -239,6 +278,22 @@ class SyncClient {
         message: 'transport error: $e',
         retriable: true,
       );
+    }
+    if (resp.statusCode == 401 &&
+        allowRefresh &&
+        refreshOnUnauthorized != null) {
+      try {
+        await refreshOnUnauthorized!();
+      } on SyncHttpError {
+        rethrow;
+      } catch (_) {
+        throw const SyncHttpError(
+          statusCode: 0,
+          message: 'refresh failed',
+          retriable: true,
+        );
+      }
+      return _send(method, uri, body: body, allowRefresh: false);
     }
     if (resp.statusCode == 200) return resp;
     throw SyncHttpError(
