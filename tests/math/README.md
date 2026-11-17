@@ -132,6 +132,14 @@ discovers every `.json` here at test time and dispatches on `expected.kind`:
 
 No new framework — plain `flutter test` + `dart:io`.
 
+The portal port at [`portal/src/consumption.ts`](../../portal/src/consumption.ts) runs the same files:
+
+```bash
+cd portal && npm ci && npm test
+```
+
+`npm test` is `node --experimental-strip-types --test`. Node 22 runs the TypeScript directly, so the package has no test-runner dependency. It discovers every `.json` here and dispatches on `expected.kind`, the same way the Dart runner does. There is no UI in that package.
+
 ## Adding a 21st fixture
 
 1. Drop a new `NN_short_name.json` in this directory. Pick `NN` to keep lexical

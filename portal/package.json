@@ -1,0 +1,13 @@
+{
+  "name": "cestovni-portal",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Portal consumption math (CES-75). Library only. No UI.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/**/*.test.ts"
+  }
+}
