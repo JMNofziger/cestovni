@@ -1,6 +1,7 @@
 'use strict';
 
-// Fixed one-minute window, per user, in memory. A reservation that does
+// Fixed window, in memory. Mutation and changes windows are one minute.
+// Auth windows are longer and keyed by client IP. A reservation that does
 // not fit is denied and does not consume quota. Not shared across processes.
 
 function intEnv(name, fallback) {
@@ -49,9 +50,20 @@ const changesPerMin = intEnv('RATE_LIMIT_CHANGES_PER_MIN', 120);
 const mutationLimiter = new FixedWindowLimiter(mutationsPerMin);
 const changesLimiter = new FixedWindowLimiter(changesPerMin);
 
+const FIFTEEN_MIN_MS = 15 * 60 * 1000;
+const SIXTY_MIN_MS = 60 * 60 * 1000;
+
+// POST /auth/google and POST /auth/google/exchange share one bucket.
+const authSignInLimiter = new FixedWindowLimiter(20, FIFTEEN_MIN_MS);
+const authStartLimiter = new FixedWindowLimiter(30, FIFTEEN_MIN_MS);
+const authRefreshLimiter = new FixedWindowLimiter(60, SIXTY_MIN_MS);
+
 module.exports = {
   mutationLimiter,
   changesLimiter,
   mutationsPerMin,
   changesPerMin,
+  authSignInLimiter,
+  authStartLimiter,
+  authRefreshLimiter,
 };

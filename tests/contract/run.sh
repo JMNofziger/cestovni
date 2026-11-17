@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 # Run the CES-43 contract suite against a running API.
 #
-#   API_BASE_URL=http://127.0.0.1:8080 JWT_SECRET=dev ./tests/contract/run.sh
+#   API_BASE_URL=http://127.0.0.1:8080 \
+#   JWT_SECRET=test-secret-ces-43-contract-suite-0123 \
+#   ./tests/contract/run.sh
+#
+# Start server/api/test-support/contract-server.js, not src/server.js.
+# That process also needs DATABASE_URL, AUTH_ISSUER_URL, and GOOGLE_CLIENT_ID.
+# It does not need GOOGLE_CLIENT_SECRET. JWT_SECRET must be at least 32 characters.
+# npm start is not used here.
 #
 # Provisions two simulated users (JWT sub claims) and exports TOKEN_A / TOKEN_B.
 # The suite expects the server's default rate limits unless

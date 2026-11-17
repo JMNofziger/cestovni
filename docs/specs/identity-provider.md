@@ -109,7 +109,7 @@ OAuth `state` and the PKCE verifier live in `auth_oauth_states` for 10 minutes. 
 
 Callback failures. A `state` that is missing, unknown, expired, or already used returns `400 oauth_state_invalid` as JSON (no redirect target is trusted without a valid state). When `state` is valid but sign-in cannot finish (Google sent `error=access_denied`, the code exchange failed, or the ID token failed the checks), the API redirects to that client's allowlisted URL with `?error=<code>` where `<code>` is `access_denied` or `google_token_invalid`, and no login code. The state row is consumed in every case.
 
-Opportunistic cleanup: `start` deletes expired `auth_oauth_states` rows and `exchange` deletes expired `auth_login_transactions` rows. Expired sessions and refresh tokens are not swept in v1 ([CES-96](https://linear.app/personal-interests-llc/issue/CES-96)).
+Opportunistic cleanup: `start` and `exchange` both call `sweepExpired()`, which deletes expired `auth_oauth_states` and `auth_login_transactions` rows. Expired sessions and refresh tokens are not swept in v1 ([CES-96](https://linear.app/personal-interests-llc/issue/CES-96)).
 
 Logout is public so an expired access token can still revoke the refresh token. The client always clears local tokens after it calls logout, including when the network fails.
 
@@ -212,7 +212,7 @@ Google Cloud Console: one Web application client whose authorized redirect URI i
 
 `tests/contract/` must not call Google, and production code carries no test backdoor. There is no test secret, no test environment variable, and no `NODE_ENV` branch in the API.
 
-- `server/api/src/app.js` exports `createServer({verifyIdToken, exchangeAuthCode})`. `verifyIdToken(idToken, {nonce?}) -> {googleSub, email|null}` throws on a failed check. `exchangeAuthCode({code, codeVerifier, redirectUri}) -> idToken` performs the Google token-endpoint call.
+- `server/api/src/app.js` exports `createServer({verifyIdToken, exchangeAuthCode, trustProxyHops?})`. `verifyIdToken(idToken, {nonce?}) -> {googleSub, email|null}` throws on a failed check. `exchangeAuthCode({code, codeVerifier, redirectUri}) -> idToken` performs the Google token-endpoint call. `trustProxyHops` defaults to `TRUST_PROXY_HOPS` or 0. The contract server passes 1.
 - `server/api/src/server.js` (`npm start`) calls `createServer()` with the real Google implementations and listens.
 - `server/api/test-support/contract-server.js` calls `createServer()` with fakes and listens. CI and `tests/contract/run.sh` start this file. It is never a deploy target.
 - The fake `verifyIdToken` accepts an HS256 JWT signed with a constant defined in that file, with the same claims a Google ID token carries (`sub`, `email`, `email_verified`, `nonce`). The fake `exchangeAuthCode` turns the code `fake:<googleSub>:<email>:<nonce>` into such a token, so the contract suite drives start, callback, and exchange offline, including the `nonce` and `state` checks.

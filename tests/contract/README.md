@@ -13,15 +13,20 @@ Validates [`docs/specs/sync-protocol.md`](../../docs/specs/sync-protocol.md) aga
 | `test_changes_contract.js` | `row_version > since`, ascending pages, `has_more` / `next_since`, `limit` clamped at 500 (`X-Limit-Clamped`), soft-deleted fill-up included with `volume_uL`, cross-user empty page. |
 | `test_restore_contract.js` | Manifest order and zero counts for a new user, counts and `max_row_version` after a vehicle and a settings row, user F stays at zero. |
 | `test_rate_limit_contract.js` | A batch larger than the per-minute mutation budget is 429 with `Retry-After` and writes nothing. A later single insert still applies. Manifest requests past the changes budget return 429. |
+| `test_identity_contract.js` | Fake Google sign-in, browser code exchange, refresh, logout, auth body limits, and the per-IP sign-in limit. |
 
 Changes, restore, and rate-limit files mint fresh `sub` values so they do not share RLS visibility or rate-limit windows with user A/B.
 
 ## Running
 
-Start the API first ([`server/api/README.md`](../../server/api/README.md)). `JWT_SECRET` must match the server. `npm ci` in `server/api/` must have been run; `run.sh` signs tokens with that `jsonwebtoken` install.
+Start `server/api/test-support/contract-server.js` first ([`server/api/README.md`](../../server/api/README.md)). `JWT_SECRET` must match the server and be at least 32 characters. The contract server also needs `DATABASE_URL`, `AUTH_ISSUER_URL`, and `GOOGLE_CLIENT_ID`. It does not need `GOOGLE_CLIENT_SECRET`. `npm start` is not the contract target. `npm ci` in `server/api/` must have been run; `run.sh` signs tokens with that `jsonwebtoken` install.
 
 ```bash
-API_BASE_URL=http://127.0.0.1:8080 JWT_SECRET=dev-secret ./tests/contract/run.sh
+API_BASE_URL=http://127.0.0.1:8080 \
+  JWT_SECRET=test-secret-ces-43-contract-suite-0123 \
+  AUTH_ISSUER_URL=http://127.0.0.1:8080 \
+  GOOGLE_CLIENT_ID=contract-test-client \
+  ./tests/contract/run.sh
 ```
 
 Optional: `USER_A` and `USER_B` (UUID defaults are the RLS fixture users). `RATE_LIMIT_MUTATIONS_PER_MIN` and `RATE_LIMIT_CHANGES_PER_MIN` must match the server process. The mutation burst test requires the mutation limit to be at most 99.
@@ -30,4 +35,4 @@ Exit 0 prints `Contract tests: PASS`. Exit 1 names the failing file.
 
 ## CI
 
-[`.github/workflows/contract-tests.yml`](../../.github/workflows/contract-tests.yml) starts Postgres 15, applies migrations with `npm run migrate --prefix server/api`, starts this API, and runs `run.sh`. Copy kept at [`ci/contract-tests.yml`](../../ci/contract-tests.yml).
+[`.github/workflows/contract-tests.yml`](../../.github/workflows/contract-tests.yml) starts Postgres 15, applies migrations with `npm run migrate --prefix server/api`, starts `server/api/test-support/contract-server.js`, and runs `run.sh`. Copy kept at [`ci/contract-tests.yml`](../../ci/contract-tests.yml). `JWT_SECRET` in that job is `test-secret-ces-43-contract-suite-0123`.
